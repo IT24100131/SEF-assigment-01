@@ -1,0 +1,13 @@
+FROM mcr.microsoft.com/dotnet/sdk:11.0-preview AS build
+WORKDIR /src
+COPY FishLink.API/FishLink.API.csproj FishLink.API/
+RUN dotnet restore FishLink.API/FishLink.API.csproj
+COPY FishLink.API/ FishLink.API/
+RUN dotnet publish FishLink.API/FishLink.API.csproj -c Release -o /app/publish --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:11.0-preview
+WORKDIR /app
+ENV ASPNETCORE_URLS=http://+:10000
+EXPOSE 10000
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "FishLink.API.dll"]
