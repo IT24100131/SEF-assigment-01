@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: fishlink-api
+    env: docker
+    dockerfilePath: ./Dockerfile.api
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Jwt__Key
+        sync: false
+      - key: Jwt__Issuer
+        value: FishLinkAPI
+      - key: Jwt__Audience
+        value: FishLinkClients
+      - key: AiAgent__BaseUrl
+        sync: false
+      - key: PriceApi__BaseUrl
+        sync: false
+
+  - type: private_service
+    name: fishlink-agent
+    env: docker
+    dockerfilePath: ./Dockerfile.agent
+    envVars:
+      - key: ASP_NET
+        sync: false
+      - key: PRICE_API_URL
+        sync: false
+
+  - type: private_service
+    name: fishlink-price-api
+    env: docker
+    dockerfilePath: ./Dockerfile.price
+
+  - type: static
+    name: fishlink-dashboard
+    rootDir: fishlink-dashboard
+    buildCommand: npm ci && npm run build
+    publishPath: build

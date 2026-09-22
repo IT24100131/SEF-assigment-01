@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FishLink Test Evidence - 21 September 2026</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; color: #18233a; }
+    h1 { color: #173477; }
+    table { border-collapse: collapse; width: 100%; margin-top: 24px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 14px; vertical-align: top; }
+    .pass { color: #08783f; font-weight: bold; }
+    .warn { color: #9a5a00; font-weight: bold; }
+    .note { margin-top: 24px; padding: 16px; background: #f2f5fa; }
+  </style>
+</head>
+<body>
+  <h1>FishLink Verified Test Evidence</h1>
+  <p><strong>Execution date:</strong> 21 September 2026</p>
+  <table>
+    <tr><th>Area</th><th>Command</th><th>Verified result</th></tr>
+    <tr><td>Backend</td><td>dotnet test FishLink.API.Tests/FishLink.API.Tests.csproj --no-restore</td><td class="pass">Passed: 5; Failed: 0; Skipped: 0</td></tr>
+    <tr><td>Agentic AI</td><td>python -m unittest discover -s tests</td><td class="pass">Passed: 4; Failed: 0</td></tr>
+    <tr><td>React</td><td>npm run build</td><td class="pass">Compiled successfully; production build generated</td></tr>
+    <tr><td>Flutter mobile</td><td>flutter analyze (fishlink_mobile)</td><td class="pass">No issues found</td></tr>
+    <tr><td>Flutter app</td><td>flutter analyze (fishlink_app)</td><td class="warn">Not passed: existing Dart errors remain</td></tr>
+  </table>
+  <div class="note">
+    <strong>Evidence limitation:</strong> No concurrent-load performance test or deployed
+    end-to-end workflow was executed during this verification. These must not be reported
+    as completed until measured and captured separately.
+  </div>
+</body>
+</html>
