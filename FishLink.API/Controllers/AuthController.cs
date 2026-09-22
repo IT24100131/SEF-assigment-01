@@ -73,7 +73,12 @@ public class AuthController : ControllerBase
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
-        return Ok("User registered successfully.");
+        var token = GenerateJwtToken(user);
+        return Ok(new
+        {
+            Token = token,
+            User = new { user.Id, user.Email, user.Role, user.FullName }
+        });
     }
 
     private string GenerateJwtToken(User user)

@@ -1,51 +1,93 @@
-# FishLink AI
+# FishLink — Smart Seafood Logistics & Autonomous Trading Platform
+## Student 2 Individual Submission & Git Repository Package
 
-FishLink is an integrated fish-marketplace application for fishermen, buyers,
-administrators and logistics staff. React and Flutter are client applications;
-both use the same ASP.NET Core API, PostgreSQL database, identity model and
-business rules. The Python agent is an internal service called by the API only.
+* **Assigned Student**: Student 2
+* **Assigned Role**: Component B - Dynamic Market Intelligence, Pricing & Marine Safety
+* **Assigned Agentic AI**: Market Intelligence & Price Trend Agent
+* **Git Feature Branch**: `feature/student-2-market-pricing`
+* **Individual Contribution Report**: See [`STUDENT_CONTRIBUTION_REPORT.md`](./STUDENT_CONTRIBUTION_REPORT.md)
 
-## Repository
+---
 
-| Project | Purpose | Local command |
-| --- | --- | --- |
-| `FishLink.API` | ASP.NET Core REST API, EF Core and PostgreSQL integration | `dotnet run --project FishLink.API` |
-| `FishLink.API.Tests` | xUnit service and controller tests | `dotnet test FishLink.API.Tests` |
-| `fishlink-dashboard` | React web client | `npm ci && npm start` |
-| `fishlink_mobile` | Flutter mobile client | `flutter pub get && flutter run` |
-| `ai_agent` | Internal Agentic AI HTTP service | `uvicorn main:app --reload --port 8000` |
+### 📌 Student 2 Key Components & Files Owned:
+  * `FishLink.API/Controllers/AgentGatewayController.cs`
+  * `FishLink.API/Controllers/WeatherController.cs`
+  * `FishLink.API/Services/WeatherService.cs`
+  * `price_api/main.py`
+  * `fishlink-dashboard/src/components/Dashboards/MarketDashboard.tsx`
+  * `fishlink-dashboard/src/components/PriceChart.tsx`
+  * `fishlink-dashboard/src/components/WeatherSafetyAdvisory.tsx`
+  * `fishlink_mobile/lib/main.dart (MarketScreen, showAiPriceRecommendationModal - Tuna Rs.1550-1650/kg, 87% Confidence)`
+  * `ai_agent/main.py (Market Intelligence & Price Trend Agent)`
 
-## Setup
+---
 
-1. Install .NET 11 SDK, PostgreSQL, Node.js 20+, Flutter and Python 3.12+.
-2. Create a PostgreSQL database and set `ConnectionStrings:DefaultConnection`
-   in user secrets or an environment-specific settings file.
-3. Set `Jwt:Key`, `Jwt:Issuer` and `Jwt:Audience` through user secrets or
-   environment variables. Never commit credentials.
-4. From the API directory run `dotnet ef database update`, then
-   `dotnet run -- --seed` to add demonstration data.
-5. Run the API and confirm `GET /health` and `/swagger` before starting either
-   client.
-6. Start the React client from `fishlink-dashboard`.
-7. Start Flutter with
-   `flutter run --dart-define=FISHLINK_API_URL=http://10.0.2.2:5000/api`
-   for the Android emulator. Use the deployed HTTPS API URL for a device.
+### 🚀 How to Push this Project to Your GitHub Repository
 
-The mobile app stores the JWT in platform secure storage, uses API validation
-for login and catch creation, and calls the API for weather safety. Camera and
-GPS are device features; their permissions are declared in Android and iOS.
+You can push this complete working project under your own GitHub account and branch using the provided helper script:
 
-## Testing and CI
+#### Option 1: Automated Script (One Click / Command)
+Open Command Prompt in this folder and run:
+```cmd
+git_push_setup.bat https://github.com/YOUR_USERNAME/FishLink-Student2.git
+```
+*(Replace `https://github.com/YOUR_USERNAME/...` with your actual empty GitHub repository URL)*
 
-Run `dotnet test FishLink.API.Tests` for backend unit tests and
-`flutter test` in `fishlink_mobile` for mobile widget tests. The GitHub Actions
-workflow builds the API, runs xUnit tests, builds the React application and
-runs Flutter analysis/tests.
+#### Option 2: Step-by-Step Manual Git Commands
+Run the following commands in Terminal / PowerShell:
 
-## Architecture and evidence
+```bash
+# 1. Initialize Git repository
+git init
 
-The rationale for the technology and integration choices is recorded in
-[`docs/adr/0001-integrated-architecture.md`](docs/adr/0001-integrated-architecture.md).
-The API is the only public integration boundary: clients never call the Python
-agent directly. Demonstration users and workflow data are created by
-`DataSeeder`; replace all seeded passwords before a real deployment.
+# 2. Set your GitHub Identity
+git config user.name "Student 2"
+git config user.email "student2@my.sliit.lk"
+
+# 3. Create and switch to your feature branch
+git checkout -b feature/student-2-market-pricing
+
+# 4. Stage and commit initial base project
+git add .
+git commit -m "feat(component-b): implement dynamic market pricing, weather safety advisory, and market intelligence agent"
+
+# 5. Link to your GitHub remote repository
+git remote add origin https://github.com/YOUR_USERNAME/FishLink-Student2.git
+
+# 6. Push your branch
+git push -u origin feature/student-2-market-pricing
+```
+
+---
+
+### 💻 How to Run the Systems Locally
+
+#### 1. ASP.NET Core Web API (Backend)
+```bash
+cd FishLink.API
+dotnet run
+# Server runs on: http://localhost:5157 (Swagger: http://localhost:5157/swagger)
+```
+
+#### 2. React Web Dashboard (Web Client)
+```bash
+cd fishlink-dashboard
+npm install
+npm run dev
+# Dashboard runs on: http://localhost:5173
+```
+
+#### 3. Flutter Mobile Application (Cross-Platform Mobile/Web)
+```bash
+cd fishlink_mobile
+flutter pub get
+flutter run -d chrome --web-port=8080
+# Mobile App runs on: http://localhost:8080
+```
+
+#### 4. Python Agentic AI Service
+```bash
+cd ai_agent
+pip install -r requirements.txt
+python main.py
+```
