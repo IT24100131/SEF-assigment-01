@@ -14,6 +14,7 @@ business rules. The Python agent is an internal service called by the API only.
 | `fishlink-dashboard` | React web client | `npm ci && npm start` |
 | `fishlink_mobile` | Flutter mobile client | `flutter pub get && flutter run` |
 | `ai_agent` | Internal Agentic AI HTTP service | `uvicorn main:app --reload --port 8000` |
+| `price_api` | Internal fish-price prediction service | `uvicorn main:app --reload --port 8001` |
 
 ## Setup
 
@@ -24,10 +25,13 @@ business rules. The Python agent is an internal service called by the API only.
    environment variables. Never commit credentials.
 4. From the API directory run `dotnet ef database update`, then
    `dotnet run -- --seed` to add demonstration data.
-5. Run the API and confirm `GET /health` and `/swagger` before starting either
+5. Start the internal price service from `price_api` with
+   `uvicorn main:app --reload --port 8001`. The API proxies market forecasts
+   through this service; keep it running while using Market Intelligence.
+6. Run the API and confirm `GET /health` and `/swagger` before starting either
    client.
-6. Start the React client from `fishlink-dashboard`.
-7. Start Flutter with
+7. Start the React client from `fishlink-dashboard`.
+8. Start Flutter with
    `flutter run --dart-define=FISHLINK_API_URL=http://10.0.2.2:5000/api`
    for the Android emulator. Use the deployed HTTPS API URL for a device.
 

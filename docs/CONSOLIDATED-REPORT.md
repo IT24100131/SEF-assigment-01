@@ -22,6 +22,9 @@ The private Python Agentic AI service is called by ASP.NET Core only.
 | [TO COMPLETE] | [TO COMPLETE] | [TO COMPLETE] | [TO COMPLETE] |
 | [TO COMPLETE] | [TO COMPLETE] | [TO COMPLETE] | [TO COMPLETE] |
 
+The detailed allocation and evidence expectations are in
+[`docs/GROUP-WORK-ALLOCATION.md`](./GROUP-WORK-ALLOCATION.md).
+
 ### 1.3 Architecture
 
 The accepted architecture decision is in

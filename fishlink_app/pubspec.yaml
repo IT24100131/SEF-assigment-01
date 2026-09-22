@@ -1,4 +1,4 @@
-name: fishlink_mobile
+name: fishlink_app
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -31,17 +31,31 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # HTTP client for API calls
+  http: ^1.1.0
+  
+  # Secure storage for JWT tokens
+  flutter_secure_storage: ^9.0.0
+  
+  # State management
+  provider: ^6.0.5
+  
+  # JSON serialization
+  json_annotation: ^4.8.1
+  
+  # UI enhancements
+  flutter_spinkit: ^5.2.0
+  
+  # Icons
   cupertino_icons: ^1.0.8
-  http: ^1.5.0
-  flutter_secure_storage: ^9.2.4
-  image_picker: ^1.2.0
-  geolocator: ^14.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.9
+  json_serializable: ^6.7.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -60,9 +74,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
-  assets:
-    - assets/hero-bg.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

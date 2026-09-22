@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
-const apiBaseUrl = String.fromEnvironment(
-  'FISHLINK_API_URL',
-  defaultValue: 'https://10.0.2.2:7042/api',
-);
+String get effectiveApiBaseUrl =>
+    const String.fromEnvironment('FISHLINK_API_URL').isNotEmpty
+        ? const String.fromEnvironment('FISHLINK_API_URL')
+        : (kIsWeb ? 'http://localhost:5157/api' : 'http://10.0.2.2:5157/api');
 
 void main() => runApp(const FishLinkApp());
 
@@ -23,7 +24,7 @@ class ApiClient {
       {Object? body, bool authenticated = true}) async {
     final token = authenticated ? await _storage.read(key: 'token') : null;
     final response = await _client
-        .send(http.Request(method, Uri.parse('$apiBaseUrl$path'))
+        .send(http.Request(method, Uri.parse('$effectiveApiBaseUrl$path'))
           ..headers.addAll({
             'Content-Type': 'application/json',
             if (token != null) 'Authorization': 'Bearer $token',
@@ -46,6 +47,18 @@ class ApiClient {
   Future<Map<String, dynamic>> login(String email, String password) =>
       _request('POST', '/Auth/login',
           body: {'email': email, 'password': password}, authenticated: false);
+
+  Future<void> register(
+      String fullName, String email, String password, String role) async {
+    await _request('POST', '/Auth/register',
+        body: {
+          'fullName': fullName,
+          'email': email,
+          'passwordHash': password,
+          'role': role,
+        },
+        authenticated: false);
+  }
 
   Future<List<dynamic>> catches({bool mine = false}) async {
     final result = await _request('GET', '/Catches');
@@ -93,8 +106,25 @@ class _FishLinkAppState extends State<FishLinkApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'FishLink AI',
-        theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff006b78)),
-            useMaterial3: true, inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder())),
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xff005b96), brightness: Brightness.light),
+            useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xfff0f4f8),
+            inputDecorationTheme: const InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(6))),
+              enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xffcbd5e1)),
+                  borderRadius: BorderRadius.all(Radius.circular(6))),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xff005b96), width: 2),
+                  borderRadius: BorderRadius.all(Radius.circular(6))),
+            ),
+          ),
         home: _signedIn
             ? HomeScreen(role: _role, onSignOut: _signOut)
             : LoginScreen(onSignedIn: _onSignedIn),
@@ -128,6 +158,138 @@ class _LoginScreenState extends State<LoginScreen> {
       await storage.write(key: 'role', value: user['role']?.toString() ?? 'Fisherman');
       widget.onSignedIn(user['role']?.toString() ?? 'Fisherman');
     } catch (e) {
+      final message = e.toString().replaceFirst('Exception: ', '');
+      setState(() => _error = message.toLowerCase().contains('email already exists')
+          ? 'This email is already registered. Please sign in instead.'
+          : message);
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => _AuthShell(
+        child: Form(
+          key: _formKey,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Icon(Icons.set_meal, size: 48, color: Color(0xff005b96)),
+            const SizedBox(height: 10),
+            const Text('Welcome to FishLink AI',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xff003366),
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            const Text('Sign in to your account', textAlign: TextAlign.center),
+            const SizedBox(height: 26),
+            TextFormField(
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                    labelText: 'Email Address', prefixIcon: Icon(Icons.email)),
+                validator: (v) => v == null || !v.contains('@')
+                    ? 'Enter a valid email'
+                    : null),
+            const SizedBox(height: 15),
+            TextFormField(
+                controller: _password,
+                obscureText: true,
+                decoration: const InputDecoration(
+                    labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                validator: (v) =>
+                    v == null || v.length < 6 ? 'Minimum 6 characters' : null),
+            if (_error != null)
+              Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(_error!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error))),
+            const SizedBox(height: 20),
+            SizedBox(
+                height: 48,
+                child: FilledButton(
+                    onPressed: _loading ? null : _login,
+                    child: _loading
+                        ? const CircularProgressIndicator()
+                        : const Text('Sign In'))),
+            const SizedBox(height: 12),
+            TextButton(
+                onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                child: const Text("Don't have an account? Register here")),
+            const SizedBox(height: 8),
+            const Text('Ensure you have registered first to test database login.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Color(0xff94a3b8))),
+          ]),
+        ),
+      );
+}
+
+class _AuthShell extends StatelessWidget {
+  const _AuthShell({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xff005b96), Color(0xff03396c)]),
+          ),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Card(
+                    elevation: 12,
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12))),
+                    child: Padding(
+                        padding: const EdgeInsets.all(32), child: child),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  String _role = 'Fisherman';
+  bool _loading = false;
+  String? _error;
+
+  Future<void> _register() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _loading = true; _error = null; });
+    try {
+      await ApiClient().register(
+          _name.text.trim(), _email.text.trim(), _password.text, _role);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful. Please sign in.')));
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -135,29 +297,81 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SafeArea(child: Center(child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24), child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480), child: Form(
-              key: _formKey, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                const Icon(Icons.waves, size: 64, color: Color(0xff006b78)),
-                const Text('FishLink AI', textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                const Text('Trusted digital fish marketplace', textAlign: TextAlign.center),
-                const SizedBox(height: 32),
-                TextFormField(controller: _email, keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email)),
-                    validator: (v) => v == null || !v.contains('@') ? 'Enter a valid email' : null),
-                const SizedBox(height: 16),
-                TextFormField(controller: _password, obscureText: true,
-                    decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock)),
-                    validator: (v) => v == null || v.length < 6 ? 'Minimum 6 characters' : null),
-                if (_error != null) Padding(padding: const EdgeInsets.only(top: 12),
-                    child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error))),
-                const SizedBox(height: 24),
-                FilledButton(onPressed: _loading ? null : _login,
-                    child: _loading ? const CircularProgressIndicator() : const Text('Sign in')),
-              ])))))),
+  Widget build(BuildContext context) => _AuthShell(
+        child: Form(
+          key: _formKey,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Icon(Icons.set_meal, size: 48, color: Color(0xff005b96)),
+            const SizedBox(height: 10),
+            const Text('Create an Account',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Color(0xff003366),
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            const Text('Join the FishLink platform', textAlign: TextAlign.center),
+            const SizedBox(height: 26),
+            TextFormField(
+                controller: _name,
+                decoration: const InputDecoration(
+                    labelText: 'Full Name', prefixIcon: Icon(Icons.person)),
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'Enter your name'
+                    : null),
+            const SizedBox(height: 15),
+            TextFormField(
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                    labelText: 'Email Address', prefixIcon: Icon(Icons.email)),
+                validator: (v) => v == null || !v.contains('@')
+                    ? 'Enter a valid email'
+                    : null),
+            const SizedBox(height: 15),
+            TextFormField(
+                controller: _password,
+                obscureText: true,
+                decoration: const InputDecoration(
+                    labelText: 'Password', prefixIcon: Icon(Icons.lock)),
+                validator: (v) =>
+                    v == null || v.length < 6 ? 'Minimum 6 characters' : null),
+            const SizedBox(height: 15),
+            DropdownButtonFormField<String>(
+              initialValue: _role,
+              decoration: const InputDecoration(
+                  labelText: 'Select Your Role',
+                  prefixIcon: Icon(Icons.badge_outlined)),
+              items: const [
+                DropdownMenuItem(value: 'Fisherman', child: Text('Fisherman')),
+                DropdownMenuItem(value: 'Buyer', child: Text('Buyer')),
+              ],
+              onChanged: (value) => setState(() => _role = value ?? 'Fisherman'),
+            ),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(_error!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error)),
+              ),
+            const SizedBox(height: 22),
+            SizedBox(
+              height: 48,
+              child: FilledButton(
+                onPressed: _loading ? null : _register,
+                child: _loading
+                    ? const CircularProgressIndicator()
+                    : const Text('Register'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Already have an account? Sign In')),
+          ]),
+        ),
       );
 }
 
@@ -179,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const MarketScreen(),
     ];
     return Scaffold(
-      appBar: AppBar(title: Text('FishLink • ${widget.role}'), actions: [
+      appBar: AppBar(title: Text('FishLink â€¢ ${widget.role}'), actions: [
         IconButton(onPressed: widget.onSignOut, icon: const Icon(Icons.logout), tooltip: 'Sign out')
       ]),
       body: screens[_index],
@@ -218,7 +432,7 @@ class _CatchListScreenState extends State<CatchListScreen> {
         final item = items[index] as Map<String, dynamic>;
         return Card(child: ListTile(leading: const CircleAvatar(child: Icon(Icons.set_meal)),
           title: Text(item['fishSpecies']?.toString() ?? 'Unknown species'),
-          subtitle: Text('${item['quantityKg']} kg • Rs ${item['askingPricePerKg']}/kg'),
+          subtitle: Text('${item['quantityKg']} kg â€¢ Rs ${item['askingPricePerKg']}/kg'),
           trailing: Chip(label: Text(item['status']?.toString() ?? 'Draft'))));
       });
     }),
