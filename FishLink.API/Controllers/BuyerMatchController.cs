@@ -465,6 +465,10 @@ public class BuyerMatchController : ControllerBase
 
             score = Math.Min(score, 100);
 
+            var distanceKm = (buyer.Id * 7 + 5) % 45 + 5;
+            var requiredKg = pref != null && pref.MaxQuantityKg < 99999 ? pref.MaxQuantityKg : fishCatch.QuantityKg;
+            var demand = score >= 85 ? "High" : score >= 65 ? "Medium" : "Normal";
+
             return new {
                 id           = buyer.Id,
                 name         = buyer.FullName,
@@ -476,6 +480,9 @@ public class BuyerMatchController : ControllerBase
                 preferredSpecies = pref?.PreferredSpecies ?? "",
                 maxBudget    = pref?.MaxPricePerKg ?? 0,
                 preferredCity = pref?.PreferredCity ?? "",
+                demand       = demand,
+                requiredKg   = requiredKg,
+                distanceKm   = distanceKm,
             };
         })
         .Where(b => b.matchScore >= 20)

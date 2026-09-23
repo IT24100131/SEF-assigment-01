@@ -11,7 +11,7 @@ Agents:
 
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime, timezone
 import requests
@@ -44,7 +44,16 @@ PRICE_ANOMALY_WARNING_PCT = 20.0  # > 20% above market → warning
 
 # ── Request Models ────────────────────────────────────────────────────────────
 
-class WorkflowRequest(BaseModel):
+def to_camel(field_name: str) -> str:
+    head, *tail = field_name.split("_")
+    return head + "".join(part.capitalize() for part in tail)
+
+
+class ApiRequest(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+class WorkflowRequest(ApiRequest):
     workflow_id:           str
     catch_id:              int
     fisherman_id:          int
@@ -59,7 +68,7 @@ class WorkflowRequest(BaseModel):
     seller_note:           str   = ""
 
 
-class BuyerMatchRequest(BaseModel):
+class BuyerMatchRequest(ApiRequest):
     species:              str
     min_quantity_kg:      float = 0
     max_quantity_kg:      float = 99999
@@ -68,7 +77,7 @@ class BuyerMatchRequest(BaseModel):
     buyer_id:             Optional[int] = None
 
 
-class LogisticsRequest(BaseModel):
+class LogisticsRequest(ApiRequest):
     """Request to Logistics Scheduling Agent — called after bid is accepted."""
     workflow_id:        str
     catch_id:           int

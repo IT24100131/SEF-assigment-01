@@ -1,15 +1,16 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../models/user.dart';
 import '../models/catch.dart';
 import '../models/market_trend.dart';
 import '../models/auth_response.dart';
 
 class ApiService {
   // Update this to your deployed API URL or local IP for testing
-  static const String baseUrl = 'https://localhost:7012/api';  // Update with your deployed URL
+  static const String baseUrl = String.fromEnvironment(
+    'FISHLINK_API_URL',
+    defaultValue: 'http://localhost:5157/api',
+  );
   
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -65,7 +66,12 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: _getHeaders(false),
-      body: json.encode(request.toJson()),
+      body: json.encode({
+        'fullName': '${request.firstName} ${request.lastName}'.trim(),
+        'email': request.email,
+        'passwordHash': request.password,
+        'role': request.role,
+      }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
