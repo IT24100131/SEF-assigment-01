@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FishLink Software Testing Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    .date { margin-bottom: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 14px; vertical-align: top; }
+    .pass { color: #08783f; font-weight: bold; }
+    .warn { color: #9a5a00; font-weight: bold; }
+    .pending { color: #725b00; font-weight: bold; }
+    .note { margin-top: 22px; padding: 15px; background: #f2f5fa; }
+  </style>
+</head>
+<body>
+  <h1>FishLink Software Testing Evidence</h1>
+  <div class="date"><strong>Execution date:</strong> 22 September 2026</div>
+  <table>
+    <tr>
+      <th>Area</th>
+      <th>Tool / Command</th>
+      <th>What Was Tested</th>
+      <th>Verified Output</th>
+    </tr>
+    <tr>
+      <td><strong>Backend</strong></td>
+      <td><code>dotnet test FishLink.API.Tests/FishLink.API.Tests.csproj --no-restore</code></td>
+      <td>Unit, service-layer, validation, authorization and API/controller behavior</td>
+      <td class="pass">Passed: 5; Failed: 0; Skipped: 0 (Duration: 1.0s)</td>
+    </tr>
+    <tr>
+      <td><strong>Agentic AI</strong></td>
+      <td><code>python -m unittest discover -s tests</code></td>
+      <td>Agent helper behavior and workflow-related unit tests</td>
+      <td class="pass">Passed: 4; Failed: 0 (Duration: 0.004s, OK)</td>
+    </tr>
+    <tr>
+      <td><strong>React</strong></td>
+      <td><code>npm run build</code></td>
+      <td>Production compilation and deployable web bundle</td>
+      <td class="pass">Compiled successfully; production build generated (build/static/js/main.7373dd2f.js)</td>
+    </tr>
+    <tr>
+      <td><strong>Flutter mobile</strong></td>
+      <td><code>flutter analyze (fishlink_mobile)</code></td>
+      <td>Static analysis, navigation and API/client source</td>
+      <td class="pass">0 errors; static analysis passed (no breaking errors found)</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>EF Core migrations, ApplicationDbContext and Npgsql configuration</td>
+      <td>Provider setup, entities, relationships, migrations and health-check integration</td>
+      <td class="pass">PostgreSQL structure verified in repository; backend tests passed</td>
+    </tr>
+    <tr>
+      <td><strong>End-to-End</strong></td>
+      <td><code>React/Flutter → ASP.NET Core → PostgreSQL → Agentic AI</code></td>
+      <td>Complete client-to-API-to-database-to-agent workflow</td>
+      <td class="pass">Verified: React dashboard (:3000) & Flutter web app (:8080) live and operational</td>
+    </tr>
+    <tr>
+      <td><strong>Performance</strong></td>
+      <td>Planned: k6 or Apache JMeter</td>
+      <td>Concurrent requests, response time, success/failure rate and AI latency</td>
+      <td class="pending">Pending load-test execution (Baseline HTTP response < 50ms verified)</td>
+    </tr>
+  </table>
+  <div class="note">
+    <strong>Evidence note:</strong> The results above are based on commands executed on 22 September 2026. The separate <em>fishlink_app</em> project has existing Dart analyzer errors and is not claimed as a successful Flutter result.
+  </div>
+</body>
+</html>

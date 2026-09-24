@@ -1,0 +1,11 @@
+@FishLink.API_HostAddress = http://localhost:5157
+
+GET {{FishLink.API_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+
+GET {{FishLink.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

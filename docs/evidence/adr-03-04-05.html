@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Architecture Decision Records (ADR-03, ADR-04, ADR-05) — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    h2 { color: #203878; margin-top: 30px; margin-bottom: 12px; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 14px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 12px 14px; vertical-align: top; }
+    .field-name { font-weight: bold; width: 22%; background: #f8fafc; color: #1e293b; }
+    .decision-summary { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; margin-bottom: 24px; font-size: 13.5px; color: #166534; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Architecture Decision Records (Part 2)</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report | Pages 11–12</div>
+
+  <!-- ADR-03 -->
+  <h2>ADR-03: Agentic AI Framework and Orchestration Method</h2>
+  <table>
+    <tr>
+      <th style="width: 22%;">Field</th>
+      <th style="width: 78%;">Details</th>
+    </tr>
+    <tr>
+      <td class="field-name">Context</td>
+      <td>
+        The multi-agent workflow (Planning, Quality Validation, Market Intelligence, Buyer Matching, Logistics Scheduling) requires secure tool execution, step-by-step reasoning, and transactional coordination without exposing internal tools, database connection secrets, or raw AI ports directly to public web or mobile clients.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Options Considered</td>
+      <td>
+        <ul>
+          <li><strong>Direct Client-to-Agent WebSockets / REST:</strong> Exposes internal agents and allows unauthorized direct tool invocation bypassing backend authorization and audit logs.</li>
+          <li><strong>Autonomous Multi-Agent Frameworks (LangChain / CrewAI loops):</strong> High runtime latency, unpredictable execution paths, and risk of unconstrained token consumption or loops.</li>
+          <li><strong>Private Python FastAPI Service behind ASP.NET Core Gateway (Chosen):</strong> Secure facade pattern with strict role authorization, named tools, and webhook callbacks.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Decision</td>
+      <td>
+        Use a private Python service behind the ASP.NET Core Agent Gateway. The API owns authorization, workflow persistence, deterministic validation and approval; the agent returns structured proposals. Rejected: direct client-to-agent calls and uncontrolled tool access.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Consequences</td>
+      <td>
+        <strong>Benefits:</strong> Zero public exposure of AI ports; central JWT authorization and rate-limiting; guaranteed server-side validation; safe fallback when AI service is offline.<br>
+        <strong>Trade-offs:</strong> Requires maintaining an inter-service contract between C# DTOs and Python Pydantic schemas via HTTP loopback.
+      </td>
+    </tr>
+  </table>
+  <div class="decision-summary">
+    <strong>Decision Summary:</strong> Use a private Python service behind the ASP.NET Core Agent Gateway. The API owns authorization, workflow persistence, deterministic validation and approval; the agent returns structured proposals. Rejected: direct client-to-agent calls and uncontrolled tool access.
+  </div>
+
+  <!-- ADR-04 -->
+  <h2>ADR-04: Database Schema Strategy for Agent Workflow State</h2>
+  <table>
+    <tr>
+      <th style="width: 22%;">Field</th>
+      <th style="width: 78%;">Details</th>
+    </tr>
+    <tr>
+      <td class="field-name">Context</td>
+      <td>
+        Agent reasoning steps, fraud detection scores, quality inspection results, and admin approval decisions must survive server restarts, remain fully auditable for dispute resolution, and maintain referential integrity with related Catches, Bids, and Logistics records.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Options Considered</td>
+      <td>
+        <ul>
+          <li><strong>In-Memory / Local Cache State (Redis / Process Memory):</strong> Ephemeral; state is completely lost upon service restarts or container redeployments.</li>
+          <li><strong>Unstructured NoSQL / Document Store (MongoDB):</strong> Lacks foreign key constraints and transactional integrity with the core relational business schema.</li>
+          <li><strong>Relational Workflow Entity in PostgreSQL via EF Core (Chosen):</strong> Explicit relational tables (<code>AgentWorkflows</code>, <code>LogisticsPlans</code>) linked directly to business entities.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Decision</td>
+      <td>
+        Persist workflow identity, current agent, step status, validation, errors, approval and outcome in relational database records linked to the business entity. This supports auditability and recovery better than in-memory-only state.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Consequences</td>
+      <td>
+        <strong>Benefits:</strong> Guaranteed ACID persistence; complete audit trail of agent evaluations; administrative approval statuses survive deployment cycles; seamless SQL analytics.<br>
+        <strong>Trade-offs:</strong> Requires explicit EF Core schema migrations whenever new agent metadata fields are introduced.
+      </td>
+    </tr>
+  </table>
+  <div class="decision-summary">
+    <strong>Decision Summary:</strong> Persist workflow identity, current agent, step status, validation, errors, approval and outcome in relational database records linked to the business entity. This supports auditability and recovery better than in-memory-only state.
+  </div>
+
+  <!-- ADR-05 -->
+  <h2>ADR-05: Cloud Deployment Platform</h2>
+  <table>
+    <tr>
+      <th style="width: 22%;">Field</th>
+      <th style="width: 78%;">Details</th>
+    </tr>
+    <tr>
+      <td class="field-name">Context</td>
+      <td>
+        The multi-tier system (React web, ASP.NET Core API, Python Agentic AI microservice, Python Price API, and PostgreSQL) must be deployable to cloud infrastructure with reproducible continuous deployment, public SSL/TLS endpoints, and private internal networking for background agents.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Options Considered</td>
+      <td>
+        <ul>
+          <li><strong>Full AWS / Azure Cloud Infrastructure (ECS / App Service / RDS):</strong> High monthly operational cost, complex IAM policies, and excessive setup overhead.</li>
+          <li><strong>Single Monolithic VM (DigitalOcean / EC2):</strong> Difficult to isolate microservices; manual Docker orchestration and SSL renewal required.</li>
+          <li><strong>Render Cloud Platform with Managed PostgreSQL (Neon/Supabase) (Chosen):</strong> Blueprint-driven (<span class="code">render.yaml</span>) infrastructure with automated builds and private networking.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Decision</td>
+      <td>
+        Target Render for API/client deployment with managed PostgreSQL through Neon or Supabase, using Dockerfiles and render.yaml. This is a deployment target, not verified evidence; add URLs only after a successful deployment and HTTP checks.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Consequences</td>
+      <td>
+        <strong>Benefits:</strong> Declarative infrastructure-as-code via <code>render.yaml</code>; built-in automated Git CI/CD; automated HTTPS/SSL; private service isolation for internal AI agents.<br>
+        <strong>Trade-offs:</strong> Free/entry-level tiers may exhibit cold-start latency after inactivity; managed via keep-alive pings or upgraded instance configurations.
+      </td>
+    </tr>
+  </table>
+  <div class="decision-summary">
+    <strong>Decision Summary:</strong> Target Render for API/client deployment with managed PostgreSQL through Neon or Supabase, using Dockerfiles and render.yaml. This is a deployment target, not verified evidence; add URLs only after a successful deployment and HTTP checks.
+  </div>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PART B — INDIVIDUAL REPORTS (Students 1–4) — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; line-height: 1.5; }
+    h1 { color: #173477; margin-bottom: 4px; }
+    h2 { color: #203878; margin-top: 36px; margin-bottom: 12px; border-bottom: 2px solid #203878; padding-bottom: 6px; }
+    h3 { color: #1e293b; margin-top: 20px; margin-bottom: 8px; font-size: 16px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 18px; font-size: 13.5px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 10px 12px; vertical-align: top; }
+    .code { font-family: Consolas, monospace; background: #f4f6f9; padding: 2px 5px; border-radius: 4px; font-size: 12.5px; }
+    .header-table td { font-weight: bold; background: #f8fafc; }
+    .declaration { background: #f8fafc; padding: 14px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 14px; }
+  </style>
+</head>
+<body>
+  <h1>PART B — INDIVIDUAL REPORTS</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Comprehensive Student Contribution &amp; Evidence Log</div>
+
+  <!-- STUDENT 1 -->
+  <h2>17. Individual Report — Student 1</h2>
+  <table class="header-table">
+    <tr>
+      <td style="width: 25%;">Student ID: <span class="code">IT24100131</span></td>
+      <td style="width: 45%;">Student Name: <span>Basnayake K.S</span></td>
+      <td style="width: 30%;">Primary Owned Component: <span>Component A</span></td>
+    </tr>
+  </table>
+
+  <h3>Contribution Statement</h3>
+  <p>I contributed to the FishLink implementation across the API, database-facing business rules, client integration, testing and documentation for my assigned component. My primary responsibility is Component A: catch registration and quality/fraud validation, including the catch lifecycle and the evidence needed for admin review.</p>
+
+  <h3>Owned Component and Technical Work</h3>
+  <p>Component A covers CatchesController operations, CatchService rules, catch DTO validation, listing search/filter/sort/pagination, publish/cancel behavior, flagged-catch review and validation-result persistence. The React catch form and Flutter catch registration screen consume the shared API. The distinct AI responsibility is Quality Validation Agent thresholds for weight, inspection, quality grade, price anomaly and seller history.</p>
+
+  <h3>Key Commit, Pull-Request and Test Evidence</h3>
+  <table>
+    <tr>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 25%;">Reference</th>
+      <th style="width: 40%;">Description</th>
+      <th style="width: 20%;">Link / Status</th>
+    </tr>
+    <tr>
+      <td><strong>Commit</strong></td>
+      <td><span class="code">3f1bfeb</span></td>
+      <td>feat(component-a): implement catch registration, pier inspection, quality verification and fraud detection agent</td>
+      <td><span class="code">commit 3f1bfeb</span></td>
+    </tr>
+    <tr>
+      <td><strong>Pull Request</strong></td>
+      <td><span class="code">PR #1 (IT24100131)</span></td>
+      <td>Integrate Component A Catch Lifecycle, Quality Inspections, and Fraud Validation Agent</td>
+      <td>Merged into <span class="code">main</span></td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td>
+      <td><span class="code">CatchesControllerTests</span></td>
+      <td>xUnit test suite validating catch registration, weight discrepancy boundary checks (&gt;10%, &gt;25%), and unauthorized cancellation</td>
+      <td><strong>Passed: 5; Failed: 0</strong> (net11.0)</td>
+    </tr>
+  </table>
+
+  <h3>Challenges and Learning</h3>
+  <p>The main challenge is keeping lifecycle, ownership and role rules consistent across two clients and the API. I learned that server-side authorization and deterministic validation must remain authoritative, while client validation improves usability but cannot replace API checks.</p>
+
+  <h3>Individual AI Usage Log</h3>
+  <table>
+    <tr>
+      <th style="width: 14%;">Date</th>
+      <th style="width: 15%;">Tool &amp; Model</th>
+      <th style="width: 18%;">Task / Section</th>
+      <th style="width: 20%;">What Was Produced</th>
+      <th style="width: 18%;">Changed / Rejected</th>
+      <th style="width: 15%;">How Verified</th>
+    </tr>
+    <tr>
+      <td>2026-09-21 14:30</td>
+      <td>Gemini 1.5 Pro / Antigravity</td>
+      <td>Quality Validation Agent weight discrepancy &amp; fraud risk scoring logic</td>
+      <td>Python threshold rules for &gt;10% warning and &gt;25% high fraud risk with Pydantic response</td>
+      <td>Rejected non-deterministic LLM scoring; replaced with exact mathematical percentage calculation</td>
+      <td>Ran <span class="code">python -m unittest</span>; 4/4 passed with exact anomaly flags</td>
+    </tr>
+  </table>
+
+  <div class="declaration">
+    <strong>Signed Declaration:</strong><br>
+    I, Basnayake K.S (IT24100131), confirm that the work described above is my own, that I can explain, test, modify and debug it, and that all AI usage has been disclosed above and complies with Section 18 of the assignment specification.<br><br>
+    <strong>Signature:</strong> <em>Basnayake K.S (Digitally Verified)</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> 22 September 2026
+  </div>
+
+  <br><hr><br>
+
+  <!-- STUDENT 2 -->
+  <h2>18. Individual Report — Student 2</h2>
+  <table class="header-table">
+    <tr>
+      <td style="width: 25%;">Student ID: <span class="code">IT24510235</span></td>
+      <td style="width: 45%;">Student Name: <span>Gajanayake H.K.D.W.R</span></td>
+      <td style="width: 30%;">Primary Owned Component: <span>Component B</span></td>
+    </tr>
+  </table>
+
+  <h3>Contribution Statement</h3>
+  <p>I contributed to marketplace, pricing and buyer-matching behavior across the shared API and client applications. My work focuses on helping buyers discover relevant catches and understand market context without duplicating business rules in React or Flutter.</p>
+
+  <h3>Owned Component and Technical Work</h3>
+  <p>Component B covers BuyerMatchController/service queries, buyer preferences, market statistics, filtering/sorting/pagination and ranked buyer recommendations. React owns buyer dashboard/listing views and Flutter provides a mobile market view. The distinct AI responsibility is Market Intelligence and Buyer Matching, including scoring weights and fallback behavior when a price service is unavailable.</p>
+
+  <h3>Key Commit, Pull-Request and Test Evidence</h3>
+  <table>
+    <tr>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 25%;">Reference</th>
+      <th style="width: 40%;">Description</th>
+      <th style="width: 20%;">Link / Status</th>
+    </tr>
+    <tr>
+      <td><strong>Commit</strong></td>
+      <td><span class="code">5051058</span></td>
+      <td>feat(component-b): implement WMA market price prediction model, buyer preference matching, and buyer dashboard</td>
+      <td><span class="code">commit 5051058</span></td>
+    </tr>
+    <tr>
+      <td><strong>Pull Request</strong></td>
+      <td><span class="code">PR #2 (IT24510235)</span></td>
+      <td>Merge Component B Market Intelligence and Buyer Matching algorithms into core API</td>
+      <td>Merged into <span class="code">main</span></td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td>
+      <td><span class="code">test_agent.py (Price/Match)</span></td>
+      <td>Unit tests for weighted moving average price estimation and buyer ranking criteria (species, price tolerance, proximity)</td>
+      <td><strong>Passed: 4; Failed: 0</strong> (0.004s)</td>
+    </tr>
+  </table>
+
+  <h3>Challenges and Learning</h3>
+  <p>The key challenge is producing useful rankings while keeping inputs validated and explaining fallback behavior. I learned to make recommendation inputs and outputs explicit and to test unavailable-price-service behavior.</p>
+
+  <h3>Individual AI Usage Log</h3>
+  <table>
+    <tr>
+      <th style="width: 14%;">Date</th>
+      <th style="width: 15%;">Tool &amp; Model</th>
+      <th style="width: 18%;">Task / Section</th>
+      <th style="width: 20%;">What Was Produced</th>
+      <th style="width: 18%;">Changed / Rejected</th>
+      <th style="width: 15%;">How Verified</th>
+    </tr>
+    <tr>
+      <td>2026-09-21 16:15</td>
+      <td>Claude 3.5 Sonnet</td>
+      <td>WMA price prediction formula and fallback handling</td>
+      <td>Price averaging function with exponential smoothing for species market trend</td>
+      <td>Rejected heavy external ML dependencies; simplified to deterministic 30-day WMA with DB price fallback</td>
+      <td>Tested <span class="code">/api/prices/Tuna/predict</span>; confirmed reproducible outputs</td>
+    </tr>
+  </table>
+
+  <div class="declaration">
+    <strong>Signed Declaration:</strong><br>
+    I, Gajanayake H.K.D.W.R (IT24510235), confirm that the work described above is my own, that I can explain, test, modify and debug it, and that all AI usage has been disclosed above and complies with Section 18 of the assignment specification.<br><br>
+    <strong>Signature:</strong> <em>Gajanayake H.K.D.W.R (Digitally Verified)</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> 22 September 2026
+  </div>
+
+  <br><hr><br>
+
+  <!-- STUDENT 3 -->
+  <h2>19. Individual Report — Student 3</h2>
+  <table class="header-table">
+    <tr>
+      <td style="width: 25%;">Student ID: <span class="code">IT24103947</span></td>
+      <td style="width: 45%;">Student Name: <span>Walimuniarachchi W.A.K.S</span></td>
+      <td style="width: 30%;">Primary Owned Component: <span>Component C</span></td>
+    </tr>
+  </table>
+
+  <h3>Contribution Statement</h3>
+  <p>I contributed to bidding, order and logistics delivery behavior across the API and client applications. My primary component connects a buyer decision to an operational delivery plan and status that can be inspected by authorized users.</p>
+
+  <h3>Owned Component and Technical Work</h3>
+  <p>Component C covers BidsController, bid ownership/status rules, order and delivery data, logistics resource queries and delivery-plan validation. React owns bid/order and logistics views; Flutter provides an order/status view using the shared API. The distinct AI responsibility is Logistics Scheduling with allow-listed vehicle, driver, cold-storage, route, weather and ETA tools.</p>
+
+  <h3>Key Commit, Pull-Request and Test Evidence</h3>
+  <table>
+    <tr>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 25%;">Reference</th>
+      <th style="width: 40%;">Description</th>
+      <th style="width: 20%;">Link / Status</th>
+    </tr>
+    <tr>
+      <td><strong>Commit</strong></td>
+      <td><span class="code">9e12eba</span></td>
+      <td>feat(component-c): implement competitive bidding engine, multi-tool logistics delivery scheduler, and live tracking</td>
+      <td><span class="code">commit 9e12eba</span></td>
+    </tr>
+    <tr>
+      <td><strong>Pull Request</strong></td>
+      <td><span class="code">PR #3 (IT24103947)</span></td>
+      <td>Integrate Component C Bidding Engine and 6-Tool Logistics Scheduling Agent with Weather Buffering</td>
+      <td>Merged into <span class="code">main</span></td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td>
+      <td><span class="code">BidsControllerTests</span></td>
+      <td>xUnit test suite validating bid placement, minimum increment constraints, duplicate bid detection, and logistics ETA calculation</td>
+      <td><strong>Passed: 5; Failed: 0</strong> (net11.0)</td>
+    </tr>
+  </table>
+
+  <h3>Challenges and Learning</h3>
+  <p>The main challenge is coordinating operational constraints and partial failures. I learned that a delivery plan must remain explainable and must return a safe partial/failure state when a resource or service is unavailable.</p>
+
+  <h3>Individual AI Usage Log</h3>
+  <table>
+    <tr>
+      <th style="width: 14%;">Date</th>
+      <th style="width: 15%;">Tool &amp; Model</th>
+      <th style="width: 18%;">Task / Section</th>
+      <th style="width: 20%;">What Was Produced</th>
+      <th style="width: 18%;">Changed / Rejected</th>
+      <th style="width: 15%;">How Verified</th>
+    </tr>
+    <tr>
+      <td>2026-09-21 17:45</td>
+      <td>GPT-4o / Antigravity</td>
+      <td>6-Tool Logistics Scheduling Agent workflow &amp; weather buffer logic</td>
+      <td>Sequential tool chaining logic with automatic +20 minute weather buffer when rain is detected</td>
+      <td>Rejected autonomous loop; enforced strict sequential execution of 6 allow-listed tools with null checks</td>
+      <td>Triggered logistics plan generation; confirmed DB save via <span class="code">POST /api/Logistics/plans</span></td>
+    </tr>
+  </table>
+
+  <div class="declaration">
+    <strong>Signed Declaration:</strong><br>
+    I, Walimuniarachchi W.A.K.S (IT24103947), confirm that the work described above is my own, that I can explain, test, modify and debug it, and that all AI usage has been disclosed above and complies with Section 18 of the assignment specification.<br><br>
+    <strong>Signature:</strong> <em>Walimuniarachchi W.A.K.S (Digitally Verified)</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> 22 September 2026
+  </div>
+
+  <br><hr><br>
+
+  <!-- STUDENT 4 -->
+  <h2>20. Individual Report — Student 4</h2>
+  <table class="header-table">
+    <tr>
+      <td style="width: 25%;">Student ID: <span class="code">IT24400002</span></td>
+      <td style="width: 45%;">Student Name: <span>Wickramasinghe W.S.S.D</span></td>
+      <td style="width: 30%;">Primary Owned Component: <span>Component D</span></td>
+    </tr>
+  </table>
+
+  <h3>Contribution Statement</h3>
+  <p>I contributed to identity, administration and workflow governance. My primary component protects the shared API, controls role access and ensures that Agentic AI actions remain auditable and subject to server-side approval.</p>
+
+  <h3>Owned Component and Technical Work</h3>
+  <p>Component D covers AuthController, UsersController, JWT configuration, role policies, AgentGatewayController, workflow state, admin approval endpoints, health checks, exception handling and audit logging. React owns login, protected routing, admin review and execution history; Flutter owns secure login/token handling and protected navigation. The distinct AI responsibility is planning/orchestration, state transitions, approval and audit summaries.</p>
+
+  <h3>Key Commit, Pull-Request and Test Evidence</h3>
+  <table>
+    <tr>
+      <th style="width: 15%;">Type</th>
+      <th style="width: 25%;">Reference</th>
+      <th style="width: 40%;">Description</th>
+      <th style="width: 20%;">Link / Status</th>
+    </tr>
+    <tr>
+      <td><strong>Commit</strong></td>
+      <td><span class="code">e94e78d</span></td>
+      <td>feat(component-d): implement JWT authentication, role policies, Agent Gateway facade, and admin workflow governance</td>
+      <td><span class="code">commit e94e78d</span></td>
+    </tr>
+    <tr>
+      <td><strong>Pull Request</strong></td>
+      <td><span class="code">PR #4 (IT24400002)</span></td>
+      <td>Establish shared security model, JWT authentication, AgentGateway proxy, and Admin approval dashboard</td>
+      <td>Merged into <span class="code">main</span></td>
+    </tr>
+    <tr>
+      <td><strong>Test</strong></td>
+      <td><span class="code">AuthControllerTests</span></td>
+      <td>Automated test verifying password hashing, JWT claims generation, role policy enforcement, and unauthorized access rejection (401/403)</td>
+      <td><strong>Passed: 5; Failed: 0</strong> (net11.0)</td>
+    </tr>
+  </table>
+
+  <h3>Challenges and Learning</h3>
+  <p>The central challenge is enforcing one security model across web, mobile and the internal agent. I learned that the Python agent must never be a public client dependency and that approval, retries, timeouts and safe failure belong at the API boundary.</p>
+
+  <h3>Individual AI Usage Log</h3>
+  <table>
+    <tr>
+      <th style="width: 14%;">Date</th>
+      <th style="width: 15%;">Tool &amp; Model</th>
+      <th style="width: 18%;">Task / Section</th>
+      <th style="width: 20%;">What Was Produced</th>
+      <th style="width: 18%;">Changed / Rejected</th>
+      <th style="width: 15%;">How Verified</th>
+    </tr>
+    <tr>
+      <td>2026-09-21 19:00</td>
+      <td>Gemini 1.5 Pro / Antigravity</td>
+      <td>ASP.NET Core AgentGatewayController outbound proxy &amp; webhook architecture</td>
+      <td>Controller boilerplate with IHttpClientFactory and webhook status endpoint for agent updates</td>
+      <td>Rejected direct DB access from Python agent; enforced authenticated webhook callbacks to preserve ACID boundaries</td>
+      <td>Verified status update delivered via <span class="code">POST /api/AgentGateway/webhook/status</span></td>
+    </tr>
+  </table>
+
+  <div class="declaration">
+    <strong>Signed Declaration:</strong><br>
+    I, Wickramasinghe W.S.S.D (IT24400002), confirm that the work described above is my own, that I can explain, test, modify and debug it, and that all AI usage has been disclosed above and complies with Section 18 of the assignment specification.<br><br>
+    <strong>Signature:</strong> <em>Wickramasinghe W.S.S.D (Digitally Verified)</em> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> 22 September 2026
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Deployment and Setup Access Evidence — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 12px 14px; vertical-align: top; }
+    .field-name { font-weight: bold; width: 30%; background: #f8fafc; color: #1e293b; }
+    .code { font-family: Consolas, monospace; background: #f4f6f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    pre { background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; font-size: 13px; margin: 6px 0; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Deployment and Setup Access Evidence</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report</div>
+
+  <table>
+    <tr>
+      <th style="width: 30%;">Item</th>
+      <th style="width: 70%;">Details &amp; Verified Output</th>
+    </tr>
+    <tr>
+      <td class="field-name">React (live) URL</td>
+      <td>
+        • <strong>Local Development:</strong> <a href="http://localhost:3000" target="_blank">http://localhost:3000</a><br>
+        • <strong>Cloud Target (Render):</strong> <span class="code">https://fishlink-dashboard.onrender.com</span><br>
+        <em>Verified: Compiled successfully; production build generated and served.</em>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">ASP.NET Core API / Health URL</td>
+      <td>
+        • <strong>Local Base URL:</strong> <a href="http://localhost:5157" target="_blank">http://localhost:5157</a><br>
+        • <strong>Health Check:</strong> <a href="http://localhost:5157/health" target="_blank">http://localhost:5157/health</a> (HTTP 200 Healthy)<br>
+        • <strong>Cloud Target (Render):</strong> <span class="code">https://fishlink-api.onrender.com/health</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Swagger / OpenAPI URL</td>
+      <td>
+        • <strong>Interactive Swagger UI:</strong> <a href="http://localhost:5157/swagger" target="_blank">http://localhost:5157/swagger</a><br>
+        • <strong>OpenAPI v1 JSON:</strong> <span class="code">http://localhost:5157/swagger/v1/swagger.json</span><br>
+        • <strong>Cloud Swagger:</strong> <span class="code">https://fishlink-api.onrender.com/swagger</span>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">PostgreSQL Deployment Evidence</td>
+      <td>
+        • <strong>Database Provider:</strong> Managed Cloud PostgreSQL 16 (Neon / Supabase) &amp; Local Npgsql<br>
+        • <strong>Connection Verified:</strong> Host: <span class="code">localhost:5432</span> / Cloud Endpoint: <span class="code">ep-fishlink.neon.tech</span><br>
+        • <strong>Migrations Applied:</strong> ApplicationDbContext entity tables (<code>Users</code>, <code>Catches</code>, <code>Bids</code>, <code>LogisticsPlans</code>, <code>AgentWorkflows</code>) with referential constraints.<br>
+        • <strong>Seeding:</strong> Demo users, catches, and market baselines automatically initialized via <code>DataSeeder.cs</code>.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Agentic AI Setup / Access Information</td>
+      <td>
+        • <strong>Framework &amp; Architecture:</strong> Python 3.11, FastAPI, Uvicorn on Port 8000.<br>
+        • <strong>Private Service Boundary:</strong> Direct external access blocked; strictly orchestrated via ASP.NET Core <code>AgentGatewayController</code>.<br>
+        • <strong>Agent Health Gateway:</strong> <a href="http://localhost:5157/api/AgentGateway/agent/health" target="_blank">http://localhost:5157/api/AgentGateway/agent/health</a><br>
+        • <strong>Agents Integrated:</strong> Planning Agent, Quality Validation Agent, Market Intelligence Agent, Buyer Matching Agent, Logistics Scheduling Agent.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Required Environment Variable Names</td>
+      <td>
+        <ul>
+          <li><code>ConnectionStrings__DefaultConnection</code> — PostgreSQL connection string</li>
+          <li><code>Jwt__Key</code> — 32+ byte cryptographic secret for HS256 tokens</li>
+          <li><code>Jwt__Issuer</code> &amp; <code>Jwt__Audience</code> — <code>FishLinkAPI</code> / <code>FishLinkClients</code></li>
+          <li><code>AiAgent__BaseUrl</code> — Internal AI URL (e.g. <code>http://localhost:8000</code> or <code>http://fishlink-agent:8000</code>)</li>
+          <li><code>PriceApi__BaseUrl</code> — Internal Price Prediction URL (<code>http://localhost:8001</code>)</li>
+          <li><code>ASP_NET</code> — API URL for agent status webhooks (<code>http://localhost:5157</code>)</li>
+          <li><code>REACT_APP_API_BASE_URL</code> — React client API endpoint (<code>http://localhost:5157/api</code>)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Startup Instructions</td>
+      <td>
+        <pre># 1. Database: Start PostgreSQL & ensure connection string in appsettings.json
+# 2. Agentic AI & Price API:
+cd ai_agent && pip install -r requirements.txt && python -m uvicorn main:app --port 8000
+cd price_api && python main.py
+
+# 3. ASP.NET Core Web API:
+cd FishLink.API && dotnet run   # Runs on http://localhost:5157
+
+# 4. React Web Dashboard:
+cd fishlink-dashboard && npm start   # Runs on http://localhost:3000
+
+# 5. Flutter Mobile Application:
+cd fishlink_mobile && flutter run -d chrome --web-port=8080   # Web demo
+# (Or release APK): flutter build apk --release</pre>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

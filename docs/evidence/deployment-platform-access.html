@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Deployment and Evaluator Access — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 14px; vertical-align: top; }
+    .code { font-family: Consolas, monospace; background: #f4f6f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .note { margin-top: 22px; padding: 15px; background: #f2f5fa; border-left: 4px solid #203878; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Deployment and Evaluator Access</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report | Page 10</div>
+
+  <table>
+    <tr>
+      <th style="width: 18%;">Component</th>
+      <th style="width: 25%;">Platform</th>
+      <th style="width: 32%;">Live URL / Access</th>
+      <th style="width: 25%;">Notes</th>
+    </tr>
+    <tr>
+      <td><strong>ASP.NET Core API</strong></td>
+      <td>Render (Web Service / Linux Docker) &amp; Localhost (Kestrel / .NET 11.0)</td>
+      <td>
+        • Local: <span class="code">http://localhost:5157</span><br>
+        • Swagger UI: <span class="code">http://localhost:5157/swagger</span><br>
+        • Health: <span class="code">http://localhost:5157/health</span><br>
+        • Deployed: <span class="code">https://fishlink-api.onrender.com</span>
+      </td>
+      <td>RESTful API with JWT Bearer auth, EF Core Relational ORM, and central AgentGateway webhook coordinator.</td>
+    </tr>
+    <tr>
+      <td><strong>PostgreSQL</strong></td>
+      <td>Neon Cloud / Supabase Managed PostgreSQL 16 (Local fallback: Npgsql)</td>
+      <td>
+        • Cloud URL: <span class="code">postgresql://neondb_owner:***@ep-fishlink.neon.tech/FishLinkDb</span><br>
+        • Local: <span class="code">Host=localhost:5432;Database=FishLinkDb</span>
+      </td>
+      <td>Restricted credentials, migrations applied. ApplicationDbContext with automatic DataSeeder for roles, catches, and bids.</td>
+    </tr>
+    <tr>
+      <td><strong>React</strong></td>
+      <td>Render (Static Web Service) &amp; Localhost (Node.js 24 / Webpack)</td>
+      <td>
+        • Local: <span class="code">http://localhost:3000</span><br>
+        • Deployed: <span class="code">https://fishlink-dashboard.onrender.com</span>
+      </td>
+      <td>Configured to use deployed API via <span class="code">REACT_APP_API_BASE_URL</span>. Role-based dashboards for Fisherman, Buyer, Admin, and Logistics.</td>
+    </tr>
+    <tr>
+      <td><strong>Flutter</strong></td>
+      <td>Android (API 21+ / ARM64) &amp; Cross-Platform Web runtime</td>
+      <td>
+        • APK Attached: <span class="code">fishlink_mobile/build/app/outputs/flutter-apk/app-release.apk</span><br>
+        • Web Runtime: <span class="code">http://localhost:8080</span>
+      </td>
+      <td>Runnable Android APK. Cross-platform mobile client with GPS harbor tracking, live bidding, and secure offline storage.</td>
+    </tr>
+    <tr>
+      <td><strong>Agentic AI</strong></td>
+      <td>Render (Private Web Service / Docker) &amp; Localhost (Python 3.11 / FastAPI)</td>
+      <td>
+        • Local: <span class="code">http://localhost:8000/docs</span><br>
+        • Health via Gateway: <span class="code">http://localhost:5157/api/AgentGateway/agent/health</span><br>
+        • Internal: <span class="code">http://fishlink-agent:8000</span>
+      </td>
+      <td>Model/framework requirements: FastAPI, Pydantic, Requests. Startup order: 1. PostgreSQL → 2. Agentic AI &amp; Price API → 3. ASP.NET API → 4. Clients.</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>Evaluator Access &amp; Credentials Notice:</strong> Demonstration user credentials (Admin, Fisherman, Buyer, Logistics) and database access strings are submitted via LMS / private evaluator channel in accordance with project guidelines.
+  </div>
+</body>
+</html>

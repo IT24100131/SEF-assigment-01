@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f0f4f8;
+  color: #334155;
+}
+
+/* Authentication Styling */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #005b96 0%, #03396c 100%);
+}
+
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-header h2 {
+  color: #003366;
+  margin: 10px 0 5px 0;
+}
+
+.auth-header p {
+  color: #64748b;
+  margin: 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.form-group input, .form-group select {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #005b96;
+}
+
+.btn-primary {
+  background-color: #005b96;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #03396c;
+}
+
+.auth-footer {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.auth-footer .link {
+  color: #005b96;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-footer .link:hover {
+  text-decoration: underline;
+}
+
+.hint {
+  margin-top: 15px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* Dashboard Styling */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #03396c;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #011f4b;
+}
+
+.logo-container h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar nav ul li {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+  color: #b3cde0;
+}
+
+.sidebar nav ul li:hover, .sidebar nav ul li.active {
+  background-color: #005b96;
+  color: white;
+  border-left: 4px solid #6497b1;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+header {
+  background-color: white;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #03396c;
+}
+
+.user-profile {
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.user-profile:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.user-profile-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #005b96;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.user-profile-name {
+  font-size: 0.88rem;
+}
+
+.dashboard-content {
+  padding: 30px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.dashboard-content h2 {
+  margin-top: 0;
+  color: #334155;
+  margin-bottom: 20px;
+}
+
+.workflow-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border-left: 6px solid #cbd5e1;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.workflow-card.PendingApproval { border-left-color: #f59e0b; }
+.workflow-card.InProgress { border-left-color: #3b82f6; }
+.workflow-card.Approved { border-left-color: #10b981; }
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #1e293b;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge.PendingApproval { background: #fef3c7; color: #d97706; }
+.badge.InProgress { background: #dbeafe; color: #2563eb; }
+.badge.Approved { background: #d1fae5; color: #059669; }
+
+.card-body p {
+  margin: 8px 0;
+  color: #475569;
+}
+
+.card-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+button.btn-approve, button.btn-reject {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  color: white;
+}
+
+.btn-approve { background-color: #10b981; }
+.btn-reject { background-color: #ef4444; }
+
+.btn-approve:hover, .btn-reject:hover { opacity: 0.9; }
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #03396c;
+}
