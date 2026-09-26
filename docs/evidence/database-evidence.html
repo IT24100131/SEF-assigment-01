@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FishLink Database Evidence</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; }
+    .meta { margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 12px; vertical-align: top; }
+    .ok { color: #08783f; font-weight: bold; }
+    .note { margin-top: 20px; padding: 14px; background: #f2f5fa; }
+  </style>
+</head>
+<body>
+  <h1>FishLink Database Evidence</h1>
+  <div class="meta">
+    <strong>Database technology:</strong> PostgreSQL with Entity Framework Core<br>
+    <strong>Evidence source:</strong> FishLink.API ApplicationDbContext and EF Core Migrations
+  </div>
+  <table>
+    <tr><th>Database evidence</th><th>Verified implementation</th></tr>
+    <tr><td>Database provider</td><td class="ok">PostgreSQL configured through UseNpgsql()</td></tr>
+    <tr><td>Tables/entities</td><td>Users, Catches, Bids, Orders, AgentWorkflows, QualityChecks, Deliveries, BuyerPreferences, Vehicles, Drivers, ColdStorages and DeliveryPlans</td></tr>
+    <tr><td>Relationships</td><td>Users → Catches; Catches → Bids; Users → Bids; Bids → Orders; catch/workflow and logistics relationships are represented in the EF model.</td></tr>
+    <tr><td>Migrations</td><td class="ok">InitialCreate, AddQualityAndDelivery, AddBuyerPreferences, AddQualityValidationFields and AddLogisticsAgentTables</td></tr>
+    <tr><td>Health verification</td><td>/health uses an Npgsql health check configured with the application connection string.</td></tr>
+    <tr><td>Test verification</td><td class="ok">Backend automated tests passed: 5 passed, 0 failed.</td></tr>
+  </table>
+  <div class="note">
+    This is repository/database-structure evidence. A live PostgreSQL screenshot
+    showing connected tables and rows should be added separately if the local or
+    deployed database is running.
+  </div>
+</body>
+</html>
