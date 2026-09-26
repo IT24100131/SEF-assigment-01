@@ -159,21 +159,78 @@ header h1 {
   width: 100%;
   max-width: 420px;
   border: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .auth-header h2 {
   color: var(--text-primary);
   margin: 10px 0 5px 0;
+  font-size: 1.8rem;
 }
 
 .auth-header p {
   color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-group label {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
+}
+
+.form-group input, .form-group select {
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s;
+}
+
+.auth-footer {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.auth-footer .link {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-footer .link:hover {
+  text-decoration: underline;
+}
+
+.hint {
+  margin-top: 15px;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 10px;
+  border-radius: 8px;
 }
 
 /* Cards & Widgets */
