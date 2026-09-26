@@ -37,6 +37,9 @@ public class CatchService : ICatchService
         if (!string.IsNullOrWhiteSpace(q.Species))
             query = query.Where(c => c.FishSpecies == q.Species);
 
+        if (q.FishermanId.HasValue)
+            query = query.Where(c => c.FishermanId == q.FishermanId.Value);
+
         if (!string.IsNullOrWhiteSpace(q.Status))
             query = query.Where(c => c.Status == q.Status);
 
@@ -150,7 +153,7 @@ public class CatchService : ICatchService
             VerifiedWeightKg     = req.VerifiedWeightKg,
             DeclaredQualityGrade = req.DeclaredQualityGrade,
             InspectionResult     = req.InspectionResult,
-            CatchDateTime        = req.CatchDateTime,
+            CatchDateTime        = req.CatchDateTime?.ToUniversalTime(),
             Status               = "Draft",
             FraudRisk            = "Unassessed",
             CreatedAt            = DateTime.UtcNow,
@@ -177,7 +180,7 @@ public class CatchService : ICatchService
         c.SellerNote           = req.SellerNote;
         c.DeclaredQualityGrade = req.DeclaredQualityGrade;
         c.InspectionResult     = req.InspectionResult;
-        c.CatchDateTime        = req.CatchDateTime;
+        c.CatchDateTime        = req.CatchDateTime?.ToUniversalTime();
         if (req.VerifiedWeightKg > 0) c.VerifiedWeightKg = req.VerifiedWeightKg;
         if (!string.IsNullOrEmpty(req.PhotoUrl)) c.PhotoUrl = req.PhotoUrl;
 

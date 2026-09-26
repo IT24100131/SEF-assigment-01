@@ -413,7 +413,7 @@ const BuyerMatchPanel: React.FC<{ c: CatchRecord }> = ({ c }) => {
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {fetched && !loading && (
-            <RefreshCw size={13} onClick={e => { e.stopPropagation(); setFetched(false); fetchMatches(); }}
+            <RefreshCw size={13} onClick={(e: any) => { e.stopPropagation(); setFetched(false); fetchMatches(); }}
               style={{ opacity: 0.6 }} />
           )}
           {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -718,12 +718,20 @@ export const FishermanDashboard = () => {
   const [editTarget,  setEditTarget]  = useState<CatchRecord | null>(null);
   const [catches,     setCatches]     = useState<CatchRecord[]>([]);
   const [actionError, setActionError] = useState<string>('');
+  const [aiProcessing, setAiProcessing] = useState<{ active: boolean; step: number; catchId: number | null; species: string }>({ active: false, step: 0, catchId: null, species: '' });
 
   const getAuthHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
 
   const fetchCatches = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/Catches`, getAuthHeader());
+      let fishermanId = 0;
+      try {
+        const token = localStorage.getItem('token') ?? '';
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        fishermanId = Number(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? 0);
+      } catch {}
+
+      const res = await axios.get(`${API_BASE_URL}/api/Catches?fishermanId=${fishermanId}`, getAuthHeader());
       // API now returns PagedResult<Catch> — extract items
       const data = res.data;
       setCatches(Array.isArray(data) ? data : (data.items ?? []));
@@ -761,6 +769,14 @@ export const FishermanDashboard = () => {
         fishermanId = Number(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? 0);
       } catch { fishermanId = 0; }
 
+      // Show AI Loading Modal
+      setAiProcessing({ active: true, step: 1, catchId: c.id, species: c.fishSpecies });
+      
+      // Simulate step progression for the UI
+      setTimeout(() => setAiProcessing(prev => ({ ...prev, step: 2 })), 1500);
+      setTimeout(() => setAiProcessing(prev => ({ ...prev, step: 3 })), 3000);
+      setTimeout(() => setAiProcessing(prev => ({ ...prev, step: 4 })), 4500);
+
       try {
         // Route through ASP.NET Core — NOT directly to port 8000
         await axios.post(`${API_BASE_URL}/api/AgentGateway/workflow/start`, {
@@ -777,9 +793,16 @@ export const FishermanDashboard = () => {
           sellerNote:            c.sellerNote ?? '',
         }, getAuthHeader());
         setActionError('');
-        setTimeout(() => fetchCatches(), 6000);
+        setTimeout(() => {
+          setAiProcessing(prev => ({ ...prev, step: 5 }));
+          setTimeout(() => {
+            setAiProcessing({ active: false, step: 0, catchId: null, species: '' });
+            fetchCatches();
+          }, 1500);
+        }, 5500);
       } catch {
         console.warn('AI agent offline — validation skipped');
+        setAiProcessing({ active: false, step: 0, catchId: null, species: '' });
       }
     } catch (err: any) {
       setActionError(err.response?.data ?? 'Error publishing listing.');
@@ -864,6 +887,48 @@ export const FishermanDashboard = () => {
   return (
     <div className="dashboard-content">
       <h2>My Catch Listings</h2>
+
+      {/* AI Processing Modal */}
+      {aiProcessing.active && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+          zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'var(--bg-secondary, white)', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '420px',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.3)', border: '1px solid var(--border-color, #e2e8f0)', textAlign: 'center' }}>
+            <Bot size={48} color="var(--primary, #005b96)" style={{ marginBottom: '16px', animation: aiProcessing.step < 5 ? 'pulse 1.5s infinite' : 'none' }} />
+            <h3 style={{ margin: '0 0 8px', color: 'var(--text-primary, #1e293b)' }}>AI Workflow Initialized</h3>
+            <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: '0.85rem', marginBottom: '24px' }}>
+              Processing Catch #{aiProcessing.catchId} — {aiProcessing.species}
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', textAlign: 'left', background: 'var(--bg-tertiary, #f8fafc)', padding: '16px', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: aiProcessing.step >= 1 ? 'var(--primary, #005b96)' : 'var(--text-secondary, #64748b)', opacity: aiProcessing.step >= 1 ? 1 : 0.5 }}>
+                {aiProcessing.step > 1 ? <CheckCircle size={16} /> : <RefreshCw size={16} className={aiProcessing.step === 1 ? "spin" : ""} />}
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Connecting to Agent Framework...</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: aiProcessing.step >= 2 ? 'var(--primary, #005b96)' : 'var(--text-secondary, #64748b)', opacity: aiProcessing.step >= 2 ? 1 : 0.5 }}>
+                {aiProcessing.step > 2 ? <CheckCircle size={16} /> : <RefreshCw size={16} className={aiProcessing.step === 2 ? "spin" : ""} />}
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Verifying Weight & Quality Grades...</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: aiProcessing.step >= 3 ? 'var(--primary, #005b96)' : 'var(--text-secondary, #64748b)', opacity: aiProcessing.step >= 3 ? 1 : 0.5 }}>
+                {aiProcessing.step > 3 ? <CheckCircle size={16} /> : <RefreshCw size={16} className={aiProcessing.step === 3 ? "spin" : ""} />}
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Calculating Price Anomalies...</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: aiProcessing.step >= 4 ? 'var(--primary, #005b96)' : 'var(--text-secondary, #64748b)', opacity: aiProcessing.step >= 4 ? 1 : 0.5 }}>
+                {aiProcessing.step > 4 ? <CheckCircle size={16} /> : <RefreshCw size={16} className={aiProcessing.step === 4 ? "spin" : ""} />}
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Running Fraud Detection Models...</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: aiProcessing.step >= 5 ? 'var(--primary, #005b96)' : 'var(--text-secondary, #64748b)', opacity: aiProcessing.step >= 5 ? 1 : 0.5 }}>
+                {aiProcessing.step >= 5 ? <CheckCircle size={16} /> : <RefreshCw size={16} className={aiProcessing.step === 5 ? "spin" : ""} />}
+                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Finalizing Report...</span>
+              </div>
+            </div>
+            <style>{`
+              @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+              .spin { animation: spin 1s linear infinite; }
+            `}</style>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="stats-row">

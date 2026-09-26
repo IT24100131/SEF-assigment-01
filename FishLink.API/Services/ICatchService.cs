@@ -41,6 +41,7 @@ public class CatchQueryParams
 
     // Filters
     public string? Species   { get; set; }
+    public int?    FishermanId { get; set; }
     public string? Status    { get; set; }
     public string? FraudRisk { get; set; }
     public decimal? MinPrice { get; set; }
