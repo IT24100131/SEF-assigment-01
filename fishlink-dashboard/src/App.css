@@ -1,310 +1,312 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #f0f4f8;
-  color: #334155;
-}
-
-/* Authentication Styling */
-.auth-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #005b96 0%, #03396c 100%);
-}
-
-.auth-card {
-  background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  width: 100%;
-  max-width: 400px;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.auth-header h2 {
-  color: #003366;
-  margin: 10px 0 5px 0;
-}
-
-.auth-header p {
-  color: #64748b;
-  margin: 0;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.form-group label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #475569;
-}
-
-.form-group input, .form-group select {
-  padding: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-family: 'Inter', sans-serif;
-  transition: border-color 0.3s;
-}
-
-.form-group input:focus, .form-group select:focus {
-  outline: none;
-  border-color: #005b96;
-}
-
-.btn-primary {
-  background-color: #005b96;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.3s;
-}
-
-.btn-primary:hover {
-  background-color: #03396c;
-}
-
-.auth-footer {
-  margin-top: 25px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.auth-footer .link {
-  color: #005b96;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.auth-footer .link:hover {
-  text-decoration: underline;
-}
-
-.hint {
-  margin-top: 15px;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  background: #f8fafc;
-  padding: 10px;
-  border-radius: 6px;
-}
-
-/* Dashboard Styling */
+/* Base structure */
 .dashboard-container {
   display: flex;
   height: 100vh;
+  background-color: var(--bg-primary);
 }
 
+/* Sidebar styling */
 .sidebar {
   width: 250px;
-  background-color: #03396c;
-  color: white;
+  background-color: var(--secondary);
+  color: var(--bg-secondary);
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease;
+  border-right: 1px solid var(--border-color);
 }
 
 .logo-container {
-  padding: 20px;
+  padding: 24px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background-color: #011f4b;
+  gap: 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo-container h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .sidebar nav ul {
   list-style: none;
-  padding: 0;
+  padding: 12px 0;
   margin: 0;
 }
 
 .sidebar nav ul li {
-  padding: 15px 20px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 16px;
   cursor: pointer;
-  transition: background 0.3s;
-  color: #b3cde0;
+  transition: all 0.2s ease;
+  color: var(--text-tertiary);
+  font-weight: 500;
 }
 
-.sidebar nav ul li:hover, .sidebar nav ul li.active {
-  background-color: #005b96;
-  color: white;
-  border-left: 4px solid #6497b1;
+.sidebar nav ul li:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
 }
 
+.sidebar nav ul li.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-left: 4px solid var(--primary);
+}
+
+/* Main Content area */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  min-width: 0;
+  background-color: var(--bg-primary);
 }
 
 header {
-  background-color: white;
+  background-color: var(--bg-secondary);
   padding: 20px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 header h1 {
   margin: 0;
   font-size: 1.4rem;
-  color: #03396c;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.theme-toggle {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
 }
 
 .user-profile {
-  background: #f1f5f9;
-  padding: 8px 15px;
+  background: var(--bg-tertiary);
+  padding: 8px 16px;
   border-radius: 20px;
-  font-weight: 500;
-  color: #475569;
+  font-weight: 600;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .dashboard-content {
   padding: 30px;
   box-sizing: border-box;
   width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .dashboard-content h2 {
   margin-top: 0;
-  color: #334155;
-  margin-bottom: 20px;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.workflow-card {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-  border-left: 6px solid #cbd5e1;
-  margin-bottom: 20px;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.workflow-card.PendingApproval { border-left-color: #f59e0b; }
-.workflow-card.InProgress { border-left-color: #3b82f6; }
-.workflow-card.Approved { border-left-color: #10b981; }
-
-.card-header {
+/* Auth Pages */
+.auth-container {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 10px;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--bg-primary);
+  background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.auth-card {
+  background: var(--bg-secondary);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid var(--border-color);
+}
+
+.auth-header h2 {
+  color: var(--text-primary);
+  margin: 10px 0 5px 0;
+}
+
+.auth-header p {
+  color: var(--text-secondary);
+}
+
+.form-group label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Cards & Widgets */
+.workflow-card {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  border-left: 6px solid var(--text-tertiary);
+  margin-bottom: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.workflow-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .card-header h3 {
-  margin: 0;
-  color: #1e293b;
-  flex: 1;
-  min-width: 0;
-  word-break: break-word;
+  color: var(--text-primary);
 }
-
-.badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.badge.PendingApproval { background: #fef3c7; color: #d97706; }
-.badge.InProgress { background: #dbeafe; color: #2563eb; }
-.badge.Approved { background: #d1fae5; color: #059669; }
 
 .card-body p {
-  margin: 8px 0;
-  color: #475569;
+  color: var(--text-secondary);
 }
-
-.card-actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-}
-
-button.btn-approve, button.btn-reject {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.3s;
-  color: white;
-}
-
-.btn-approve { background-color: #10b981; }
-.btn-reject { background-color: #ef4444; }
-
-.btn-approve:hover, .btn-reject:hover { opacity: 0.9; }
 
 .stats-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
-  flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 
 .stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  flex: 1;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  background: var(--bg-secondary);
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
 }
 
 .stat-card h3 {
-  margin: 0 0 10px 0;
-  color: #64748b;
-  font-size: 0.9rem;
-  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
 }
 
 .stat-card p {
-  margin: 0;
-  font-size: 1.8rem;
+  color: var(--text-primary);
+  font-size: 2rem;
   font-weight: 700;
-  color: #03396c;
+  margin: 0;
 }
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  background-color: var(--primary-light);
+}
+
+.btn-approve {
+  background-color: var(--success);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-approve:hover {
+  background-color: #059669;
+}
+
+.btn-reject {
+  background-color: var(--danger);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reject:hover {
+  background-color: #dc2626;
+}
+
+/* Utilities */
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge.PendingApproval { background: var(--warning-light); color: var(--warning-text); }
+.badge.InProgress { background: var(--primary-light); color: var(--primary); }
+.badge.Approved { background: var(--success-light); color: var(--success-text); }

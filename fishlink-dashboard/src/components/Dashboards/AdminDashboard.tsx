@@ -131,14 +131,15 @@ const WeatherWidget: React.FC = () => {
 // ── Admin Dashboard ───────────────────────────────────────────────────────────
 
 export const AdminDashboard: React.FC<{
-  defaultTab?: 'flagged' | 'workflows' | 'logistics';
+  defaultTab?: 'flagged' | 'workflows' | 'logistics' | 'marketplace';
   onTabChange?: (tab: string) => void;
 }> = ({ defaultTab = 'flagged' }) => {
-  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics'>(defaultTab);
+  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics' | 'marketplace'>(defaultTab);
 
   // Sync when parent sidebar tab changes
   useEffect(() => { setActiveTab(defaultTab as any); }, [defaultTab]);
   const [flagged,       setFlagged]       = useState<FlaggedCatch[]>([]);
+  const [published,     setPublished]     = useState<FlaggedCatch[]>([]);
   const [workflows,     setWorkflows]     = useState<any[]>([]);
   const [deliveryPlans, setDeliveryPlans] = useState<DeliveryPlan[]>([]);
   const [loading,       setLoading]       = useState(false);
@@ -155,6 +156,17 @@ export const AdminDashboard: React.FC<{
       );
       setFlagged(res.data);
     } catch { setFlagged([]); }
+    finally { setLoading(false); }
+  };
+
+  const fetchPublished = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/Catches?status=Published`, { headers: authHeader }
+      );
+      setPublished(res.data.items ?? res.data);
+    } catch { setPublished([]); }
     finally { setLoading(false); }
   };
 
@@ -217,7 +229,7 @@ export const AdminDashboard: React.FC<{
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchFlagged(); fetchWorkflows(); fetchDeliveryPlans(); }, []);
+  useEffect(() => { fetchFlagged(); fetchWorkflows(); fetchDeliveryPlans(); fetchPublished(); }, []);
 
   const handleApprove = async (id: number) => {
     try {
@@ -289,6 +301,7 @@ export const AdminDashboard: React.FC<{
         {([
           { key: 'flagged',   label: '🚨 Flagged Catches' },
           { key: 'workflows', label: '🤖 AI Workflow Log' },
+          { key: 'marketplace', label: '🟢 Published Market' },
           { key: 'logistics', label: '🚚 Delivery Plans' },
         ] as const).map(t => (
           <button key={t.key} onClick={() => { setActiveTab(t.key); }}
@@ -300,9 +313,9 @@ export const AdminDashboard: React.FC<{
             {t.label}
           </button>
         ))}
-        <button onClick={() => { fetchFlagged(); fetchWorkflows(); fetchDeliveryPlans(); }}
+        <button onClick={() => { fetchFlagged(); fetchWorkflows(); fetchDeliveryPlans(); fetchPublished(); }}
           style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-            background: 'transparent', color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+            background: 'transparent', color: 'var(--text-secondary, #64748b)', display: 'flex', alignItems: 'center', gap: 4 }}>
           <RefreshCw size={14} /> Refresh
         </button>
       </div>
@@ -473,6 +486,55 @@ export const AdminDashboard: React.FC<{
                     Already reviewed — no further action required
                   </div>
                 )}
+              </div>
+            ))
+          )}
+        </>
+      )}
+
+      {/* ── Marketplace Tab ─────────────────────────────────────────── */}
+      {activeTab === 'marketplace' && !loading && (
+        <>
+          <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: '0.85rem', marginBottom: '20px' }}>
+            Live view of all published and active catches currently visible to buyers on the marketplace.
+          </p>
+          {published.length === 0 ? (
+            <div className="workflow-card" style={{ textAlign: 'center', padding: '40px' }}>
+              <Fish size={48} color="var(--primary, #10b981)" style={{ marginBottom: '12px' }} />
+              <h3 style={{ color: 'var(--text-primary)' }}>No published catches</h3>
+              <p style={{ color: 'var(--text-secondary)' }}>There are no active catches in the marketplace.</p>
+            </div>
+          ) : (
+            published.map(c => (
+              <div key={c.id} className="workflow-card" style={{ marginBottom: '20px' }}>
+                <div className="card-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h3 style={{ margin: 0, color: 'var(--text-primary)' }}>Catch #{c.id} — {c.fishSpecies}</h3>
+                  </div>
+                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.78rem',
+                    fontWeight: 700, background: '#d1fae5', color: '#065f46' }}>
+                    {c.status}
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gap: '12px', margin: '16px 0' }}>
+                  <div style={{ background: 'var(--bg-tertiary, #f8fafc)', borderRadius: '8px', padding: '10px 14px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Weight</p>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{c.quantityKg}kg</p>
+                  </div>
+                  <div style={{ background: 'var(--bg-tertiary, #f8fafc)', borderRadius: '8px', padding: '10px 14px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Quality Grade</p>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{c.declaredQualityGrade}</p>
+                  </div>
+                  <div style={{ background: 'var(--bg-tertiary, #f8fafc)', borderRadius: '8px', padding: '10px 14px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Asking Price</p>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>Rs. {Number(c.askingPricePerKg).toLocaleString()}/kg</p>
+                  </div>
+                  <div style={{ background: 'var(--bg-tertiary, #f8fafc)', borderRadius: '8px', padding: '10px 14px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.72rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Location</p>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.95rem' }}>{c.location}</p>
+                  </div>
+                </div>
               </div>
             ))
           )}
