@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Fish, MapPin, Activity, Ship, ShoppingCart, LogOut, ShieldAlert } from 'lucide-react';
+import { Fish, MapPin, Activity, Ship, ShoppingCart, LogOut, ShieldAlert, Moon, Sun } from 'lucide-react';
 import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
 import { Landing } from './components/Landing';
@@ -9,6 +9,7 @@ import { MarketTrends } from './components/Dashboards/MarketTrends';
 import { BuyerDashboard } from './components/Dashboards/BuyerDashboard';
 import { AdminDashboard } from './components/Dashboards/AdminDashboard';
 import { LogisticsDashboard } from './components/Dashboards/LogisticsDashboard';
+import { Footer } from './components/Footer';
 import './App.css';
 
 
@@ -17,6 +18,17 @@ const DashboardLayout = () => {
   const role = localStorage.getItem('role') || 'Admin';
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
 
   const handleLogout = () => {
     localStorage.removeItem('role');
@@ -31,7 +43,7 @@ const DashboardLayout = () => {
       }
       return (
         <AdminDashboard
-          defaultTab={activeTab === 'workflows' ? 'workflows' : 'flagged'}
+          defaultTab={activeTab === 'workflows' ? 'workflows' : activeTab === 'marketplace' ? 'marketplace' : 'flagged'}
         />
       );
     }
@@ -57,7 +69,7 @@ const DashboardLayout = () => {
     <div className="dashboard-container">
       <aside className="sidebar">
         <div className="logo-container">
-          <Fish color="white" size={32} />
+          <Fish color="var(--primary)" size={32} />
           <h2>FishLink AI</h2>
         </div>
         <nav>
@@ -69,6 +81,9 @@ const DashboardLayout = () => {
                 </li>
                 <li className={activeTab === 'workflows' ? 'active' : ''} onClick={() => setActiveTab('workflows')}>
                   <Activity size={18} /> <span>AI Workflows</span>
+                </li>
+                <li className={activeTab === 'marketplace' ? 'active' : ''} onClick={() => setActiveTab('marketplace')}>
+                  <Fish size={18} /> <span>Published Market</span>
                 </li>
                 <li className={activeTab === 'logistics' ? 'active' : ''} onClick={() => setActiveTab('logistics')}>
                   <MapPin size={18} /> <span>Logistics</span>
@@ -115,9 +130,15 @@ const DashboardLayout = () => {
       <main className="main-content">
         <header>
           <h1>{role} Portal</h1>
-          <div className="user-profile">{role} User</div>
+          <div className="header-right">
+            <button className="theme-toggle" onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <div className="user-profile">{role} User</div>
+          </div>
         </header>
         {renderContent()}
+        <Footer />
       </main>
     </div>
   );

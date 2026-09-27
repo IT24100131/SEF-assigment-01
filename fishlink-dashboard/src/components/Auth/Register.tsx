@@ -55,8 +55,6 @@ export const Register = () => {
             <select value={role} onChange={(e) => setRole(e.target.value)}>
               <option value="Fisherman">Fisherman</option>
               <option value="Buyer">Buyer</option>
-              <option value="Admin">Admin</option>
-              <option value="Logistics">Logistics Provider</option>
             </select>
           </div>
           <button type="submit" className="btn-primary">Register</button>
