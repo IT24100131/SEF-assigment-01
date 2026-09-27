@@ -3,6 +3,7 @@ import {
   CheckCircle, XCircle, RefreshCw,
   ShieldCheck, Eye, ChevronDown, ChevronUp,
   Activity, Fish, Scale, Star, Clock, Truck, MapPin,
+  ShieldAlert, AlertTriangle, HelpCircle, Bot, CloudSun, User, Snowflake, Ruler, Flag, FileText, Navigation
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
@@ -61,8 +62,8 @@ const riskBg = (r: string) =>
   r === 'High' ? '#fee2e2' : r === 'Medium' ? '#fef3c7' : r === 'Low' ? '#d1fae5' : '#f1f5f9';
 const riskBorder = (r: string) =>
   r === 'High' ? '#fca5a5' : r === 'Medium' ? '#fde68a' : r === 'Low' ? '#6ee7b7' : '#e2e8f0';
-const riskIcon = (r: string) =>
-  r === 'High' ? '🚨' : r === 'Medium' ? '⚠️' : r === 'Low' ? '✅' : '❓';
+const RiskIcon = ({r}: {r: string}) =>
+  r === 'High' ? <ShieldAlert size={14} /> : r === 'Medium' ? <AlertTriangle size={14} /> : r === 'Low' ? <CheckCircle size={14} /> : <HelpCircle size={14} />;
 
 // ── Weather Widget (OpenWeatherMap via ASP.NET Core) ─────────────────────────
 
@@ -88,7 +89,7 @@ const WeatherWidget: React.FC = () => {
   return (
     <div style={{ marginBottom: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: '1.1rem' }}>🌤️</span>
+        <CloudSun size={20} color="#64748b" />
         <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#334155' }}>
           Live Weather — Sri Lanka Fishing Ports
           <span style={{ fontWeight: 400, color: '#94a3b8', fontSize: '0.78rem', marginLeft: 8 }}>
@@ -131,10 +132,10 @@ const WeatherWidget: React.FC = () => {
 // ── Admin Dashboard ───────────────────────────────────────────────────────────
 
 export const AdminDashboard: React.FC<{
-  defaultTab?: 'flagged' | 'workflows' | 'logistics' | 'marketplace';
+  defaultTab?: 'flagged' | 'workflows' | 'logistics' | 'marketplace' | 'staff';
   onTabChange?: (tab: string) => void;
 }> = ({ defaultTab = 'flagged' }) => {
-  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics' | 'marketplace'>(defaultTab);
+  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics' | 'marketplace' | 'staff'>(defaultTab);
 
   // Sync when parent sidebar tab changes
   useEffect(() => { setActiveTab(defaultTab as any); }, [defaultTab]);
@@ -145,6 +146,32 @@ export const AdminDashboard: React.FC<{
   const [loading,       setLoading]       = useState(false);
   const [actionMsg,     setActionMsg]     = useState('');
   const [expanded,      setExpanded]      = useState<number | null>(null);
+
+  const [staffFullName, setStaffFullName] = useState('');
+  const [staffEmail,    setStaffEmail]    = useState('');
+  const [staffPassword, setStaffPassword] = useState('');
+  const [staffRole,     setStaffRole]     = useState('Logistics');
+  const [staffAlert,    setStaffAlert]    = useState<{type: 'success'|'error', msg: string} | null>(null);
+
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStaffAlert(null);
+    try {
+      await axios.post(`${API_BASE_URL}/api/Auth/admin/create-user`, {
+        fullName: staffFullName,
+        email: staffEmail,
+        password: staffPassword,
+        role: staffRole
+      }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+      setStaffAlert({ type: 'success', msg: 'Staff user created successfully.' });
+      setStaffFullName('');
+      setStaffEmail('');
+      setStaffPassword('');
+      setStaffRole('Logistics');
+    } catch (err: any) {
+      setStaffAlert({ type: 'error', msg: err.response?.data || 'Failed to create staff.' });
+    }
+  };
 
   const authHeader = { Authorization: `Bearer ${localStorage.getItem('token')}` };
 
@@ -299,17 +326,18 @@ export const AdminDashboard: React.FC<{
       <div style={{ display: 'flex', gap: 4, marginBottom: '24px',
         background: '#f1f5f9', borderRadius: '10px', padding: 4, width: 'fit-content' }}>
         {([
-          { key: 'flagged',   label: '🚨 Flagged Catches' },
-          { key: 'workflows', label: '🤖 AI Workflow Log' },
-          { key: 'marketplace', label: '🟢 Published Market' },
-          { key: 'logistics', label: '🚚 Delivery Plans' },
+          { key: 'flagged',   label: <><ShieldAlert size={16} /> Flagged Catches</> },
+          { key: 'workflows', label: <><Bot size={16} /> AI Workflow Log</> },
+          { key: 'marketplace', label: <><CheckCircle size={16} /> Published Market</> },
+          { key: 'logistics', label: <><Truck size={16} /> Delivery Plans</> },
+          { key: 'staff', label: <><User size={16} /> Staff Management</> },
         ] as const).map(t => (
           <button key={t.key} onClick={() => { setActiveTab(t.key); }}
             style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
               fontWeight: 600, fontSize: '0.85rem',
               background: activeTab === t.key ? 'white' : 'transparent',
               color:      activeTab === t.key ? '#005b96' : '#64748b',
-              boxShadow:  activeTab === t.key ? '0 1px 4px rgba(0,0,0,0.1)' : 'none' }}>
+              display: 'flex', alignItems: 'center', gap: '6px' }}>
             {t.label}
           </button>
         ))}
@@ -347,9 +375,8 @@ export const AdminDashboard: React.FC<{
                     <h3 style={{ margin: 0 }}>Catch #{c.id} — {c.fishSpecies}</h3>
                     {/* Risk badge */}
                     <span style={{ padding: '3px 12px', borderRadius: '16px', fontSize: '0.78rem',
-                      fontWeight: 700, background: riskBg(c.fraudRisk), color: riskColor(c.fraudRisk),
-                      border: `1px solid ${riskBorder(c.fraudRisk)}` }}>
-                      {riskIcon(c.fraudRisk)} Risk: {c.fraudRisk}
+                      fontWeight: 700, background: riskBg(c.fraudRisk), color: riskColor(c.fraudRisk) }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><RiskIcon r={c.fraudRisk} /> Risk: {c.fraudRisk}</span>
                     </span>
                     {c.requiresAdminReview && (
                       <span style={{ padding: '3px 12px', borderRadius: '16px', fontSize: '0.78rem',
@@ -565,7 +592,9 @@ export const AdminDashboard: React.FC<{
                     {c.fraudRisk && c.fraudRisk !== 'Unassessed' && (
                       <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem',
                         fontWeight: 700, background: riskBg(c.fraudRisk), color: riskColor(c.fraudRisk) }}>
-                        {riskIcon(c.fraudRisk)} {c.fraudRisk}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <RiskIcon r={c.fraudRisk} /> {c.fraudRisk}
+                        </span>
                       </span>
                     )}
                     <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem',
@@ -635,8 +664,8 @@ export const AdminDashboard: React.FC<{
                 {/* Header */}
                 <div className="card-header">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    <h3 style={{ margin: 0, fontSize: '0.95rem' }}>
-                      🚚 {plan.planId}
+                    <h3 style={{ margin: 0, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Truck size={16} /> {plan.planId}
                     </h3>
                     <span style={{ padding: '3px 10px', borderRadius: 12, fontSize: '0.75rem',
                       fontWeight: 700,
@@ -646,10 +675,10 @@ export const AdminDashboard: React.FC<{
                       color: plan.status === 'PendingApproval' ? '#92400e'
                            : plan.status === 'Scheduled' ? '#065f46'
                            : plan.status === 'Delivered' ? '#4c1d95' : '#991b1b' }}>
-                      {plan.status === 'PendingApproval' ? '⏳ Pending Approval'
-                     : plan.status === 'Scheduled' ? '✅ Scheduled'
-                     : plan.status === 'Delivered' ? '🏁 Delivered'
-                     : '❌ ' + plan.status}
+                      {plan.status === 'PendingApproval' ? <span style={{display:'flex', alignItems:'center', gap:4}}><Clock size={14}/> Pending Approval</span>
+                     : plan.status === 'Scheduled' ? <span style={{display:'flex', alignItems:'center', gap:4}}><CheckCircle size={14}/> Scheduled</span>
+                     : plan.status === 'Delivered' ? <span style={{display:'flex', alignItems:'center', gap:4}}><Flag size={14}/> Delivered</span>
+                     : <span style={{display:'flex', alignItems:'center', gap:4}}><XCircle size={14}/> {plan.status}</span>}
                     </span>
                   </div>
                   <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
@@ -661,21 +690,21 @@ export const AdminDashboard: React.FC<{
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                   gap: 10, margin: '14px 0' }}>
                   {[
-                    { icon: '🚛', label: 'Vehicle',      value: plan.vehicleCode },
-                    { icon: '👤', label: 'Driver',       value: plan.driverCode },
-                    { icon: '🧊', label: 'Cold Storage', value: plan.coldStorageCode },
-                    { icon: '📍', label: 'Route',        value: plan.selectedRoute },
-                    { icon: '📏', label: 'Distance',     value: `${plan.distanceKm} km` },
-                    { icon: '⏱️', label: 'Est. Time',    value: `${plan.estimatedMinutes} min` },
-                    { icon: '🕐', label: 'Pickup',       value: plan.pickupTime ? new Date(plan.pickupTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—' },
-                    { icon: '🏁', label: 'ETA',          value: plan.estimatedETA ? new Date(plan.estimatedETA).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—' },
+                    { icon: <Truck size={14} />, label: 'Vehicle',      value: plan.vehicleCode },
+                    { icon: <User size={14} />, label: 'Driver',       value: plan.driverCode },
+                    { icon: <Snowflake size={14} />, label: 'Cold Storage', value: plan.coldStorageCode },
+                    { icon: <Navigation size={14} />, label: 'Route',        value: plan.selectedRoute },
+                    { icon: <Ruler size={14} />, label: 'Distance',     value: `${plan.distanceKm} km` },
+                    { icon: <Clock size={14} />, label: 'Est. Time',    value: `${plan.estimatedMinutes} min` },
+                    { icon: <Clock size={14} />, label: 'Pickup',       value: plan.pickupTime ? new Date(plan.pickupTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—' },
+                    { icon: <Flag size={14} />, label: 'ETA',          value: plan.estimatedETA ? new Date(plan.estimatedETA).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '—' },
                   ].map(d => (
                     <div key={d.label} style={{ background: '#f8fafc', borderRadius: 8, padding: '10px 12px' }}>
                       <p style={{ margin: '0 0 3px', fontSize: '0.7rem', color: '#64748b',
                         textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
                         {d.label}
                       </p>
-                      <p style={{ margin: 0, fontWeight: 700, color: '#1e293b', fontSize: '0.88rem' }}>
+                      <p style={{ margin: 0, fontWeight: 700, color: '#1e293b', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 6 }}>
                         {d.icon} {d.value}
                       </p>
                     </div>
@@ -700,7 +729,9 @@ export const AdminDashboard: React.FC<{
                   <div style={{ background: '#fefce8', border: '1px solid #fde047',
                     borderRadius: 8, padding: '8px 12px', marginBottom: 12,
                     fontSize: '0.82rem', color: '#713f12' }}>
-                    🌤️ <strong>Weather:</strong> {plan.weatherNote}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <CloudSun size={16} /> <strong>Weather:</strong> {plan.weatherNote}
+                    </div>
                   </div>
                 )}
 
@@ -730,7 +761,9 @@ export const AdminDashboard: React.FC<{
                   <div style={{ background: '#f0fdf4', border: '1px solid #6ee7b7',
                     borderRadius: 8, padding: '8px 12px', marginBottom: 12,
                     fontSize: '0.82rem', color: '#065f46' }}>
-                    📝 <strong>Admin Note:</strong> {plan.adminNote}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <FileText size={16} /> <strong>Admin Note:</strong> {plan.adminNote}
+                    </div>
                   </div>
                 )}
 
@@ -758,7 +791,7 @@ export const AdminDashboard: React.FC<{
                       className="btn-primary"
                       style={{ display: 'flex', alignItems: 'center', gap: 8,
                         padding: '8px 20px', marginTop: 0, borderRadius: 8 }}>
-                      🏁 Mark as Delivered
+                      <Flag size={16} /> Mark as Delivered
                     </button>
                   </div>
                 )}
@@ -766,6 +799,65 @@ export const AdminDashboard: React.FC<{
             ))
           )}
         </>
+      )}
+
+      {/* ── Staff Management Tab ─────────────────────────────────────────── */}
+      {activeTab === 'staff' && (
+        <div className="workflow-card" style={{ maxWidth: '600px', margin: '0 auto', padding: '30px' }}>
+          <div className="card-header" style={{ marginBottom: '24px' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <User size={24} color="#005b96" /> Provision Sub-Admin / Staff
+            </h3>
+            <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>
+              Create new administrative and operational personnel accounts securely.
+            </p>
+          </div>
+          
+          {staffAlert && (
+            <div style={{
+              background: staffAlert.type === 'success' ? '#f0fdf4' : '#fef2f2',
+              color: staffAlert.type === 'success' ? '#065f46' : '#991b1b',
+              padding: '12px 16px', borderRadius: '8px', marginBottom: '20px',
+              border: `1px solid ${staffAlert.type === 'success' ? '#6ee7b7' : '#fca5a5'}`
+            }}>
+              {staffAlert.msg}
+            </div>
+          )}
+
+          <form onSubmit={handleCreateStaff} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Full Name</label>
+              <input type="text" required value={staffFullName} onChange={e => setStaffFullName(e.target.value)}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }} />
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Email Address</label>
+              <input type="email" required value={staffEmail} onChange={e => setStaffEmail(e.target.value)}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }} />
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Temporary Password</label>
+              <input type="password" required value={staffPassword} onChange={e => setStaffPassword(e.target.value)}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Role</label>
+              <select value={staffRole} onChange={e => setStaffRole(e.target.value)}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem', background: '#fff' }}>
+                <option value="Admin">Admin</option>
+                <option value="Logistics">Logistics Provider</option>
+                <option value="Quality">Quality Agent</option>
+              </select>
+            </div>
+
+            <button type="submit" className="btn-primary" style={{ marginTop: '10px', padding: '12px', fontSize: '1rem' }}>
+              Create Staff Account
+            </button>
+          </form>
+        </div>
       )}
 
       <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>

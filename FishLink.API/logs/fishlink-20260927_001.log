@@ -1,0 +1,1199 @@
+2026-09-27 16:06:51.034 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 16:06:52.059 +05:30 [ERR] Microsoft.Extensions.Hosting.Internal.Host Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5157: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<StartAsync>g__OnBind|0(ListenOptions options, CancellationToken onBindCancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__16_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-09-27 16:06:53.197 +05:30 [FTL]  FishLink API failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5157: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<StartAsync>g__OnBind|0(ListenOptions options, CancellationToken onBindCancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__16_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+   at Microsoft.Extensions.Hosting.Internal.Host.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Run(IHost host)
+   at Program.<Main>$(String[] args) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Program.cs:line 141
+2026-09-27 16:18:10.712 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 16:18:11.390 +05:30 [ERR] Microsoft.Extensions.Hosting.Internal.Host Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5157: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<StartAsync>g__OnBind|0(ListenOptions options, CancellationToken onBindCancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__16_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-09-27 16:18:11.441 +05:30 [FTL]  FishLink API failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5157: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<StartAsync>g__OnBind|0(ListenOptions options, CancellationToken onBindCancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__16_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+   at Microsoft.Extensions.Hosting.Internal.Host.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Run(IHost host)
+   at Program.<Main>$(String[] args) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Program.cs:line 141
+2026-09-27 16:20:41.339 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 16:20:41.529 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 16:20:41.533 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 16:20:41.551 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 16:20:41.551 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 16:25:03.644 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 16:25:03.852 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 16:25:03.857 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 16:25:03.859 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 16:25:03.865 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 16:30:17.432 +05:30 [INF] Microsoft.Hosting.Lifetime Application is shutting down...
+2026-09-27 16:38:51.476 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 16:38:51.664 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 16:38:51.670 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 16:38:51.673 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 16:38:51.678 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 16:39:10.861 +05:30 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-09-27 16:39:11.122 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET / responded 404 in 337.232 ms
+2026-09-27 16:39:11.375 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /favicon.ico responded 404 in 5.233 ms
+2026-09-27 16:39:22.823 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger responded 301 in 1.748 ms
+2026-09-27 16:39:23.023 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 183.384 ms
+2026-09-27 16:39:23.120 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui.css responded 200 in 35.099 ms
+2026-09-27 16:39:23.120 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-standalone-preset.js responded 200 in 27.838 ms
+2026-09-27 16:39:23.346 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/swagger-ui-bundle.js responded 200 in 257.691 ms
+2026-09-27 16:39:24.404 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/favicon-16x16.png responded 200 in 1.198 ms
+2026-09-27 16:39:24.653 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 200 in 297.064 ms
+2026-09-27 17:13:05.647 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 17:13:05.924 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 17:13:05.929 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 17:13:05.930 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 17:13:05.930 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 17:15:09.819 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 17:15:10.047 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 17:15:10.054 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 17:15:10.054 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 17:15:10.054 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 17:15:48.546 +05:30 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-09-27 17:15:51.087 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/vehicles responded 200 in 2599.023 ms
+2026-09-27 21:03:29.350 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 21:03:29.590 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 21:03:29.598 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 21:03:29.890 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 21:03:29.904 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 21:04:24.986 +05:30 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-09-27 21:04:24.995 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 23.114 ms
+2026-09-27 21:04:28.214 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 3193.365 ms
+2026-09-27 21:04:28.318 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 11.282 ms
+2026-09-27 21:04:28.318 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.085 ms
+2026-09-27 21:04:28.344 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.253 ms
+2026-09-27 21:04:28.318 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.073 ms
+2026-09-27 21:04:28.413 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.158 ms
+2026-09-27 21:04:28.319 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.200 ms
+2026-09-27 21:04:28.322 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.223 ms
+2026-09-27 21:04:28.419 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 1.910 ms
+2026-09-27 21:04:28.912 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 459.277 ms
+2026-09-27 21:04:28.977 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:04:28.981 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:04:29.003 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 518.709 ms
+2026-09-27 21:04:29.016 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 588.223 ms
+2026-09-27 21:04:29.027 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 595.850 ms
+2026-09-27 21:04:29.087 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 163.820 ms
+2026-09-27 21:04:29.088 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 62.733 ms
+2026-09-27 21:04:29.093 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:04:29.177 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 160.260 ms
+2026-09-27 21:04:29.209 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:04:29.212 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 175.516 ms
+2026-09-27 21:11:38.902 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.270 ms
+2026-09-27 21:11:38.902 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.290 ms
+2026-09-27 21:11:38.940 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Negombo
+2026-09-27 21:11:38.946 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Colombo
+2026-09-27 21:11:38.949 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Galle
+2026-09-27 21:11:38.951 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Jaffna
+2026-09-27 21:11:38.958 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Matara
+2026-09-27 21:11:38.969 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 56.332 ms
+2026-09-27 21:11:38.973 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.457 ms
+2026-09-27 21:12:05.357 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.091 ms
+2026-09-27 21:12:05.364 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.096 ms
+2026-09-27 21:12:05.382 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.079 ms
+2026-09-27 21:12:05.381 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.128 ms
+2026-09-27 21:12:05.408 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.120 ms
+2026-09-27 21:12:05.439 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.112 ms
+2026-09-27 21:12:05.413 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.114 ms
+2026-09-27 21:12:05.425 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.092 ms
+2026-09-27 21:12:05.431 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.108 ms
+2026-09-27 21:12:05.455 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.149 ms
+2026-09-27 21:12:05.464 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.185 ms
+2026-09-27 21:12:05.531 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.783 ms
+2026-09-27 21:12:05.737 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:12:05.730 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 232.057 ms
+2026-09-27 21:12:05.756 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:12:05.784 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 4.832 ms
+2026-09-27 21:12:05.817 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 344.406 ms
+2026-09-27 21:12:05.848 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 365.998 ms
+2026-09-27 21:12:05.847 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 11.562 ms
+2026-09-27 21:12:05.918 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:12:05.905 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 415.427 ms
+2026-09-27 21:12:05.944 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:12:06.100 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.628 ms
+2026-09-27 21:12:06.056 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.637 ms
+2026-09-27 21:12:06.289 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 398.411 ms
+2026-09-27 21:12:06.310 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 378.757 ms
+2026-09-27 21:33:55.990 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.152 ms
+2026-09-27 21:33:56.460 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 466.415 ms
+2026-09-27 21:33:56.564 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.074 ms
+2026-09-27 21:33:56.577 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.058 ms
+2026-09-27 21:33:56.576 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.118 ms
+2026-09-27 21:33:56.581 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.115 ms
+2026-09-27 21:33:56.637 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.209 ms
+2026-09-27 21:33:56.645 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.073 ms
+2026-09-27 21:33:56.651 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.324 ms
+2026-09-27 21:33:56.657 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.071 ms
+2026-09-27 21:33:56.693 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 27.910 ms
+2026-09-27 21:33:56.727 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:33:56.789 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 31.391 ms
+2026-09-27 21:33:56.861 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 190.607 ms
+2026-09-27 21:33:56.865 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 157.198 ms
+2026-09-27 21:33:56.893 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 23.295 ms
+2026-09-27 21:33:56.909 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:33:56.971 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:33:57.083 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 203.857 ms
+2026-09-27 21:33:57.103 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 427.213 ms
+2026-09-27 21:33:57.130 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:33:57.195 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 78.340 ms
+2026-09-27 21:34:44.930 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/register responded 204 in 0.294 ms
+2026-09-27 21:34:45.289 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/register responded 200 in 352.606 ms
+2026-09-27 21:34:50.386 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.207 ms
+2026-09-27 21:34:50.566 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 176.330 ms
+2026-09-27 21:34:50.640 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.054 ms
+2026-09-27 21:34:50.640 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.034 ms
+2026-09-27 21:34:50.656 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.059 ms
+2026-09-27 21:34:50.656 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.112 ms
+2026-09-27 21:34:50.675 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.049 ms
+2026-09-27 21:34:50.689 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.053 ms
+2026-09-27 21:34:50.708 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.054 ms
+2026-09-27 21:34:50.715 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.120 ms
+2026-09-27 21:34:50.723 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 4.859 ms
+2026-09-27 21:34:50.738 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 3.751 ms
+2026-09-27 21:34:50.738 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:34:50.740 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:34:50.758 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.774 ms
+2026-09-27 21:34:50.806 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 57.787 ms
+2026-09-27 21:34:50.808 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 83.564 ms
+2026-09-27 21:34:50.829 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 99.036 ms
+2026-09-27 21:34:50.850 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:34:50.859 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:34:50.882 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 46.614 ms
+2026-09-27 21:34:50.888 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 36.676 ms
+2026-09-27 21:35:01.230 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.014 ms
+2026-09-27 21:35:01.230 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.050 ms
+2026-09-27 21:35:01.239 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Negombo
+2026-09-27 21:35:01.245 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Colombo
+2026-09-27 21:35:01.248 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Galle
+2026-09-27 21:35:01.249 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Jaffna
+2026-09-27 21:35:01.253 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Matara
+2026-09-27 21:35:01.257 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 19.220 ms
+2026-09-27 21:35:01.263 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.675 ms
+2026-09-27 21:35:07.778 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.335 ms
+2026-09-27 21:35:07.778 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.020 ms
+2026-09-27 21:35:07.778 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.024 ms
+2026-09-27 21:35:07.784 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.040 ms
+2026-09-27 21:35:07.784 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.032 ms
+2026-09-27 21:35:07.785 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.048 ms
+2026-09-27 21:35:07.802 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 12.287 ms
+2026-09-27 21:35:07.814 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.080 ms
+2026-09-27 21:35:07.817 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.087 ms
+2026-09-27 21:35:07.820 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.044 ms
+2026-09-27 21:35:07.824 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.620 ms
+2026-09-27 21:35:07.840 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 7.716 ms
+2026-09-27 21:35:07.849 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:35:07.853 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.106 ms
+2026-09-27 21:35:07.864 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.376 ms
+2026-09-27 21:35:07.864 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:35:07.873 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 4.801 ms
+2026-09-27 21:35:07.879 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 6.179 ms
+2026-09-27 21:35:07.885 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 46.307 ms
+2026-09-27 21:35:07.896 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 4.894 ms
+2026-09-27 21:35:07.908 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 52.521 ms
+2026-09-27 21:35:07.914 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:35:07.916 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.515 ms
+2026-09-27 21:35:07.932 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:35:07.971 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 47.819 ms
+2026-09-27 21:35:07.959 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 55.688 ms
+2026-09-27 21:35:42.182 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.037 ms
+2026-09-27 21:35:42.183 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.019 ms
+2026-09-27 21:35:42.190 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 2.683 ms
+2026-09-27 21:35:42.198 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.252 ms
+2026-09-27 21:35:52.468 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.071 ms
+2026-09-27 21:35:52.468 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.019 ms
+2026-09-27 21:35:52.468 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.066 ms
+2026-09-27 21:35:52.468 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.016 ms
+2026-09-27 21:35:52.496 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 9.772 ms
+2026-09-27 21:35:52.496 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 8.514 ms
+2026-09-27 21:35:52.511 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:35:52.514 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:35:52.552 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 42.498 ms
+2026-09-27 21:35:52.532 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 30.825 ms
+2026-09-27 21:35:52.564 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.026 ms
+2026-09-27 21:35:52.564 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.036 ms
+2026-09-27 21:35:52.654 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.546 ms
+2026-09-27 21:35:52.660 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.437 ms
+2026-09-27 21:36:04.593 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.172 ms
+2026-09-27 21:36:04.911 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 313.851 ms
+2026-09-27 21:36:04.959 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.085 ms
+2026-09-27 21:36:04.962 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.038 ms
+2026-09-27 21:36:04.967 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.074 ms
+2026-09-27 21:36:04.970 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.040 ms
+2026-09-27 21:36:04.971 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.040 ms
+2026-09-27 21:36:04.973 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.046 ms
+2026-09-27 21:36:05.078 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 88.462 ms
+2026-09-27 21:36:05.081 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 1.911 ms
+2026-09-27 21:36:05.200 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 138.349 ms
+2026-09-27 21:36:05.200 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 200.031 ms
+2026-09-27 21:36:05.266 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 272.764 ms
+2026-09-27 21:36:05.272 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 3.653 ms
+2026-09-27 21:36:15.819 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.072 ms
+2026-09-27 21:36:15.819 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.034 ms
+2026-09-27 21:36:15.819 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.013 ms
+2026-09-27 21:36:15.820 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.010 ms
+2026-09-27 21:36:15.820 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.008 ms
+2026-09-27 21:36:15.820 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.008 ms
+2026-09-27 21:36:15.852 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.088 ms
+2026-09-27 21:36:15.865 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.046 ms
+2026-09-27 21:36:15.869 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.038 ms
+2026-09-27 21:36:15.875 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.049 ms
+2026-09-27 21:36:15.909 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:36:15.879 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.654 ms
+2026-09-27 21:36:15.887 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 5.371 ms
+2026-09-27 21:36:15.895 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:36:15.904 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 6.498 ms
+2026-09-27 21:36:15.912 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.388 ms
+2026-09-27 21:36:15.914 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 14.117 ms
+2026-09-27 21:36:15.927 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 6.709 ms
+2026-09-27 21:36:15.935 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 48.853 ms
+2026-09-27 21:36:15.945 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 1 results, page 1/1
+2026-09-27 21:36:15.951 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.814 ms
+2026-09-27 21:36:15.973 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:36:15.982 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.421 ms
+2026-09-27 21:36:16.011 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.428 ms
+2026-09-27 21:36:16.096 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 163.151 ms
+2026-09-27 21:36:16.172 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 212.961 ms
+2026-09-27 21:36:29.907 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.093 ms
+2026-09-27 21:36:29.909 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.033 ms
+2026-09-27 21:36:29.918 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 3.063 ms
+2026-09-27 21:36:29.928 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.727 ms
+2026-09-27 21:37:07.014 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.027 ms
+2026-09-27 21:37:07.199 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 181.538 ms
+2026-09-27 21:37:07.229 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.038 ms
+2026-09-27 21:37:07.231 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.040 ms
+2026-09-27 21:37:07.283 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:37:07.286 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 27.144 ms
+2026-09-27 21:37:07.293 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:37:07.297 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 8.582 ms
+2026-09-27 21:37:13.773 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Skipjack/predict responded 204 in 0.035 ms
+2026-09-27 21:37:13.775 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Trevally (Paraw)/predict responded 204 in 0.015 ms
+2026-09-27 21:37:13.775 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Tuna (Yellowfin)/predict responded 204 in 0.059 ms
+2026-09-27 21:37:13.776 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Mackerel/predict responded 204 in 0.035 ms
+2026-09-27 21:37:13.777 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/market-stats responded 204 in 0.035 ms
+2026-09-27 21:37:13.777 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Tuna (Yellowfin)/predict responded 204 in 0.050 ms
+2026-09-27 21:37:13.792 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Trevally (Paraw)/predict responded 204 in 0.041 ms
+2026-09-27 21:37:13.793 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Skipjack/predict responded 204 in 0.053 ms
+2026-09-27 21:37:13.796 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/AgentGateway/prices/Mackerel/predict responded 204 in 0.040 ms
+2026-09-27 21:37:13.798 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/market-stats responded 204 in 0.037 ms
+2026-09-27 21:37:13.841 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Tuna%20%28Yellowfin%29/predict
+2026-09-27 21:37:13.840 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Skipjack/predict
+2026-09-27 21:37:13.840 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Mackerel/predict
+2026-09-27 21:37:13.841 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Trevally%20%28Paraw%29/predict
+2026-09-27 21:37:13.848 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Tuna%20%28Yellowfin%29/predict
+2026-09-27 21:37:13.849 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Skipjack/predict
+2026-09-27 21:37:13.850 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Mackerel/predict
+2026-09-27 21:37:13.855 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Trevally%20%28Paraw%29/predict
+2026-09-27 21:37:13.906 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/market-stats responded 200 in 63.575 ms
+2026-09-27 21:37:13.912 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/market-stats responded 200 in 3.915 ms
+2026-09-27 21:37:17.968 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4099.8376ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.968 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4103.2222ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.968 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4107.3679ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.968 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4094.1203ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.979 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4144.5888ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.983 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4150.2941ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.988 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4155.6255ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:17.994 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4161.7505ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:18.159 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Mackerel
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:18.165 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Skipjack
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:18.200 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Tuna (Yellowfin)
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:18.207 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Trevally (Paraw)
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.SocketsHttpHandler.<SendAsync>g__CreateHandlerAndSendAsync|119_0(HttpRequestMessage request, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:18.240 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Mackerel/predict responded 503 in 4407.492 ms
+2026-09-27 21:37:18.243 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Mackerel/predict
+2026-09-27 21:37:18.248 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Skipjack/predict responded 503 in 4444.010 ms
+2026-09-27 21:37:18.252 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Skipjack/predict
+2026-09-27 21:37:18.259 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Tuna (Yellowfin)/predict responded 503 in 4431.516 ms
+2026-09-27 21:37:18.269 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Trevally (Paraw)/predict responded 503 in 4459.333 ms
+2026-09-27 21:37:18.278 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Tuna%20%28Yellowfin%29/predict
+2026-09-27 21:37:18.279 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Mackerel/predict
+2026-09-27 21:37:18.285 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler Start processing HTTP request GET http://localhost:8001/api/prices/Trevally%20%28Paraw%29/predict
+2026-09-27 21:37:18.285 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Skipjack/predict
+2026-09-27 21:37:18.298 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Tuna%20%28Yellowfin%29/predict
+2026-09-27 21:37:18.304 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler Sending HTTP request GET http://localhost:8001/api/prices/Trevally%20%28Paraw%29/predict
+2026-09-27 21:37:22.386 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4086.3621ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.386 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4071.5802ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.397 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4154.318ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.402 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4094.4998ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.406 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4128.4941ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.412 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Mackerel
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:22.417 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4164.8595ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.419 +05:30 [INF] System.Net.Http.HttpClient.Default.ClientHandler HTTP request failed after 4100.3208ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.423 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Tuna (Yellowfin)
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:22.431 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Mackerel/predict responded 503 in 4188.181 ms
+2026-09-27 21:37:22.438 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Skipjack
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:22.443 +05:30 [INF] System.Net.Http.HttpClient.Default.LogicalHandler HTTP request failed after 4158.3717ms
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+2026-09-27 21:37:22.452 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Tuna (Yellowfin)/predict responded 503 in 4177.245 ms
+2026-09-27 21:37:22.465 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Skipjack/predict responded 503 in 4214.544 ms
+2026-09-27 21:37:22.477 +05:30 [WRN] FishLink.API.Controllers.AgentGatewayController Price API unreachable for species Trevally (Paraw)
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8001)
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, Int64 connectionId, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, Boolean isForHttp2, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.HttpMessageHandlerStage.SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.RuntimeAsyncTaskContinuation.GetResult[T](Task task, Byte& result)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+   at FishLink.API.Controllers.AgentGatewayController.GetPricePrediction(String species) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Controllers\AgentGatewayController.cs:line 147
+2026-09-27 21:37:22.492 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/AgentGateway/prices/Trevally (Paraw)/predict responded 503 in 4209.083 ms
+2026-09-27 21:38:04.486 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.036 ms
+2026-09-27 21:38:04.672 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 179.888 ms
+2026-09-27 21:38:04.812 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 12.518 ms
+2026-09-27 21:38:04.818 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.043 ms
+2026-09-27 21:38:04.822 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.048 ms
+2026-09-27 21:38:04.822 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.043 ms
+2026-09-27 21:38:04.845 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 1.481 ms
+2026-09-27 21:38:04.860 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.110 ms
+2026-09-27 21:38:04.881 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 5.323 ms
+2026-09-27 21:38:04.890 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 12.801 ms
+2026-09-27 21:38:04.906 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 33.710 ms
+2026-09-27 21:38:04.936 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 10.461 ms
+2026-09-27 21:38:04.947 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 17.120 ms
+2026-09-27 21:38:04.971 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 29.944 ms
+2026-09-27 21:38:22.375 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Bids responded 204 in 0.038 ms
+2026-09-27 21:38:26.627 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Bids responded 201 in 4246.560 ms
+2026-09-27 21:38:38.490 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.034 ms
+2026-09-27 21:38:38.498 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.259 ms
+2026-09-27 21:38:38.500 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.033 ms
+2026-09-27 21:38:38.500 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.024 ms
+2026-09-27 21:38:38.500 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.020 ms
+2026-09-27 21:38:38.503 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.042 ms
+2026-09-27 21:38:38.507 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.036 ms
+2026-09-27 21:38:38.520 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.031 ms
+2026-09-27 21:38:38.526 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.035 ms
+2026-09-27 21:38:38.535 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.030 ms
+2026-09-27 21:38:38.542 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.289 ms
+2026-09-27 21:38:38.551 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.463 ms
+2026-09-27 21:38:38.577 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:38:38.584 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 23.588 ms
+2026-09-27 21:38:38.594 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:38:38.601 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.323 ms
+2026-09-27 21:38:38.605 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.076 ms
+2026-09-27 21:38:38.612 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 55.501 ms
+2026-09-27 21:38:38.622 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 52.189 ms
+2026-09-27 21:38:38.625 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.197 ms
+2026-09-27 21:38:38.636 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.287 ms
+2026-09-27 21:38:38.655 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:38:38.680 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:38:38.688 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.390 ms
+2026-09-27 21:38:38.698 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 64.661 ms
+2026-09-27 21:38:38.702 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 58.557 ms
+2026-09-27 21:38:40.415 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.034 ms
+2026-09-27 21:38:40.416 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.011 ms
+2026-09-27 21:38:40.417 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.033 ms
+2026-09-27 21:38:40.417 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.293 ms
+2026-09-27 21:38:40.421 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.032 ms
+2026-09-27 21:38:40.424 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.038 ms
+2026-09-27 21:38:40.452 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 4.265 ms
+2026-09-27 21:38:40.454 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 4.059 ms
+2026-09-27 21:38:40.461 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 2.003 ms
+2026-09-27 21:38:40.473 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 3.327 ms
+2026-09-27 21:38:40.478 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 20.636 ms
+2026-09-27 21:38:40.500 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 23.541 ms
+2026-09-27 21:38:55.960 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.036 ms
+2026-09-27 21:38:55.961 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.036 ms
+2026-09-27 21:38:55.973 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.032 ms
+2026-09-27 21:38:55.961 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.010 ms
+2026-09-27 21:38:55.963 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.037 ms
+2026-09-27 21:38:55.964 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.032 ms
+2026-09-27 21:38:55.978 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.038 ms
+2026-09-27 21:38:55.961 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.010 ms
+2026-09-27 21:38:55.988 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.034 ms
+2026-09-27 21:38:55.991 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.054 ms
+2026-09-27 21:38:55.999 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.672 ms
+2026-09-27 21:38:56.006 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.227 ms
+2026-09-27 21:38:56.010 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.398 ms
+2026-09-27 21:38:56.025 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:38:56.025 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.259 ms
+2026-09-27 21:38:56.053 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:38:56.055 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.329 ms
+2026-09-27 21:38:56.062 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.291 ms
+2026-09-27 21:38:56.072 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 51.760 ms
+2026-09-27 21:38:56.075 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.355 ms
+2026-09-27 21:38:56.093 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:38:56.094 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 62.716 ms
+2026-09-27 21:38:56.106 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.397 ms
+2026-09-27 21:38:56.126 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:38:56.148 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 64.372 ms
+2026-09-27 21:38:56.191 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 71.422 ms
+2026-09-27 21:39:12.234 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.037 ms
+2026-09-27 21:39:12.538 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 298.771 ms
+2026-09-27 21:39:12.622 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.047 ms
+2026-09-27 21:39:12.625 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.108 ms
+2026-09-27 21:39:12.625 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.037 ms
+2026-09-27 21:39:12.627 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/preferences/me responded 204 in 0.050 ms
+2026-09-27 21:39:12.627 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/available responded 204 in 0.022 ms
+2026-09-27 21:39:12.627 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/BuyerMatch/recommend responded 204 in 0.030 ms
+2026-09-27 21:39:12.694 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 20.584 ms
+2026-09-27 21:39:12.767 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 43.535 ms
+2026-09-27 21:39:12.821 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/preferences/me responded 200 in 4.280 ms
+2026-09-27 21:39:12.938 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 249.447 ms
+2026-09-27 21:39:12.940 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/BuyerMatch/recommend responded 200 in 32.629 ms
+2026-09-27 21:39:12.969 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/BuyerMatch/available responded 200 in 9.490 ms
+2026-09-27 21:39:21.349 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.041 ms
+2026-09-27 21:39:21.353 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.035 ms
+2026-09-27 21:39:21.366 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.045 ms
+2026-09-27 21:39:21.373 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.279 ms
+2026-09-27 21:39:21.472 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.053 ms
+2026-09-27 21:39:21.475 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.037 ms
+2026-09-27 21:39:21.483 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.051 ms
+2026-09-27 21:39:21.505 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.032 ms
+2026-09-27 21:39:21.520 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.059 ms
+2026-09-27 21:39:21.526 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.036 ms
+2026-09-27 21:39:21.526 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.273 ms
+2026-09-27 21:39:21.535 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.226 ms
+2026-09-27 21:39:21.549 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:39:21.553 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 12.114 ms
+2026-09-27 21:39:21.563 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.604 ms
+2026-09-27 21:39:21.575 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 4.950 ms
+2026-09-27 21:39:21.585 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 403 in 0.199 ms
+2026-09-27 21:39:21.610 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 76.272 ms
+2026-09-27 21:39:21.649 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.242 ms
+2026-09-27 21:39:21.704 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:39:21.707 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.243 ms
+2026-09-27 21:39:21.712 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:39:21.721 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 39.101 ms
+2026-09-27 21:39:21.748 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 205.590 ms
+2026-09-27 21:39:21.760 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:39:21.812 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 62.017 ms
+2026-09-27 21:39:46.841 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.033 ms
+2026-09-27 21:39:47.021 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 401 in 175.632 ms
+2026-09-27 21:39:49.987 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 401 in 329.632 ms
+2026-09-27 21:39:56.502 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.048 ms
+2026-09-27 21:39:56.842 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 401 in 333.827 ms
+2026-09-27 21:39:57.657 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 401 in 227.108 ms
+2026-09-27 21:40:11.221 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 0.031 ms
+2026-09-27 21:40:11.402 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 176.434 ms
+2026-09-27 21:40:11.473 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.050 ms
+2026-09-27 21:40:11.474 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.042 ms
+2026-09-27 21:40:11.479 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.040 ms
+2026-09-27 21:40:11.479 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.007 ms
+2026-09-27 21:40:11.499 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.066 ms
+2026-09-27 21:40:11.520 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 4.704 ms
+2026-09-27 21:40:11.549 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.046 ms
+2026-09-27 21:40:11.552 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.044 ms
+2026-09-27 21:40:11.586 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 21.979 ms
+2026-09-27 21:40:11.601 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 8.451 ms
+2026-09-27 21:40:11.624 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:40:11.635 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:40:11.658 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 8.906 ms
+2026-09-27 21:40:11.671 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 17.996 ms
+2026-09-27 21:40:11.684 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 101.384 ms
+2026-09-27 21:40:11.697 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 122.482 ms
+2026-09-27 21:40:11.739 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:40:11.790 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:40:12.419 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 702.155 ms
+2026-09-27 21:40:12.422 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 698.261 ms
+2026-09-27 21:41:04.655 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.037 ms
+2026-09-27 21:41:04.657 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.035 ms
+2026-09-27 21:41:04.666 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.791 ms
+2026-09-27 21:41:04.693 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.803 ms
+2026-09-27 21:41:05.912 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.038 ms
+2026-09-27 21:41:05.913 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.036 ms
+2026-09-27 21:41:05.913 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.029 ms
+2026-09-27 21:41:05.914 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.030 ms
+2026-09-27 21:41:05.932 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 6.267 ms
+2026-09-27 21:41:05.951 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:41:05.958 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 4.978 ms
+2026-09-27 21:41:05.961 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:41:05.966 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 20.430 ms
+2026-09-27 21:41:05.980 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 26.275 ms
+2026-09-27 21:41:06.027 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.280 ms
+2026-09-27 21:41:06.036 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.330 ms
+2026-09-27 21:41:12.598 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.414 ms
+2026-09-27 21:41:12.598 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.033 ms
+2026-09-27 21:41:12.599 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.018 ms
+2026-09-27 21:41:12.601 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.036 ms
+2026-09-27 21:41:12.602 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.041 ms
+2026-09-27 21:41:12.603 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.035 ms
+2026-09-27 21:41:12.608 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.031 ms
+2026-09-27 21:41:12.619 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.048 ms
+2026-09-27 21:41:12.624 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.036 ms
+2026-09-27 21:41:12.632 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.053 ms
+2026-09-27 21:41:12.642 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.341 ms
+2026-09-27 21:41:12.652 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 5.403 ms
+2026-09-27 21:41:12.657 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:41:12.667 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 2.280 ms
+2026-09-27 21:41:12.679 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:41:12.683 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.252 ms
+2026-09-27 21:41:12.694 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 7.369 ms
+2026-09-27 21:41:12.700 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 4.154 ms
+2026-09-27 21:41:12.703 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 52.307 ms
+2026-09-27 21:41:12.715 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.275 ms
+2026-09-27 21:41:12.717 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 43.414 ms
+2026-09-27 21:41:12.736 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:41:12.737 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 0.289 ms
+2026-09-27 21:41:12.750 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:41:12.815 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 85.568 ms
+2026-09-27 21:41:12.827 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 81.960 ms
+2026-09-27 21:41:31.808 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.041 ms
+2026-09-27 21:41:31.809 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.013 ms
+2026-09-27 21:41:31.809 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.007 ms
+2026-09-27 21:41:31.809 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.007 ms
+2026-09-27 21:41:31.809 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.007 ms
+2026-09-27 21:41:31.809 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.006 ms
+2026-09-27 21:41:31.813 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.050 ms
+2026-09-27 21:41:31.823 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.037 ms
+2026-09-27 21:41:31.846 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 14.367 ms
+2026-09-27 21:41:31.865 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:41:31.870 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 1.873 ms
+2026-09-27 21:41:31.880 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 4.301 ms
+2026-09-27 21:41:31.887 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:41:31.896 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 1.722 ms
+2026-09-27 21:41:31.901 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 50.636 ms
+2026-09-27 21:41:31.915 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 5 results, page 1/1
+2026-09-27 21:41:31.931 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 47.572 ms
+2026-09-27 21:41:31.960 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 0 results, page 1/0
+2026-09-27 21:41:32.057 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 146.014 ms
+2026-09-27 21:41:32.087 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 147.098 ms
+2026-09-27 22:08:01.040 +05:30 [FTL]  FishLink API failed to start
+System.ArgumentOutOfRangeException: Index was out of range. Must be non-negative and less than the size of the collection. (Parameter 'index')
+   at System.Collections.Generic.List`1.get_Item(Int32 index)
+   at FishLink.API.DataSeeder.SeedAsync(ApplicationDbContext db) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\DataSeeder.cs:line 86
+   at Program.<Main>$(String[] args) in C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API\Program.cs:line 106
+2026-09-27 22:08:46.278 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 22:08:46.569 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 22:08:46.573 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 22:08:46.574 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 22:08:46.574 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 22:12:09.639 +05:30 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-09-27 22:12:09.648 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 34.724 ms
+2026-09-27 22:12:13.291 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 3622.401 ms
+2026-09-27 22:12:13.291 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 1103.536 ms
+2026-09-27 22:12:13.407 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 5.483 ms
+2026-09-27 22:12:13.414 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.118 ms
+2026-09-27 22:12:13.414 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.112 ms
+2026-09-27 22:12:13.421 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 8.307 ms
+2026-09-27 22:12:13.422 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.119 ms
+2026-09-27 22:12:13.425 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.102 ms
+2026-09-27 22:12:13.433 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.110 ms
+2026-09-27 22:12:13.438 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.141 ms
+2026-09-27 22:12:13.781 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 340.174 ms
+2026-09-27 22:12:13.852 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 4 results, page 1/1
+2026-09-27 22:12:13.854 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 17 results, page 1/2
+2026-09-27 22:12:13.877 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 439.201 ms
+2026-09-27 22:12:13.891 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 463.840 ms
+2026-09-27 22:12:13.894 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 94.765 ms
+2026-09-27 22:12:13.897 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 467.169 ms
+2026-09-27 22:12:13.915 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 23.422 ms
+2026-09-27 22:12:13.922 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 4 results, page 1/1
+2026-09-27 22:12:13.922 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 34.369 ms
+2026-09-27 22:12:13.922 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 17 results, page 1/2
+2026-09-27 22:12:13.928 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 25.685 ms
+2026-09-27 22:12:14.182 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 1084.011 ms
+2026-09-27 22:26:40.502 +05:30 [INF]  FishLink API starting on Development
+2026-09-27 22:26:40.699 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-27 22:26:40.705 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-27 22:26:40.708 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-27 22:26:40.715 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\FishLink-Clean\FishLink.API
+2026-09-27 22:28:47.167 +05:30 [WRN] Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware Failed to determine the https port for redirect.
+2026-09-27 22:28:47.192 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Auth/login responded 204 in 41.538 ms
+2026-09-27 22:28:50.045 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 2834.492 ms
+2026-09-27 22:28:50.175 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.250 ms
+2026-09-27 22:28:50.176 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.119 ms
+2026-09-27 22:28:50.176 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.092 ms
+2026-09-27 22:28:50.177 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.083 ms
+2026-09-27 22:28:50.208 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches/flagged responded 204 in 0.204 ms
+2026-09-27 22:28:50.212 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.253 ms
+2026-09-27 22:28:50.217 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Logistics/plans responded 204 in 0.117 ms
+2026-09-27 22:28:50.223 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Catches responded 204 in 0.131 ms
+2026-09-27 22:28:50.665 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 408.817 ms
+2026-09-27 22:28:50.728 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 4 results, page 1/1
+2026-09-27 22:28:50.730 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 17 results, page 1/2
+2026-09-27 22:28:50.753 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 486.679 ms
+2026-09-27 22:28:50.782 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 556.169 ms
+2026-09-27 22:28:50.806 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Logistics/plans responded 200 in 42.744 ms
+2026-09-27 22:28:50.974 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches/flagged responded 200 in 185.734 ms
+2026-09-27 22:28:50.937 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 695.105 ms
+2026-09-27 22:28:50.996 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 17 results, page 1/2
+2026-09-27 22:28:51.013 +05:30 [INF] FishLink.API.Services.CatchService GetCatches: 4 results, page 1/1
+2026-09-27 22:28:51.075 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 116.367 ms
+2026-09-27 22:28:51.082 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Catches responded 200 in 105.408 ms
+2026-09-27 22:28:51.254 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP POST /api/Auth/login responded 200 in 1170.803 ms
+2026-09-27 22:28:54.775 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.408 ms
+2026-09-27 22:28:54.778 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP OPTIONS /api/Weather/locations responded 204 in 0.116 ms
+2026-09-27 22:28:54.799 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Negombo
+2026-09-27 22:28:54.805 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Colombo
+2026-09-27 22:28:54.812 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Galle
+2026-09-27 22:28:54.824 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Jaffna
+2026-09-27 22:28:54.826 +05:30 [INF] FishLink.API.Services.WeatherService OpenWeatherMap API key not configured — using simulated weather for Matara
+2026-09-27 22:28:54.836 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 52.710 ms
+2026-09-27 22:28:54.840 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /api/Weather/locations responded 200 in 1.691 ms

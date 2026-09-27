@@ -9,6 +9,7 @@ import { MarketTrends } from './components/Dashboards/MarketTrends';
 import { BuyerDashboard } from './components/Dashboards/BuyerDashboard';
 import { AdminDashboard } from './components/Dashboards/AdminDashboard';
 import { LogisticsDashboard } from './components/Dashboards/LogisticsDashboard';
+import { Footer } from './components/Footer';
 import './App.css';
 
 
@@ -137,6 +138,7 @@ const DashboardLayout = () => {
           </div>
         </header>
         {renderContent()}
+        <Footer />
       </main>
     </div>
   );

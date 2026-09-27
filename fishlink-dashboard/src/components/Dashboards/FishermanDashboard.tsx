@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw, CircleDot, Search, Award, Mail, Calendar, ShieldAlert, AlertTriangle, FileText } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 
@@ -35,14 +35,14 @@ interface BidRecord {
 
 // ── Status config ─────────────────────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<string, { emoji: string; label: string; color: string; bg: string; border: string }> = {
-  Draft:           { emoji: '🟡', label: 'Draft',            color: '#92400e', bg: '#fef3c7', border: '#f59e0b' },
-  Published:       { emoji: '🟢', label: 'Published',        color: '#065f46', bg: '#d1fae5', border: '#10b981' },
-  Bidding:         { emoji: '🔵', label: 'Bidding',          color: '#1e40af', bg: '#dbeafe', border: '#3b82f6' },
-  PendingApproval: { emoji: '🟠', label: 'Pending Approval', color: '#9a3412', bg: '#ffedd5', border: '#f97316' },
-  Sold:            { emoji: '🟣', label: 'Sold',             color: '#4c1d95', bg: '#ede9fe', border: '#8b5cf6' },
-  Cancelled:       { emoji: '🔴', label: 'Cancelled',        color: '#991b1b', bg: '#fee2e2', border: '#ef4444' },
-  Expired:         { emoji: '⚪', label: 'Expired',          color: '#374151', bg: '#f3f4f6', border: '#9ca3af' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  Draft:           { label: 'Draft',            color: '#92400e', bg: '#fef3c7', border: '#f59e0b' },
+  Published:       { label: 'Published',        color: '#065f46', bg: '#d1fae5', border: '#10b981' },
+  Bidding:         { label: 'Bidding',          color: '#1e40af', bg: '#dbeafe', border: '#3b82f6' },
+  PendingApproval: { label: 'Pending Approval', color: '#9a3412', bg: '#ffedd5', border: '#f97316' },
+  Sold:            { label: 'Sold',             color: '#4c1d95', bg: '#ede9fe', border: '#8b5cf6' },
+  Cancelled:       { label: 'Cancelled',        color: '#991b1b', bg: '#fee2e2', border: '#ef4444' },
+  Expired:         { label: 'Expired',          color: '#374151', bg: '#f3f4f6', border: '#9ca3af' },
 };
 
 // Statuses where Edit is allowed
@@ -55,7 +55,7 @@ const PUBLISHABLE = ['Draft'];
 const DELETABLE = ['Draft'];
 
 const getStatusCfg = (status: string) =>
-  STATUS_CONFIG[status] ?? { emoji: '⚫', label: status, color: '#334155', bg: '#f1f5f9', border: '#94a3b8' };
+  STATUS_CONFIG[status] ?? { label: status, color: '#334155', bg: '#f1f5f9', border: '#94a3b8' };
 
 // ── Status Badge ──────────────────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
       color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
       whiteSpace: 'nowrap', flexShrink: 0,
     }}>
-      {cfg.emoji} {cfg.label}
+      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CircleDot size={12} fill={cfg.color} /> {cfg.label}</span>
     </span>
   );
 };
@@ -206,7 +206,7 @@ const CatchForm: React.FC<CatchFormProps> = ({
           padding: '16px', marginTop: '4px' }}>
           <p style={{ margin: '0 0 14px', fontWeight: 700, color: '#0369a1', fontSize: '0.88rem',
             display: 'flex', alignItems: 'center', gap: '6px' }}>
-            🔍 Quality & Inspection Details
+            <Search size={16}/> Quality & Inspection Details
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -234,8 +234,8 @@ const CatchForm: React.FC<CatchFormProps> = ({
               <label>Inspection Result</label>
               <select value={inspectionResult} onChange={e => setInspectionResult(e.target.value)}>
                 <option value="Pending">Pending</option>
-                <option value="Passed">✅ Passed</option>
-                <option value="Failed">❌ Failed</option>
+                <option value="Passed">Passed</option>
+                <option value="Failed">Failed</option>
               </select>
             </div>
 
@@ -316,7 +316,7 @@ const HighestBid: React.FC<{ catchId: number }> = ({ catchId }) => {
   if (highestBid === null) return null;
   return (
     <p style={{ margin: '6px 0 0', color: '#059669', fontWeight: 700, fontSize: '0.9rem' }}>
-      🏆 Current highest bid: <strong>Rs. {highestBid.toLocaleString()}/kg</strong>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Award size={16}/> Current highest bid: <strong>Rs. {highestBid.toLocaleString()}/kg</strong></span>
     </p>
   );
 };
@@ -402,7 +402,7 @@ const BuyerMatchPanel: React.FC<{ c: CatchRecord }> = ({ c }) => {
         }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Bot size={16} /> 🤖 AI Buyer Matching
+          <Bot size={16} /> AI Buyer Matching
           {fetched && !loading && (
             <span style={{ background: matches.length > 0 ? '#dbeafe' : '#fee2e2',
               color: matches.length > 0 ? '#1e40af' : '#991b1b',
@@ -481,7 +481,7 @@ const BuyerMatchPanel: React.FC<{ c: CatchRecord }> = ({ c }) => {
                       {m.hasPreference ? (
                         <span style={{ padding: '1px 6px', borderRadius: '8px', fontSize: '0.68rem',
                           fontWeight: 700, background: '#dbeafe', color: '#1e40af' }}>
-                          ⚙ Prefs set
+                          Prefs set
                         </span>
                       ) : (
                         <span style={{ padding: '1px 6px', borderRadius: '8px', fontSize: '0.68rem',
@@ -660,11 +660,11 @@ const BuyerProfileModal: React.FC<{ buyerId: number; buyerName: string; onClose:
 
               {/* Info */}
               <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '12px 14px', marginBottom: 20 }}>
-                <p style={{ margin: '0 0 4px', fontSize: '0.83rem', color: '#334155' }}>
-                  📧 <strong>Email:</strong> {profile.email}
+                <p style={{ margin: '0 0 4px', fontSize: '0.83rem', color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Mail size={14}/> <strong>Email:</strong> {profile.email}
                 </p>
-                <p style={{ margin: 0, fontSize: '0.83rem', color: '#334155' }}>
-                  📅 <strong>Member since:</strong> {new Date(profile.joinedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <p style={{ margin: 0, fontSize: '0.83rem', color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Calendar size={14}/> <strong>Member since:</strong> {new Date(profile.joinedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>
 
@@ -1021,8 +1021,10 @@ export const FishermanDashboard = () => {
                       <span style={{ fontWeight: 700, fontSize: '0.82rem',
                         color: c.fraudRisk === 'High' ? '#991b1b'
                                : c.fraudRisk === 'Medium' ? '#92400e' : '#065f46' }}>
-                        {c.fraudRisk === 'High' ? '🚨' : c.fraudRisk === 'Medium' ? '⚠️' : '✅'}
-                        {' '}Fraud Risk: {c.fraudRisk}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          {c.fraudRisk === 'High' ? <ShieldAlert size={14}/> : c.fraudRisk === 'Medium' ? <AlertTriangle size={14}/> : <CheckCircle size={14}/>}
+                          Fraud Risk: {c.fraudRisk}
+                        </span>
                         {c.requiresAdminReview && ' — Admin Review Required'}
                       </span>
                       {c.qualityScore !== undefined && c.qualityScore > 0 && (
