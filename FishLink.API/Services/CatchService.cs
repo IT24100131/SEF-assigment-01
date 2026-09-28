@@ -37,6 +37,9 @@ public class CatchService : ICatchService
         if (!string.IsNullOrWhiteSpace(q.Species))
             query = query.Where(c => c.FishSpecies == q.Species);
 
+        if (q.FishermanId.HasValue)
+            query = query.Where(c => c.FishermanId == q.FishermanId.Value);
+
         if (!string.IsNullOrWhiteSpace(q.Status))
             query = query.Where(c => c.Status == q.Status);
 

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Bot, MapPin, Package, DollarSign,
   Star, CheckCircle, AlertCircle, RefreshCw,
-  ShoppingCart, TrendingUp, Fish, X, Settings, Save,
+  ShoppingCart, TrendingUp, Fish, X, Settings, Save, List,
+  Zap, BarChart
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
@@ -354,9 +355,11 @@ export const BuyerDashboard: React.FC = () => {
           <h2 style={{ margin: 0 }}>Live Market & AI Buyer Matching</h2>
           <p style={{ color: '#64748b', margin: '6px 0 0', fontSize: '0.9rem' }}>
             {totalAvailable} listings available ·{' '}
-            {hasSavedPref
-              ? '✅ Recommendations based on your saved preferences'
-              : '⚠ Set your preferences for better recommendations'}
+            {hasSavedPref ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><CheckCircle size={14} color="#10b981" /> Recommendations based on your saved preferences</span>
+            ) : (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><AlertCircle size={14} color="#f59e0b" /> Set your preferences for better recommendations</span>
+            )}
           </p>
         </div>
       </div>
@@ -365,9 +368,9 @@ export const BuyerDashboard: React.FC = () => {
       <div style={{ display: 'flex', gap: 4, marginTop: 20, marginBottom: 24,
         background: '#f1f5f9', borderRadius: 10, padding: 4, width: 'fit-content' }}>
         {([
-          { key: 'recommend', label: '🤖 Recommendations' },
-          { key: 'browse',    label: '📋 Browse All' },
-          { key: 'preferences', label: '⚙️ My Preferences' },
+          { key: 'recommend', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Bot size={16} /> Recommendations</span> },
+          { key: 'browse',    label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><List size={16} /> Browse All</span> },
+          { key: 'preferences', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Settings size={16} /> My Preferences</span> },
         ] as const).map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             style={{
@@ -418,8 +421,8 @@ export const BuyerDashboard: React.FC = () => {
           {!hasSavedPref && (
             <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10,
               padding: '14px 16px', marginBottom: 20 }}>
-              <p style={{ margin: '0 0 8px', fontWeight: 600, color: '#92400e', fontSize: '0.9rem' }}>
-                ⚡ Get personalised recommendations
+              <p style={{ margin: '0 0 8px', fontWeight: 600, color: '#92400e', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={16} /> Get personalised recommendations
               </p>
               <p style={{ margin: '0 0 12px', color: '#78350f', fontSize: '0.85rem' }}>
                 Save your fish preferences once — we'll automatically rank the best catches for you every time.
@@ -436,7 +439,7 @@ export const BuyerDashboard: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Bot size={20} color="#005b96" />
-              <h3 style={{ margin: 0, color: '#1e293b' }}>🤖 Recommended for You</h3>
+              <h3 style={{ margin: 0, color: '#1e293b' }}>Recommended for You</h3>
             </div>
             <button onClick={() => runRecommendations(savedPref ?? undefined)}
               className="btn-outline"
@@ -590,8 +593,8 @@ export const BuyerDashboard: React.FC = () => {
             {/* Score breakdown info */}
             <div style={{ background: '#f0f9ff', borderRadius: 8, padding: '12px 14px',
               margin: '20px 0', border: '1px solid #bae6fd' }}>
-              <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#0369a1', fontSize: '0.85rem' }}>
-                📊 How your recommendation score is calculated:
+              <p style={{ margin: '0 0 8px', fontWeight: 700, color: '#0369a1', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <BarChart size={16} /> How your recommendation score is calculated:
               </p>
               {[
                 ['Species match',    '40 pts'],
