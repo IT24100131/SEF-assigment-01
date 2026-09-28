@@ -34,7 +34,7 @@ jobs:
     - name: Web client
       working-directory: fishlink-dashboard
       run: |
-        npm ci
+        npm install
         npm run build
     - name: Flutter client
       uses: subosito/flutter-action@v2
