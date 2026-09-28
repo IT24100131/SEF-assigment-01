@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../../config/api';
 
 interface CatchRecord {
   id: number;
+  fishermanId: number;
   fishSpecies: string;
   quantityKg: number;
   askingPricePerKg: number;
@@ -53,6 +54,24 @@ const CANCELLABLE = ['Draft', 'Published'];
 const PUBLISHABLE = ['Draft'];
 // Statuses where Delete (full remove) is allowed
 const DELETABLE = ['Draft'];
+
+const getApiErrorMessage = (err: any, fallback: string) => {
+  const data = err?.response?.data;
+  if (typeof data === 'string') return data;
+  if (data?.detail) return data.detail;
+  if (data?.title) return data.title;
+  return fallback;
+};
+
+const getCurrentUserId = () => {
+  try {
+    const token = localStorage.getItem('token') ?? '';
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return Number(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? 0);
+  } catch {
+    return 0;
+  }
+};
 
 const getStatusCfg = (status: string) =>
   STATUS_CONFIG[status] ?? { label: status, color: '#334155', bg: '#f1f5f9', border: '#94a3b8' };
@@ -734,7 +753,9 @@ export const FishermanDashboard = () => {
       const res = await axios.get(`${API_BASE_URL}/api/Catches?fishermanId=${fishermanId}`, getAuthHeader());
       // API now returns PagedResult<Catch> — extract items
       const data = res.data;
-      setCatches(Array.isArray(data) ? data : (data.items ?? []));
+      const items = Array.isArray(data) ? data : (data.items ?? []);
+      const currentUserId = getCurrentUserId();
+      setCatches(items.filter((item: CatchRecord) => item.fishermanId === currentUserId));
     } catch (err) {
       console.error('Failed to fetch catches', err);
     }
@@ -805,7 +826,7 @@ export const FishermanDashboard = () => {
         setAiProcessing({ active: false, step: 0, catchId: null, species: '' });
       }
     } catch (err: any) {
-      setActionError(err.response?.data ?? 'Error publishing listing.');
+      setActionError(getApiErrorMessage(err, 'Error publishing listing.'));
     }
   };
 
@@ -820,7 +841,7 @@ export const FishermanDashboard = () => {
       await fetchCatches();
       setActionError('');
     } catch (err: any) {
-      setActionError(err.response?.data ?? 'Error cancelling listing.');
+      setActionError(getApiErrorMessage(err, 'Error cancelling listing.'));
     }
   };
 
@@ -835,7 +856,7 @@ export const FishermanDashboard = () => {
       await fetchCatches();
       setActionError('');
     } catch (err: any) {
-      setActionError(err.response?.data ?? 'Error deleting listing.');
+      setActionError(getApiErrorMessage(err, 'Error deleting listing.'));
     }
   };
 

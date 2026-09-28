@@ -129,13 +129,23 @@ try
         });
     }
 
-    app.UseHttpsRedirection();
     app.UseCors("AllowAll");
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseHttpsRedirection();
+    }
     app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapControllers();
     app.MapHealthChecks("/health");
+    app.MapGet("/", () => Results.Ok(new
+    {
+        service = "FishLink API",
+        status = "running",
+        health = "/health",
+        swagger = "/swagger"
+    }));
 
     Log.Information("FishLink API starting on {Environment}", app.Environment.EnvironmentName);
     app.Run();

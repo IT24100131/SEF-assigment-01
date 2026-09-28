@@ -153,7 +153,7 @@ public class CatchService : ICatchService
             VerifiedWeightKg     = req.VerifiedWeightKg,
             DeclaredQualityGrade = req.DeclaredQualityGrade,
             InspectionResult     = req.InspectionResult,
-            CatchDateTime        = req.CatchDateTime?.ToUniversalTime(),
+            CatchDateTime        = NormalizeUtc(req.CatchDateTime),
             Status               = "Draft",
             FraudRisk            = "Unassessed",
             CreatedAt            = DateTime.UtcNow,
@@ -162,6 +162,19 @@ public class CatchService : ICatchService
         await _db.SaveChangesAsync();
         _logger.LogInformation("Catch {Id} created by fisherman {FishermanId}", c.Id, fishermanId);
         return c;
+    }
+
+    private static DateTime? NormalizeUtc(DateTime? value)
+    {
+        if (!value.HasValue)
+            return null;
+
+        return value.Value.Kind switch
+        {
+            DateTimeKind.Utc => value.Value,
+            DateTimeKind.Local => value.Value.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(value.Value, DateTimeKind.Utc),
+        };
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
@@ -180,7 +193,7 @@ public class CatchService : ICatchService
         c.SellerNote           = req.SellerNote;
         c.DeclaredQualityGrade = req.DeclaredQualityGrade;
         c.InspectionResult     = req.InspectionResult;
-        c.CatchDateTime        = req.CatchDateTime?.ToUniversalTime();
+        c.CatchDateTime        = NormalizeUtc(req.CatchDateTime);
         if (req.VerifiedWeightKg > 0) c.VerifiedWeightKg = req.VerifiedWeightKg;
         if (!string.IsNullOrEmpty(req.PhotoUrl)) c.PhotoUrl = req.PhotoUrl;
 
