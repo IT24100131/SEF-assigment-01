@@ -1,0 +1,72 @@
+2026-09-28 20:35:53.931 +05:30 [INF]  FishLink API starting on Development
+2026-09-28 20:35:54.346 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-28 20:35:54.371 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-28 20:35:54.444 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-28 20:35:54.472 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\SEF-Fishlink\SEF-assigment-01\FishLink.API
+2026-09-28 20:38:47.008 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET / responded 200 in 683.832 ms
+2026-09-28 20:39:12.881 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 200 in 305.859 ms
+2026-09-28 20:39:13.006 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.css responded 200 in 34.608 ms
+2026-09-28 20:39:13.012 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 200 in 2.258 ms
+2026-09-28 20:39:16.267 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 500 in 223.594 ms
+System.MissingMethodException: Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`4 parametersGenerator, Func`4 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-09-28 20:39:20.132 +05:30 [ERR] FishLink.API.Middleware.ErrorHandlingMiddleware Unhandled exception on GET /swagger/v1/swagger.json — Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+System.MissingMethodException: Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`4 parametersGenerator, Func`4 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at FishLink.API.Middleware.ErrorHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\gajan\Desktop\SEF-Fishlink\SEF-assigment-01\FishLink.API\Middleware\ErrorHandlingMiddleware.cs:line 26
+2026-09-28 20:40:45.510 +05:30 [INF] Microsoft.Hosting.Lifetime Application is shutting down...
+2026-09-28 20:41:12.495 +05:30 [INF]  FishLink API starting on Development
+2026-09-28 20:41:13.906 +05:30 [INF] Microsoft.Hosting.Lifetime Now listening on: http://localhost:5157
+2026-09-28 20:41:14.145 +05:30 [INF] Microsoft.Hosting.Lifetime Application started. Press Ctrl+C to shut down.
+2026-09-28 20:41:14.399 +05:30 [INF] Microsoft.Hosting.Lifetime Hosting environment: Development
+2026-09-28 20:41:14.445 +05:30 [INF] Microsoft.Hosting.Lifetime Content root path: C:\Users\gajan\Desktop\SEF-Fishlink\SEF-assigment-01\FishLink.API
+2026-09-28 20:41:40.738 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.html responded 304 in 386.233 ms
+2026-09-28 20:41:41.173 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.js responded 304 in 2.587 ms
+2026-09-28 20:41:41.202 +05:30 [INF] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/index.css responded 304 in 31.026 ms
+2026-09-28 20:41:43.119 +05:30 [ERR] Serilog.AspNetCore.RequestLoggingMiddleware HTTP GET /swagger/v1/swagger.json responded 500 in 286.260 ms
+System.MissingMethodException: Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`4 parametersGenerator, Func`4 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2026-09-28 20:41:45.271 +05:30 [ERR] FishLink.API.Middleware.ErrorHandlingMiddleware Unhandled exception on GET /swagger/v1/swagger.json — Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+System.MissingMethodException: Method not found: 'System.Collections.Generic.IDictionary`2<System.String,Microsoft.OpenApi.OpenApiMediaType> Microsoft.OpenApi.IOpenApiRequestBody.get_Content()'.
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at System.Runtime.CompilerServices.AsyncMethodBuilderCore.Start[TStateMachine](TStateMachine& stateMachine)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOpenApiOperationFromMetadataAsync(ApiDescription apiDescription, SchemaRepository schemaRepository, OpenApiDocument document)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository, Func`4 parametersGenerator, Func`4 bodyGenerator, Func`3 applyFilters)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationAsync(OpenApiDocument document, ApiDescription apiDescription, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperationsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository, Func`4 operationsGenerator)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePathsAsync(OpenApiDocument document, IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwaggerAsync(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at FishLink.API.Middleware.ErrorHandlingMiddleware.InvokeAsync(HttpContext context) in C:\Users\gajan\Desktop\SEF-Fishlink\SEF-assigment-01\FishLink.API\Middleware\ErrorHandlingMiddleware.cs:line 26
