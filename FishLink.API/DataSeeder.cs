@@ -14,15 +14,34 @@ public static class DataSeeder
     {
         Console.WriteLine("🌱 Starting seed...");
 
+        // ── 0. Seed Root Admin ───────────────────────────────────────────────
+        var rootAdmin = await db.Users.FirstOrDefaultAsync(u => u.Email == "Admin@gmail.com");
+        if (rootAdmin == null)
+        {
+            db.Users.Add(new User
+            {
+                FullName = "System Admin",
+                Email = "Admin@gmail.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+            Console.WriteLine("  ✅ Seeded root admin account (Admin@gmail.com)");
+        }
+        else
+        {
+            Console.WriteLine("  ⏭ Root admin already exists.");
+        }
         // ── 1. Get buyer IDs ─────────────────────────────────────────────────
         var buyers = await db.Users
             .Where(u => u.Role == "Buyer")
             .OrderBy(u => u.Id)
             .ToListAsync();
 
-        if (buyers.Count == 0)
+        if (buyers.Count < 5)
         {
-            Console.WriteLine("❌ No buyers found. Register buyers first.");
+            Console.WriteLine("❌ Not enough buyers found. Register at least 5 buyers first.");
             return;
         }
 

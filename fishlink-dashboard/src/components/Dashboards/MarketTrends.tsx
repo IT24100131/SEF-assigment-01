@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, RefreshCw, AlertCircle, Activity, Calendar } from 'lucide-react';
+import { BarChart3, RefreshCw, AlertCircle, Activity, Calendar, TrendingUp, TrendingDown, Minus, Database, Zap } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 
@@ -53,8 +53,8 @@ interface CombinedStat {
 
 const trendColor  = (p: number) => p > 3 ? '#10b981' : p < -3 ? '#ef4444' : '#3b82f6';
 const trendBg     = (p: number) => p > 3 ? '#d1fae5' : p < -3 ? '#fee2e2' : '#dbeafe';
-const trendLabel  = (p: number) =>
-  p > 3 ? `▲ +${p}%` : p < -3 ? `▼ ${p}%` : `― ${p > 0 ? '+' : ''}${p}%`;
+const TrendLabel = ({p}: {p: number}) =>
+  p > 3 ? <span style={{display: 'flex', alignItems: 'center', gap: 4}}><TrendingUp size={14}/> +{p}%</span> : p < -3 ? <span style={{display: 'flex', alignItems: 'center', gap: 4}}><TrendingDown size={14}/> {p}%</span> : <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Minus size={14}/> {p > 0 ? '+' : ''}{p}%</span>;
 
 const confidenceBg = (c: string) =>
   c === 'high' ? '#d1fae5' : c === 'medium' ? '#fef3c7' : '#fee2e2';
@@ -210,7 +210,7 @@ export const MarketTrends = () => {
                   {/* API trend badge */}
                   <span style={{ padding:'2px 8px', borderRadius:'10px', fontSize:'0.75rem', fontWeight:700,
                     background: trendBg(s.apiTrend), color: trendColor(s.apiTrend) }}>
-                    {trendLabel(s.apiTrend)}
+                    <TrendLabel p={s.apiTrend} />
                   </span>
                   {/* Confidence badge */}
                   <span style={{ padding:'2px 8px', borderRadius:'10px', fontSize:'0.75rem', fontWeight:600,
@@ -286,17 +286,17 @@ export const MarketTrends = () => {
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Avg last 30d: <strong>Rs. {s.apiAvg.toLocaleString()}/kg</strong></p>
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Recommended: <strong>Rs. {s.apiRecommended.toLocaleString()}/kg</strong></p>
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color: trendColor(s.apiTrend) }}>
-                        Trend: <strong>{trendLabel(s.apiTrend)}</strong>
+                        Trend: <strong><TrendLabel p={s.apiTrend} /></strong>
                       </p>
                     </div>
                     <div style={{ background:'#f0fdf4', borderRadius:'8px', padding:'14px', border:'1px solid #bbf7d0' }}>
-                      <p style={{ fontWeight:700, color:'#15803d', margin:'0 0 8px', fontSize:'0.85rem' }}>🗄️ Live DB Transactions</p>
+                      <p style={{ fontWeight:700, color:'#15803d', margin:'0 0 8px', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:6 }}><Database size={16} /> Live DB Transactions</p>
                       {s.dbCatchCount > 0 ? (
                         <>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Avg last 30d: <strong>Rs. {s.dbAvg?.toLocaleString()}/kg</strong></p>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Catches: <strong>{s.dbCatchCount} ({s.dbTotalKg} kg)</strong></p>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color: trendColor(s.dbTrend ?? 0) }}>
-                            Trend: <strong>{trendLabel(s.dbTrend ?? 0)}</strong>
+                            Trend: <strong><TrendLabel p={s.dbTrend ?? 0} /></strong>
                           </p>
                         </>
                       ) : (
@@ -308,7 +308,7 @@ export const MarketTrends = () => {
                   {/* Blended recommendation */}
                   <div style={{ background:'#fefce8', border:'1px solid #fde047', borderRadius:'8px', padding:'14px', marginBottom:'14px' }}>
                     <p style={{ margin:0, fontWeight:700, color:'#854d0e', fontSize:'0.9rem' }}>
-                      ⚡ Blended AI Recommendation: Rs. {s.blendedPrice.toLocaleString()}/kg
+                      <span style={{ display:'flex', alignItems:'center', gap:6 }}><Zap size={16} /> Blended AI Recommendation: Rs. {s.blendedPrice.toLocaleString()}/kg</span>
                     </p>
                     <p style={{ margin:'4px 0 0', color:'#713f12', fontSize:'0.8rem' }}>
                       60% price model weight + 40% local DB weight
@@ -359,7 +359,7 @@ export const MarketTrends = () => {
                         </td>
                         <td style={{ padding:'10px 12px' }}>
                           <span style={{ color: trendColor(s.apiTrend), fontWeight:700 }}>
-                            {trendLabel(s.apiTrend)}
+                            <TrendLabel p={s.apiTrend} />
                           </span>
                         </td>
                         <td style={{ padding:'10px 12px' }}>
