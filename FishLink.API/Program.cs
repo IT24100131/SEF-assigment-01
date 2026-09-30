@@ -49,10 +49,18 @@ try
         c.SwaggerDoc("v1", new() { Title = "FishLink AI API", Version = "v1" });
     });
 
+    var defaultConn = "Host=ep-old-cell-b4wg6dvp-pooler.c-6.us-east-2.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_aWZT89YbosAi;SSL Mode=Require;Trust Server Certificate=true;";
+    var connStr = builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
+        ?? builder.Configuration["ConnectionStrings__DefaultConnection"]
+        ?? builder.Configuration["onnectionStrings__DefaultConnection"]
+        ?? builder.Configuration["onnectionStrings_DefaultConnection"]
+        ?? defaultConn;
+
     // PostgreSQL
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.UseNpgsql(connStr);
         options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     });
 
@@ -100,7 +108,7 @@ try
 
     // ── Health check endpoint ─────────────────────────────────────────────────
     builder.Services.AddHealthChecks()
-        .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+        .AddNpgSql(connStr);
 
     var app = builder.Build();
 
