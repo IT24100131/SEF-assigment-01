@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.x'
+          dotnet-version: '9.x'
 
       - name: Build with dotnet
         run: dotnet build FishLink.API/FishLink.API.csproj --configuration Release
@@ -63,3 +63,4 @@ jobs:
           slot-name: 'Production'
           package: .
           
+
