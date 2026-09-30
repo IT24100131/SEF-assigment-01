@@ -51,7 +51,10 @@ try
 
     // PostgreSQL
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+    });
 
     // JWT Authentication
     var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -122,15 +125,17 @@ try
             "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.000} ms";
     });
 
-    if (app.Environment.IsDevelopment())
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
     {
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "FishLink AI API v1");
-            c.RoutePrefix = "swagger";
-        });
-    }
+        ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+    });
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FishLink AI API v1");
+        c.RoutePrefix = "swagger";
+    });
 
     app.UseCors("AllowAll");
     if (!app.Environment.IsDevelopment())
