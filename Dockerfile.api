@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies
@@ -10,7 +10,7 @@ COPY FishLink.API/ FishLink.API/
 RUN dotnet publish FishLink.API/FishLink.API.csproj -c Release -o /app/publish --no-restore
 
 # Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:11.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:10000
 EXPOSE 10000
