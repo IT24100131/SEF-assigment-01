@@ -159,6 +159,15 @@ export const BuyerDashboard: React.FC = () => {
   // ── Save preference ─────────────────────────────────────────────────────────
   const handleSavePreference = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pref.minQuantityKg > pref.maxQuantityKg) {
+      setPrefError('Minimum quantity cannot exceed maximum quantity.');
+      return;
+    }
+    if (!Number.isFinite(pref.maxPricePerKg) || pref.maxPricePerKg <= 0) {
+      setPrefError('Maximum price must be greater than zero.');
+      return;
+    }
+    if (!window.confirm('Save these buyer preferences?')) return;
     setPrefSaving(true);
     setPrefError('');
     try {
@@ -194,6 +203,7 @@ export const BuyerDashboard: React.FC = () => {
     setBidError('');
     const price = Number(bidForm.bidPrice);
     if (!price || price <= 0) { setBidError('Please enter a valid bid price.'); return; }
+    if (!window.confirm(`Submit your bid of Rs. ${price.toLocaleString()}/kg for ${bidForm.species}?`)) return;
     try {
       await axios.post(
         `${API_BASE_URL}/api/Bids`,
@@ -554,19 +564,19 @@ export const BuyerDashboard: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label>Min Quantity (kg)</label>
-                  <input type="number" min="0" value={pref.minQuantityKg}
+                  <input type="number" min="0" step="0.01" required value={pref.minQuantityKg}
                     onChange={e => setPref({ ...pref, minQuantityKg: Number(e.target.value) })} />
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <label>Max Quantity (kg)</label>
-                  <input type="number" min="0" value={pref.maxQuantityKg}
+                  <input type="number" min="0" step="0.01" required value={pref.maxQuantityKg}
                     onChange={e => setPref({ ...pref, maxQuantityKg: Number(e.target.value) })} />
                 </div>
               </div>
 
               <div className="form-group" style={{ margin: 0 }}>
                 <label>Maximum Price (Rs/kg)</label>
-                <input type="number" min="0" value={pref.maxPricePerKg}
+                <input type="number" min="0.01" step="0.01" required value={pref.maxPricePerKg}
                   onChange={e => setPref({ ...pref, maxPricePerKg: Number(e.target.value) })}
                   placeholder="e.g. 2500" />
                 <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>

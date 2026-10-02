@@ -4,6 +4,7 @@ import { Fish, ArrowRight, X, CheckCircle, Phone, Mail, MapPin } from 'lucide-re
 import axios from 'axios';
 import '../landing.css';
 import { API_BASE_URL } from '../config/api';
+import { PasswordInput } from './Auth/PasswordInput';
 
 export const Landing = () => {
   const navigate = useNavigate();
@@ -13,14 +14,16 @@ export const Landing = () => {
   // Auth States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('Fisherman');
   const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!window.confirm('Sign in to FishLink AI?')) return;
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/Auth/login`, { email, password });
+      const response = await axios.post(`${API_BASE_URL}/api/Auth/login`, { email: email.trim(), password });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('role', user.role);
@@ -36,9 +39,22 @@ export const Landing = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (fullName.trim().length < 2) {
+      setError('Enter a name with at least 2 characters.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!window.confirm('Create this FishLink account?')) return;
     try {
       await axios.post(`${API_BASE_URL}/api/Auth/register`, {
-        fullName, email, passwordHash: password, role
+        fullName: fullName.trim(), email: email.trim(), passwordHash: password, role
       });
       alert('Registration successful! Please login.');
       setAuthView('login');
@@ -302,7 +318,7 @@ export const Landing = () => {
               </div>
               <div className="form-group">
                 <label>Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" required />
+                <PasswordInput accessibleLabel="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" required />
               </div>
               <button type="submit" className="btn-primary" style={{marginTop: '10px'}}>Sign In</button>
               <div className="auth-footer" style={{marginTop: '20px'}}>
@@ -313,7 +329,7 @@ export const Landing = () => {
             <form onSubmit={handleRegister} className="auth-form">
               <div className="form-group">
                 <label>Full Name</label>
-                <input type="text" placeholder="e.g. John Doe" required value={fullName} onChange={e => setFullName(e.target.value)} />
+                <input type="text" placeholder="e.g. John Doe" required minLength={2} value={fullName} onChange={e => setFullName(e.target.value)} />
               </div>
               <div className="form-group">
                 <label>Email Address</label>
@@ -321,14 +337,17 @@ export const Landing = () => {
               </div>
               <div className="form-group">
                 <label>Password</label>
-                <input type="password" placeholder="Enter password" required value={password} onChange={e => setPassword(e.target.value)} />
+                <PasswordInput accessibleLabel="password" autoComplete="new-password" placeholder="At least 8 characters" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>Confirm Password</label>
+                <PasswordInput accessibleLabel="confirm password" autoComplete="new-password" placeholder="Re-enter password" required minLength={8} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
               </div>
               <div className="form-group">
                 <label>Select Your Role</label>
                 <select value={role} onChange={(e) => setRole(e.target.value)}>
                   <option value="Fisherman">Fisherman</option>
                   <option value="Buyer">Buyer</option>
-                  <option value="Admin">Admin</option>
                 </select>
               </div>
               <button type="submit" className="btn-primary" style={{marginTop: '10px'}}>Register</button>

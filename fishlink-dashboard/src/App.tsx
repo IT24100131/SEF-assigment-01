@@ -9,7 +9,6 @@ import { MarketTrends } from './components/Dashboards/MarketTrends';
 import { BuyerDashboard } from './components/Dashboards/BuyerDashboard';
 import { AdminDashboard } from './components/Dashboards/AdminDashboard';
 import { LogisticsDashboard } from './components/Dashboards/LogisticsDashboard';
-import { Footer } from './components/Footer';
 import './App.css';
 
 
@@ -31,6 +30,7 @@ const DashboardLayout = () => {
   }, [isDark]);
 
   const handleLogout = () => {
+    if (!window.confirm('Are you sure you want to log out?')) return;
     localStorage.removeItem('role');
     localStorage.removeItem('token');
     navigate('/');
@@ -138,7 +138,6 @@ const DashboardLayout = () => {
           </div>
         </header>
         {renderContent()}
-        <Footer />
       </main>
     </div>
   );
