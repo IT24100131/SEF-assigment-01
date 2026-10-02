@@ -406,12 +406,9 @@ def run_logistics_agent(req: "WorkflowRequest", recommended_price: float) -> dic
 def tool_get_catch_details(catch_id: int) -> dict | None:
     """Tool: fetch full catch record from DB."""
     try:
-        resp = requests.get(f"{ASP_NET}/api/Catches", timeout=5)
+        resp = requests.get(f"{ASP_NET}/api/Catches/{catch_id}/quality-context", timeout=5)
         resp.raise_for_status()
-        for c in resp.json():
-            if c.get("id") == catch_id:
-                return c
-        return None
+        return resp.json()
     except Exception as e:
         print(f"[tool_get_catch_details] {e}")
         return None
@@ -450,18 +447,16 @@ def tool_get_seller_history(fisherman_id: int) -> dict:
 def tool_get_transaction_history(catch_id: int) -> dict:
     """Tool: check for suspicious bid patterns on this catch."""
     try:
-        resp = requests.get(f"{ASP_NET}/api/Bids/catch/{catch_id}", timeout=5)
+        resp = requests.get(
+            f"{ASP_NET}/api/Bids/catch/{catch_id}/quality-pattern", timeout=5
+        )
         resp.raise_for_status()
-        bids = resp.json()
-        total    = len(bids)
-        # Detect duplicate bids from same buyer
-        buyer_counts = {}
-        for b in bids:
-            bid = b.get("buyerId", 0)
-            buyer_counts[bid] = buyer_counts.get(bid, 0) + 1
-        duplicate_bids = sum(1 for v in buyer_counts.values() if v > 1)
-        return {"totalBids": total, "duplicateBidCount": duplicate_bids,
-                "suspicious": duplicate_bids > 0}
+        data = resp.json()
+        return {
+            "totalBids": int(data.get("totalBids", 0)),
+            "duplicateBidCount": int(data.get("duplicateBidCount", 0)),
+            "suspicious": bool(data.get("suspicious", False)),
+        }
     except Exception as e:
         print(f"[tool_get_transaction_history] {e}")
         return {"totalBids": 0, "duplicateBidCount": 0, "suspicious": False}
@@ -544,6 +539,14 @@ def run_quality_validation_agent(req: WorkflowRequest) -> ValidationResult:
     # ── Call tools to gather all data ─────────────────────────────────────────
     print("  [Tool] get_catch_details()")
     catch = tool_get_catch_details(req.catch_id)
+    if catch:
+        req.fisherman_id = int(catch.get("fishermanId", req.fisherman_id))
+        req.quantity_kg = float(catch.get("quantityKg", req.quantity_kg))
+        req.asking_price = float(catch.get("askingPricePerKg", req.asking_price))
+        req.fish_species = str(catch.get("fishSpecies", req.fish_species))
+        req.verified_weight_kg = float(catch.get("verifiedWeightKg") or req.verified_weight_kg)
+        req.declared_quality_grade = str(catch.get("declaredQualityGrade") or req.declared_quality_grade)
+        req.inspection_result = str(catch.get("inspectionResult") or req.inspection_result)
 
     print("  [Tool] get_market_price()")
     market = tool_get_market_price(req.fish_species)
@@ -662,10 +665,10 @@ def run_quality_validation_agent(req: WorkflowRequest) -> ValidationResult:
 
     else:  # Poor
         result.add_check("Seller History", False,
-            f"Risk: POOR | {fraud_flags} fraud flags — HIGH RISK SELLER")
-        result.add_warning(f"High-risk seller: {fraud_flags} previous fraud flags")
-        result.fraud_risk = "High"
-        result.requires_admin_review = True
+            f"Risk: POOR | {fraud_flags} prior fraud flags — elevated seller risk")
+        result.add_warning(f"Seller has {fraud_flags} prior fraud flags; admin review required")
+        if result.fraud_risk == "Low":
+            result.fraud_risk = "Medium"
 
     # ── Step 5: Transaction Pattern Check ────────────────────────────────────
     if txn.get("suspicious"):
@@ -854,7 +857,7 @@ def run_agentic_workflow(req: WorkflowRequest):
 
     # Post validation result back to .NET DB
     try:
-        requests.post(VALIDATE_URL, json={
+        response = requests.post(VALIDATE_URL, json={
             "catchId":              req.catch_id,
             "fraudRisk":            validation.fraud_risk,
             "weightDiscrepancyPct": validation.weight_discrepancy_pct,
@@ -863,6 +866,7 @@ def run_agentic_workflow(req: WorkflowRequest):
             "requiresAdminReview":  validation.requires_admin_review,
             "recommendedStatus":    validation.recommended_status,
         }, timeout=5)
+        response.raise_for_status()
         print(f"  [QualityAgent] Validation result saved to DB.")
     except Exception as e:
         print(f"  [QualityAgent] Failed to save result: {e}")
