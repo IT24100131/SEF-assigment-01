@@ -33,6 +33,27 @@ public class CatchesController : ControllerBase
         return c == null ? NotFound($"Catch {id} not found.") : Ok(c);
     }
 
+    [HttpGet("{id}/quality-context")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetQualityContext(int id)
+    {
+        var c = await _service.GetByIdAsync(id);
+        if (c == null) return NotFound($"Catch {id} not found.");
+
+        return Ok(new
+        {
+            c.Id,
+            c.FishermanId,
+            c.FishSpecies,
+            c.QuantityKg,
+            c.AskingPricePerKg,
+            c.VerifiedWeightKg,
+            c.DeclaredQualityGrade,
+            c.InspectionResult,
+            c.CatchDateTime,
+        });
+    }
+
     // ── GET /api/Catches/market-stats
     [HttpGet("market-stats")]
     [AllowAnonymous]

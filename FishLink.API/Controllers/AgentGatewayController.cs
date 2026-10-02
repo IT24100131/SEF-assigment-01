@@ -184,15 +184,35 @@ public class AgentGatewayController : ControllerBase
             reason = "Average weekly price trajectory with steady wholesale bidding.";
         }
 
+        var confidenceLabel = confidence >= 90 ? "high" : confidence >= 80 ? "medium" : "low";
+
         return Ok(new
         {
             species = species,
+            unit = "LKR/kg",
+            recommendedPrice = avgPrice,
+            confidence = confidenceLabel,
+            insight = reason,
+            summary = new
+            {
+                avgLast30 = avgPrice,
+                avgPrev30 = avgPrice,
+                trendPct = 0,
+                minLast30 = minPrice,
+                maxLast30 = maxPrice,
+                stddevLast30 = 0,
+            },
+            next7Days = Enumerable.Range(1, 7).Select(day => new
+            {
+                date = DateTime.UtcNow.AddDays(day).ToString("yyyy-MM-dd"),
+                predictedPrice = avgPrice,
+            }),
             recommendedRange = $"Rs.{minPrice:0} – Rs.{maxPrice:0} / kg",
             minPrice = minPrice,
             maxPrice = maxPrice,
             averagePrice = avgPrice,
             demand = demand,
-            confidence = confidence,
+            confidenceScore = confidence,
             reason = reason,
             source = "Price Recommendation Agent (via ASP.NET Core API)"
         });
