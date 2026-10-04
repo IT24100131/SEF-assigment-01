@@ -1,3 +1,4 @@
+// ignore_for_file: unused_element, unused_element_parameter
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -4759,7 +4760,7 @@ class _BidCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      bidPricePerKg + ' / kg',
+                      '$bidPricePerKg / kg',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
