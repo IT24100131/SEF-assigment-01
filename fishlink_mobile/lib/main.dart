@@ -285,8 +285,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) => _AuthShell(
-        child: Form(
-          key: _formKey,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -369,7 +370,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
-      );
+      ),
+    );
 }
 
 class RegisterScreen extends StatefulWidget {
