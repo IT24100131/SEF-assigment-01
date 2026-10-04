@@ -347,6 +347,9 @@ const CatchForm: React.FC<CatchFormProps> = ({
         <button type="submit" className="btn-primary" style={{ marginTop: '20px', width: '100%' }}>
           {editId ? '💾 Save Changes' : '📋 Save as Draft'}
         </button>
+        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#64748b', marginTop: '12px' }}>
+          By saving, you confirm the accuracy of this information and agree to FishLink's quality standards.
+        </p>
       </form>
       {datePickerOpen && (
         <div className="date-picker-backdrop" role="presentation">
