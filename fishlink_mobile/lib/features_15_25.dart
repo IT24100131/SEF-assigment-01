@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -1789,7 +1790,7 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   String _filter = 'All';
-  List<Map<String, dynamic>> _alerts = [
+  final List<Map<String, dynamic>> _alerts = [
     {
       'id': 1,
       'title': '🔔 New Bid Received',

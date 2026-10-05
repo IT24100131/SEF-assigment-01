@@ -3,21 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import { Fish } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
+import { PasswordInput } from './PasswordInput';
 
 export const Register = () => {
   const [role, setRole] = useState('Fisherman');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (fullName.trim().length < 2) {
+      setError('Enter a name with at least 2 characters.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!window.confirm('Create this FishLink account?')) return;
     try {
       await axios.post(`${API_BASE_URL}/api/Auth/register`, {
-        fullName,
-        email,
+        fullName: fullName.trim(),
+        email: email.trim(),
         passwordHash: password, // Simply using the plain password for demo, API should hash
         role
       });
@@ -40,7 +55,7 @@ export const Register = () => {
         <form onSubmit={handleRegister} className="auth-form">
           <div className="form-group">
             <label>Full Name</label>
-            <input type="text" placeholder="e.g. John Doe" required value={fullName} onChange={e => setFullName(e.target.value)} />
+            <input type="text" placeholder="e.g. John Doe" required minLength={2} value={fullName} onChange={e => setFullName(e.target.value)} />
           </div>
           <div className="form-group">
             <label>Email Address</label>
@@ -48,7 +63,11 @@ export const Register = () => {
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" placeholder="Enter password" required value={password} onChange={e => setPassword(e.target.value)} />
+            <PasswordInput accessibleLabel="password" autoComplete="new-password" placeholder="At least 8 characters" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Confirm Password</label>
+            <PasswordInput accessibleLabel="confirm password" autoComplete="new-password" placeholder="Re-enter password" required minLength={8} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
           </div>
           <div className="form-group">
             <label>Select Your Role</label>

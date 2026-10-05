@@ -9,7 +9,6 @@ import { MarketTrends } from './components/Dashboards/MarketTrends';
 import { BuyerDashboard } from './components/Dashboards/BuyerDashboard';
 import { AdminDashboard } from './components/Dashboards/AdminDashboard';
 import { LogisticsDashboard } from './components/Dashboards/LogisticsDashboard';
-import { Footer } from './components/Footer';
 import './App.css';
 
 
@@ -31,6 +30,7 @@ const DashboardLayout = () => {
   }, [isDark]);
 
   const handleLogout = () => {
+    if (!window.confirm('Are you sure you want to log out?')) return;
     localStorage.removeItem('role');
     localStorage.removeItem('token');
     navigate('/');
@@ -129,7 +129,10 @@ const DashboardLayout = () => {
 
       <main className="main-content">
         <header>
-          <h1>{role} Portal</h1>
+          <div>
+            <h1 style={{ margin: 0 }}>{role} Portal</h1>
+            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)' }}>Manage your FishLink activities efficiently</p>
+          </div>
           <div className="header-right">
             <button className="theme-toggle" onClick={() => setIsDark(!isDark)} title="Toggle Dark Mode">
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -138,7 +141,6 @@ const DashboardLayout = () => {
           </div>
         </header>
         {renderContent()}
-        <Footer />
       </main>
     </div>
   );

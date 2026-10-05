@@ -30,6 +30,25 @@ public class BidsController : ControllerBase
         return Ok(bids);
     }
 
+    [HttpGet("catch/{catchId}/quality-pattern")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetQualityPatternForCatch(int catchId)
+    {
+        var bidCounts = await _context.Bids
+            .Where(b => b.CatchId == catchId)
+            .GroupBy(b => b.BuyerId)
+            .Select(group => group.Count())
+            .ToListAsync();
+        var duplicateBidCount = bidCounts.Count(count => count > 1);
+
+        return Ok(new
+        {
+            totalBids = bidCounts.Sum(),
+            duplicateBidCount,
+            suspicious = duplicateBidCount > 0,
+        });
+    }
+
     [HttpPost]
     [Authorize(Roles = "Buyer")]
     public async Task<IActionResult> PlaceBid([FromBody] Bid newBid)

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
+import { PasswordInput } from '../Auth/PasswordInput';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -135,10 +136,14 @@ export const AdminDashboard: React.FC<{
   defaultTab?: 'flagged' | 'workflows' | 'logistics' | 'marketplace' | 'staff';
   onTabChange?: (tab: string) => void;
 }> = ({ defaultTab = 'flagged' }) => {
-  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics' | 'marketplace' | 'staff'>(defaultTab);
+  const isAdmin = localStorage.getItem('role') === 'Admin';
+  const initialTab = defaultTab === 'staff' && !isAdmin ? 'logistics' : defaultTab;
+  const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics' | 'marketplace' | 'staff'>(initialTab);
 
   // Sync when parent sidebar tab changes
-  useEffect(() => { setActiveTab(defaultTab as any); }, [defaultTab]);
+  useEffect(() => {
+    setActiveTab(defaultTab === 'staff' && !isAdmin ? 'logistics' : defaultTab);
+  }, [defaultTab, isAdmin]);
   const [flagged,       setFlagged]       = useState<FlaggedCatch[]>([]);
   const [published,     setPublished]     = useState<FlaggedCatch[]>([]);
   const [workflows,     setWorkflows]     = useState<any[]>([]);
@@ -330,7 +335,7 @@ export const AdminDashboard: React.FC<{
           { key: 'workflows', label: <><Bot size={16} /> AI Workflow Log</> },
           { key: 'marketplace', label: <><CheckCircle size={16} /> Published Market</> },
           { key: 'logistics', label: <><Truck size={16} /> Delivery Plans</> },
-          { key: 'staff', label: <><User size={16} /> Staff Management</> },
+          ...(isAdmin ? [{ key: 'staff' as const, label: <><User size={16} /> Staff Management</> }] : []),
         ] as const).map(t => (
           <button key={t.key} onClick={() => { setActiveTab(t.key); }}
             style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
@@ -802,7 +807,7 @@ export const AdminDashboard: React.FC<{
       )}
 
       {/* ── Staff Management Tab ─────────────────────────────────────────── */}
-      {activeTab === 'staff' && (
+      {isAdmin && activeTab === 'staff' && (
         <div className="workflow-card" style={{ maxWidth: '600px', margin: '0 auto', padding: '30px' }}>
           <div className="card-header" style={{ marginBottom: '24px' }}>
             <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -827,7 +832,7 @@ export const AdminDashboard: React.FC<{
           <form onSubmit={handleCreateStaff} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Full Name</label>
-              <input type="text" required value={staffFullName} onChange={e => setStaffFullName(e.target.value)}
+              <input type="text" required minLength={2} value={staffFullName} onChange={e => setStaffFullName(e.target.value)}
                 style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }} />
             </div>
             
@@ -839,8 +844,15 @@ export const AdminDashboard: React.FC<{
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontWeight: 600, fontSize: '0.9rem', color: '#334155' }}>Temporary Password</label>
-              <input type="password" required value={staffPassword} onChange={e => setStaffPassword(e.target.value)}
-                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }} />
+              <PasswordInput
+                accessibleLabel="temporary password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={staffPassword}
+                onChange={e => setStaffPassword(e.target.value)}
+                style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.95rem' }}
+              />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

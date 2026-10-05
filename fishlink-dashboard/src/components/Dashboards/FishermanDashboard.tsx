@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw, CircleDot, Search, Award, Mail, Calendar, ShieldAlert, AlertTriangle, FileText } from 'lucide-react';
+import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw, CircleDot, Search, Award, Mail, Calendar, CalendarDays, ShieldAlert, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 
@@ -67,7 +67,11 @@ const getCurrentUserId = () => {
   try {
     const token = localStorage.getItem('token') ?? '';
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return Number(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? 0);
+    const userId = payload.nameid
+      ?? payload.sub
+      ?? payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+      ?? 0;
+    return Number(userId);
   } catch {
     return 0;
   }
@@ -127,7 +131,12 @@ const CatchForm: React.FC<CatchFormProps> = ({
   const [photoPreview,     setPhotoPreview]     = useState('');
   const [submitted,        setSubmitted]        = useState(false);
   const [error,            setError]            = useState('');
+  const [datePickerOpen,   setDatePickerOpen]   = useState(false);
+  const [dateDraft,        setDateDraft]        = useState(initialCatchDateTime ?? '');
+  const [datePickerError,  setDatePickerError]  = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const localDateTimeMax = new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+    .toISOString().slice(0, 16);
 
   const getAuthHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
 
@@ -154,6 +163,23 @@ const CatchForm: React.FC<CatchFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!Number.isFinite(Number(quantity)) || Number(quantity) <= 0) {
+      setError('Quantity must be greater than zero.');
+      return;
+    }
+    if (!Number.isFinite(Number(price)) || Number(price) <= 0) {
+      setError('Asking price must be greater than zero.');
+      return;
+    }
+    if (verifiedWeight && (!Number.isFinite(Number(verifiedWeight)) || Number(verifiedWeight) < 0)) {
+      setError('Verified weight cannot be negative.');
+      return;
+    }
+    if (catchDateTime && new Date(catchDateTime).getTime() > Date.now()) {
+      setError('Catch date and time cannot be in the future.');
+      return;
+    }
+    if (!window.confirm(editId === null ? 'Save this catch as a draft?' : 'Save changes to this catch?')) return;
     try {
       const payload = {
         fishSpecies:          species,
@@ -213,11 +239,11 @@ const CatchForm: React.FC<CatchFormProps> = ({
         </div>
         <div className="form-group">
           <label>Quantity (kg)</label>
-          <input type="number" placeholder="e.g. 150" required value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+          <input type="number" min="0.01" step="0.01" placeholder="e.g. 150" required value={quantity} onChange={(e) => setQuantity(e.target.value)} />
         </div>
         <div className="form-group">
           <label>Asking Price (Rs/kg)</label>
-          <input type="number" placeholder="e.g. 1400" required value={price} onChange={(e) => setPrice(e.target.value)} />
+          <input type="number" min="0.01" step="0.01" placeholder="e.g. 1400" required value={price} onChange={(e) => setPrice(e.target.value)} />
         </div>
 
         {/* ── Quality & Inspection Fields ── */}
@@ -231,7 +257,7 @@ const CatchForm: React.FC<CatchFormProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div className="form-group" style={{ margin: 0 }}>
               <label>Verified Weight (kg)</label>
-              <input type="number" placeholder="e.g. 98" value={verifiedWeight}
+              <input type="number" min="0" step="0.01" placeholder="e.g. 98" value={verifiedWeight}
                 onChange={e => setVerifiedWeight(e.target.value)} />
               <p style={{ margin: '3px 0 0', fontSize: '0.72rem', color: '#64748b' }}>
                 Physical weight at pier
@@ -260,8 +286,19 @@ const CatchForm: React.FC<CatchFormProps> = ({
 
             <div className="form-group" style={{ margin: 0 }}>
               <label>Catch Date & Time</label>
-              <input type="datetime-local" value={catchDateTime}
-                onChange={e => setCatchDateTime(e.target.value)} />
+              <button
+                type="button"
+                className="date-picker-trigger"
+                aria-label="Select catch date and time"
+                onClick={() => {
+                  setDateDraft(catchDateTime);
+                  setDatePickerError('');
+                  setDatePickerOpen(true);
+                }}
+              >
+                <CalendarDays size={17} />
+                <span>{catchDateTime ? catchDateTime.replace('T', ' ') : 'Select date and time'}</span>
+              </button>
             </div>
           </div>
 
@@ -310,7 +347,48 @@ const CatchForm: React.FC<CatchFormProps> = ({
         <button type="submit" className="btn-primary" style={{ marginTop: '20px', width: '100%' }}>
           {editId ? '💾 Save Changes' : '📋 Save as Draft'}
         </button>
+        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#64748b', marginTop: '12px' }}>
+          By saving, you confirm the accuracy of this information and agree to FishLink's quality standards.
+        </p>
       </form>
+      {datePickerOpen && (
+        <div className="date-picker-backdrop" role="presentation">
+          <section className="date-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="catch-date-title">
+            <div className="date-picker-heading">
+              <h3 id="catch-date-title">Catch Date & Time</h3>
+              <button type="button" aria-label="Close date picker" onClick={() => setDatePickerOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <label htmlFor="catch-date-input">Select when the catch was landed</label>
+            <input
+              id="catch-date-input"
+              type="datetime-local"
+              max={localDateTimeMax}
+              value={dateDraft}
+              onChange={e => setDateDraft(e.target.value)}
+            />
+            {datePickerError && <p className="date-picker-error" role="alert">{datePickerError}</p>}
+            <div className="date-picker-actions">
+              <button type="button" className="btn-outline" onClick={() => setDatePickerOpen(false)}>Cancel</button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => {
+                  if (dateDraft && new Date(dateDraft).getTime() > Date.now()) {
+                    setDatePickerError('Catch date and time cannot be in the future.');
+                    return;
+                  }
+                  setCatchDateTime(dateDraft);
+                  setDatePickerOpen(false);
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
@@ -743,13 +821,7 @@ export const FishermanDashboard = () => {
 
   const fetchCatches = async () => {
     try {
-      let fishermanId = 0;
-      try {
-        const token = localStorage.getItem('token') ?? '';
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        fishermanId = Number(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ?? 0);
-      } catch {}
-
+      const fishermanId = getCurrentUserId();
       const res = await axios.get(`${API_BASE_URL}/api/Catches?fishermanId=${fishermanId}`, getAuthHeader());
       // API now returns PagedResult<Catch> — extract items
       const data = res.data;

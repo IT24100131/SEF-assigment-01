@@ -197,6 +197,13 @@ public class CatchService : ICatchService
         if (req.VerifiedWeightKg > 0) c.VerifiedWeightKg = req.VerifiedWeightKg;
         if (!string.IsNullOrEmpty(req.PhotoUrl)) c.PhotoUrl = req.PhotoUrl;
 
+        c.FraudRisk            = "Unassessed";
+        c.WeightDiscrepancyPct = 0;
+        c.QualityScore         = 0;
+        c.ValidationSummary    = string.Empty;
+        c.RequiresAdminReview  = false;
+        if (c.Status == "Published") c.Status = "Draft";
+
         await _db.SaveChangesAsync();
         _logger.LogInformation("Catch {Id} updated by fisherman {FishermanId}", id, fishermanId);
         return true;
@@ -257,7 +264,8 @@ public class CatchService : ICatchService
         c.QualityScore         = result.QualityScore;
         c.ValidationSummary    = result.ValidationSummary;
         c.RequiresAdminReview  = result.RequiresAdminReview;
-        if (c.Status == "Draft") c.Status = result.RecommendedStatus;
+        if (c.Status is "Draft" or "Published")
+            c.Status = result.RecommendedStatus;
 
         await _db.SaveChangesAsync();
         _logger.LogInformation("Validation saved for Catch {Id}: {Risk}", result.CatchId, result.FraudRisk);

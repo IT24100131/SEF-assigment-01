@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Fish } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
+import { PasswordInput } from './PasswordInput';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,9 +13,10 @@ export const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!window.confirm('Sign in to FishLink AI?')) return;
     try {
       const response = await axios.post(`${API_BASE_URL}/api/Auth/login`, {
-        email,
+        email: email.trim(),
         password
       });
       
@@ -50,8 +52,9 @@ export const Login = () => {
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input 
-              type="password" 
+            <PasswordInput
+              accessibleLabel="password"
+              autoComplete="current-password"
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               placeholder="Enter password" 

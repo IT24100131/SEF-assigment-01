@@ -60,6 +60,11 @@ const confidenceBg = (c: string) =>
   c === 'high' ? '#d1fae5' : c === 'medium' ? '#fef3c7' : '#fee2e2';
 const confidenceColor = (c: string) =>
   c === 'high' ? '#059669' : c === 'medium' ? '#d97706' : '#dc2626';
+const normalizedSpeciesKey = (species: string) => species.toLowerCase().replace(/[^a-z0-9]/g, '');
+const speciesKey = (species: string) => {
+  const key = normalizedSpeciesKey(species);
+  return key === 'yellowfishtuna' ? 'tunayellowfin' : key;
+};
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -97,7 +102,9 @@ export const MarketTrends = () => {
         const pred: PricePrediction | null =
           predResult.status === 'fulfilled' ? predResult.value.data : null;
 
-        const db = dbStats.find(d => d.species.toLowerCase() === sp.toLowerCase()) ?? null;
+        const db = dbStats.find(d => normalizedSpeciesKey(d.species) === normalizedSpeciesKey(sp))
+          ?? dbStats.find(d => speciesKey(d.species) === speciesKey(sp))
+          ?? null;
 
         const apiRec = pred?.recommendedPrice ?? 0;
         const dbRec  = db?.recommendedPrice   ?? 0;

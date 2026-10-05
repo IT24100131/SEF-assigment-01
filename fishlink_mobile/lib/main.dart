@@ -1,3 +1,4 @@
+// ignore_for_file: unused_element, unused_element_parameter
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -284,8 +285,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) => _AuthShell(
-        child: Form(
-          key: _formKey,
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -368,7 +370,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
-      );
+      ),
+    );
 }
 
 class RegisterScreen extends StatefulWidget {
@@ -4759,7 +4762,7 @@ class _BidCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      bidPricePerKg + ' / kg',
+                      '$bidPricePerKg / kg',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,

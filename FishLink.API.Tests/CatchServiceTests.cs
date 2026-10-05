@@ -44,6 +44,27 @@ public sealed class CatchServiceTests
     }
 
     [Fact]
+    public async Task ReceiveValidationResultAsync_updates_a_published_catch_status()
+    {
+        var (db, service) = CreateSut();
+        db.Catches.Add(new Catch { Id = 1, FishermanId = 7, FishSpecies = "Tuna", Status = "Published" });
+        await db.SaveChangesAsync();
+
+        await service.ReceiveValidationResultAsync(new ValidationResultRequest
+        {
+            CatchId = 1,
+            FraudRisk = "High",
+            RecommendedStatus = "Draft",
+            RequiresAdminReview = true,
+        });
+
+        var result = await db.Catches.FindAsync(1);
+        Assert.Equal("Draft", result!.Status);
+        Assert.Equal("High", result.FraudRisk);
+        Assert.True(result.RequiresAdminReview);
+    }
+
+    [Fact]
     public async Task GetCatchesAsync_filters_sorts_and_paginates()
     {
         var (db, service) = CreateSut();
@@ -58,5 +79,44 @@ public sealed class CatchServiceTests
 
         Assert.Equal(1, result.TotalCount);
         Assert.Equal("Negombo", result.Items.Single().Location);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_clears_stale_validation_and_returns_published_catch_to_draft()
+    {
+        var (db, service) = CreateSut();
+        db.Catches.Add(new Catch
+        {
+            Id = 1,
+            FishermanId = 7,
+            FishSpecies = "Mackerel",
+            QuantityKg = 160,
+            AskingPricePerKg = 1700,
+            VerifiedWeightKg = 162,
+            Status = "Published",
+            FraudRisk = "High",
+            WeightDiscrepancyPct = 1.2m,
+            QualityScore = 95,
+            ValidationSummary = "Old validation result",
+            RequiresAdminReview = true,
+        });
+        await db.SaveChangesAsync();
+
+        await service.UpdateAsync(1, new CatchRequest
+        {
+            FishSpecies = "Mackerel",
+            QuantityKg = 160,
+            AskingPricePerKg = 683,
+            Location = "Negombo",
+            VerifiedWeightKg = 160,
+        }, 7);
+
+        var result = await db.Catches.FindAsync(1);
+        Assert.Equal("Draft", result!.Status);
+        Assert.Equal("Unassessed", result.FraudRisk);
+        Assert.Equal(0, result.WeightDiscrepancyPct);
+        Assert.Equal(0, result.QualityScore);
+        Assert.Empty(result.ValidationSummary);
+        Assert.False(result.RequiresAdminReview);
     }
 }
