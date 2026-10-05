@@ -16,6 +16,7 @@
   border-right: 1px solid var(--border-color);
 }
 
+/* UI polish: Added subtle header styling */
 .logo-container {
   padding: 24px;
   display: flex;
