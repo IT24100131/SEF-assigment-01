@@ -15,7 +15,6 @@
   transition: background-color 0.3s ease;
   border-right: 1px solid var(--border-color);
 }
-
 /* UI polish: Added subtle header styling */
 .logo-container {
   padding: 24px;
