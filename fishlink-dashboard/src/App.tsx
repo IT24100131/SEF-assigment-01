@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Fish, MapPin, Activity, Ship, ShoppingCart, LogOut, ShieldAlert, Moon, Sun } from 'lucide-react';
+import { Fish, MapPin, Activity, Ship, ShoppingCart, LogOut, ShieldAlert, Moon, Sun, Settings, SlidersHorizontal } from 'lucide-react';
 import { Login } from './components/Auth/Login';
 import { Register } from './components/Auth/Register';
 import { Landing } from './components/Landing';
@@ -9,7 +9,6 @@ import { MarketTrends } from './components/Dashboards/MarketTrends';
 import { BuyerDashboard } from './components/Dashboards/BuyerDashboard';
 import { AdminDashboard } from './components/Dashboards/AdminDashboard';
 import { LogisticsDashboard } from './components/Dashboards/LogisticsDashboard';
-import { Footer } from './components/Footer';
 import './App.css';
 
 
@@ -51,7 +50,9 @@ const DashboardLayout = () => {
       return <LogisticsDashboard />;
     }
     if (role === 'Buyer') {
-      if (activeTab === 'home')   return <BuyerDashboard />;
+      if (activeTab === 'home') return <BuyerDashboard initialTab="recommend" onNavigateTab={setActiveTab} />;
+      if (activeTab === 'saved-preferences') return <BuyerDashboard initialTab="saved-preferences" onNavigateTab={setActiveTab} />;
+      if (activeTab === 'preferences') return <BuyerDashboard initialTab="preferences" onNavigateTab={setActiveTab} />;
       if (activeTab === 'orders') return (
         <div>
           <LogisticsDashboard />
@@ -112,6 +113,12 @@ const DashboardLayout = () => {
                 <li className={activeTab === 'home'   ? 'active' : ''} onClick={() => setActiveTab('home')}>
                   <ShoppingCart size={18} /> <span>Live Market</span>
                 </li>
+                <li className={activeTab === 'saved-preferences' ? 'active' : ''} onClick={() => setActiveTab('saved-preferences')}>
+                  <SlidersHorizontal size={18} /> <span>Saved Preferences</span>
+                </li>
+                <li className={activeTab === 'preferences' ? 'active' : ''} onClick={() => setActiveTab('preferences')}>
+                  <Settings size={18} /> <span>My Preferences</span>
+                </li>
                 <li className={activeTab === 'orders' ? 'active' : ''} onClick={() => setActiveTab('orders')}>
                   <MapPin size={18} /> <span>My Orders</span>
                 </li>
@@ -138,7 +145,6 @@ const DashboardLayout = () => {
           </div>
         </header>
         {renderContent()}
-        <Footer />
       </main>
     </div>
   );
