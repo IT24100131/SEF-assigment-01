@@ -92,3 +92,13 @@ cd ai_agent
 pip install -r requirements.txt
 python main.py
 ```
+
+---
+
+## Member 4 (IT24100131) Individual Contribution - Logistics Fleet Scheduling
+* **Owned Component:** Cold-Chain Fleet Scheduling, Geo-Routing & Human-in-the-Loop Admin Approval
+* **Backend Controller:** [FishLink.API/Controllers/LogisticsController.cs](FishLink.API/Controllers/LogisticsController.cs)
+* **Frontend UI:** [DeliveryPlanWeather.tsx](fishlink-dashboard/src/components/DeliveryPlanWeather.tsx), [LiveRouteTrackerModal.tsx](fishlink-dashboard/src/components/LiveRouteTrackerModal.tsx)
+* **Mobile View:** [dmin_and_logistics.dart](fishlink_mobile/lib/admin_and_logistics.dart)
+* **Standalone Runner:** python member4_tests.py or .\run_member4.bat
+* **Technical Report:** [docs/individual-reports/member4-logistics-fleet.md](docs/individual-reports/member4-logistics-fleet.md)
