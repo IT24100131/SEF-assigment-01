@@ -785,8 +785,12 @@ def get_available_catches(token: str | None = None) -> list[dict]:
 
 def score_catch(catch: dict, pref: BuyerMatchRequest) -> dict:
     score = 0; reasons = []
-    if catch["fishSpecies"].lower() == pref.species.lower():
+    if not pref.species:
+        score += 20; reasons.append("~ No species preference set")
+    elif catch["fishSpecies"].lower() == pref.species.lower():
         score += 40; reasons.append("✓ Exact species match")
+    elif pref.species.lower() in catch["fishSpecies"].lower() or catch["fishSpecies"].lower() in pref.species.lower():
+        score += 38; reasons.append("✓ Species match")
     else:
         reasons.append(f"✗ Species: {catch['fishSpecies']} (wanted {pref.species})")
     qty = float(catch["quantityKg"])

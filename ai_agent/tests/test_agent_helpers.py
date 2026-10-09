@@ -30,6 +30,24 @@ class AgentHelperTests(unittest.TestCase):
         self.assertEqual(len(matches), 1)
         self.assertGreaterEqual(matches[0]["matchScore"], 30)
 
+    def test_buyer_matching_supports_species_alias(self):
+        matches = run_buyer_matching(
+            [{"fishSpecies": "Tuna (Yellowfin)", "quantityKg": 40,
+              "askingPricePerKg": 1000, "location": "Negombo",
+              "qualityScore": 85}],
+            BuyerMatchRequest(species="Tuna", max_price_per_kg=1200),
+        )
+        self.assertIn("Species match", matches[0]["matchReasons"])
+
+    def test_buyer_matching_explains_empty_species_preference(self):
+        matches = run_buyer_matching(
+            [{"fishSpecies": "Tuna", "quantityKg": 40,
+              "askingPricePerKg": 1000, "location": "Negombo",
+              "qualityScore": 85}],
+            BuyerMatchRequest(species="", max_price_per_kg=1200),
+        )
+        self.assertIn("No species preference", matches[0]["matchReasons"])
+
     def test_workflow_request_keeps_structured_quality_fields(self):
         request = WorkflowRequest(
             workflow_id="test-1", catch_id=1, fisherman_id=2,
