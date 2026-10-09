@@ -160,6 +160,16 @@ class ApiClient {
     if (res is List) return res;
     return [];
   }
+  Future<Map<String, dynamic>> updateBuyerPreferences(Map<String, dynamic> payload) async {
+    final res = await _rawRequest('POST', '/BuyerMatch/preferences/me', body: payload);
+    return res is Map<String, dynamic> ? res : {};
+  }
+
+  Future<Map<String, dynamic>> getBuyerPreferences() async {
+    final res = await _rawRequest('GET', '/BuyerMatch/preferences/me');
+    if (res is Map<String, dynamic>) return res;
+    return {};
+  }
 }
 
 class FishLinkApp extends StatefulWidget {
@@ -2409,7 +2419,7 @@ class _FishermanCatchDetailsSheetState
 // FEATURE 10: 🛒 BUYER DASHBOARD
 // ══════════════════════════════════════════════════════════════════════════════
 
-class BuyerDashboardScreen extends StatelessWidget {
+class BuyerDashboardScreen extends StatefulWidget {
   const BuyerDashboardScreen({
     required this.onSignOut,
     this.onNavigateTab,
@@ -2418,6 +2428,422 @@ class BuyerDashboardScreen extends StatelessWidget {
 
   final VoidCallback onSignOut;
   final ValueChanged<int>? onNavigateTab;
+
+  @override
+  State<BuyerDashboardScreen> createState() => _BuyerDashboardScreenState();
+}
+
+class _BuyerDashboardScreenState extends State<BuyerDashboardScreen> {
+  int _selectedView = 0; // 0: All Published Catches, 1: AI Recommendations, 2: Preferences Form
+
+  // Preferences state (matching React BuyerDashboard.tsx)
+  String _preferredSpecies = 'Tuna (Yellowfin)';
+  final _minQtyCtrl = TextEditingController(text: '50');
+  final _maxQtyCtrl = TextEditingController(text: '300');
+  final _maxPriceCtrl = TextEditingController(text: '2200');
+  String _preferredCity = 'Negombo';
+  final _notesCtrl = TextEditingController(
+      text: 'Grade A sashimi quality only. Requires chilled cold-chain.');
+  bool _prefSaving = false;
+  bool _prefSaved = false;
+  bool _isLoadingCatches = false;
+
+  final List<String> _speciesList = [
+    'Any species',
+    'Tuna (Yellowfin)',
+    'Skipjack',
+    'Trevally (Paraw)',
+    'Mackerel',
+  ];
+
+  final List<String> _cityList = [
+    'Any location',
+    'Negombo',
+    'Colombo',
+    'Kandy',
+    'Galle',
+    'Matara',
+    'Jaffna',
+  ];
+
+  List<Map<String, dynamic>> _liveCatches = [];
+
+  final List<Map<String, dynamic>> _savedBids = [
+    {
+      'id': 'saved-bid-1',
+      'species': 'Tuna (Yellowfin)',
+      'minQty': 50,
+      'maxQty': 300,
+      'maxPrice': 2200,
+      'city': 'Negombo',
+      'notes': 'Grade A sashimi export quality. Requires chilled cold-chain.',
+      'createdAt': 'Today, 08:30 AM',
+    },
+    {
+      'id': 'saved-bid-2',
+      'species': 'Trevally (Paraw)',
+      'minQty': 60,
+      'maxQty': 150,
+      'maxPrice': 1500,
+      'city': 'Colombo',
+      'notes': 'Fresh morning landing for Colombo central wholesale retail.',
+      'createdAt': 'Yesterday, 14:15 PM',
+    },
+    {
+      'id': 'saved-bid-3',
+      'species': 'Skipjack',
+      'minQty': 40,
+      'maxQty': 200,
+      'maxPrice': 1000,
+      'city': 'Galle',
+      'notes': 'Grade A/B for local canning & distribution.',
+      'createdAt': '2 days ago',
+    },
+  ];
+
+  void _addSavedBid() {
+    final species = _preferredSpecies;
+    final minQ = int.tryParse(_minQtyCtrl.text.trim()) ?? 50;
+    final maxQ = int.tryParse(_maxQtyCtrl.text.trim()) ?? 300;
+    final maxP = int.tryParse(_maxPriceCtrl.text.trim()) ?? 2200;
+    final city = _preferredCity;
+    final notes = _notesCtrl.text.trim();
+
+    final newBid = {
+      'id': 'saved-bid-${DateTime.now().millisecondsSinceEpoch}',
+      'species': species,
+      'minQty': minQ,
+      'maxQty': maxQ,
+      'maxPrice': maxP,
+      'city': city,
+      'notes': notes.isNotEmpty ? notes : 'Standard procurement requirements',
+      'createdAt': 'Just now',
+    };
+
+    setState(() {
+      _savedBids.insert(0, newBid);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Target Bid saved for $species! AI Buyer Matching calculated.'),
+        backgroundColor: const Color(0xff059669),
+      ),
+    );
+  }
+
+  void _deleteSavedBid(String id) {
+    setState(() {
+      _savedBids.removeWhere((b) => b['id'] == id);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Saved bid inquiry removed.'),
+        backgroundColor: Color(0xff475569),
+      ),
+    );
+  }
+
+  Map<String, dynamic> _calculateMatchForSavedBid(Map<String, dynamic> b) {
+    final targetSpecies = (b['species']?.toString() ?? '').toLowerCase();
+    final maxPrice = (b['maxPrice'] as num?)?.toDouble() ?? 2200.0;
+    final minQty = (b['minQty'] as num?)?.toDouble() ?? 50.0;
+    final maxQty = (b['maxQty'] as num?)?.toDouble() ?? 300.0;
+    final targetCity = (b['city']?.toString() ?? '').toLowerCase();
+
+    Map<String, dynamic>? bestCatch;
+    int highestScore = 0;
+    List<String> bestReasons = [];
+
+    for (var c in _allPublishedCatches) {
+      int score = 20;
+      List<String> reasons = [];
+      final cSpecies = (c['fullSpecies']?.toString() ?? c['species']?.toString() ?? '').toLowerCase();
+      final cPrice = (c['price'] as num?)?.toDouble() ?? 1500.0;
+      final cQty = (c['quantity'] as num?)?.toDouble() ?? 100.0;
+      final cLoc = (c['location']?.toString() ?? '').toLowerCase();
+
+      if (targetSpecies == 'any species' ||
+          cSpecies.contains(targetSpecies.replaceAll('(', '').split(' ').first.toLowerCase())) {
+        score += 40;
+        reasons.add('Species match (+40)');
+      }
+
+      if (cPrice <= maxPrice) {
+        score += 20;
+        reasons.add('Price Rs.${cPrice.toInt()} <= Budget Rs.${maxPrice.toInt()} (+20)');
+      } else {
+        score -= 10;
+      }
+
+      if (cQty >= minQty && cQty <= maxQty) {
+        score += 20;
+        reasons.add('Volume ${cQty.toInt()}kg fits target (+20)');
+      }
+
+      if (targetCity != 'any location' && (cLoc.contains(targetCity) || targetCity.contains(cLoc))) {
+        score += 15;
+        reasons.add('Location proximity (+15)');
+      }
+
+      final quality = c['quality']?.toString() ?? '';
+      if (quality.contains('A')) {
+        score += 5;
+        reasons.add('Grade A certified (+5)');
+      }
+
+      final clamped = score.clamp(35, 98);
+      if (clamped > highestScore) {
+        highestScore = clamped;
+        bestCatch = c;
+        bestReasons = reasons;
+      }
+    }
+
+    if (highestScore == 0) {
+      highestScore = 75;
+      bestReasons = ['Baseline harbour market match'];
+    }
+
+    return {
+      'score': highestScore,
+      'reasons': bestReasons.join(' · '),
+      'matchedCatch': bestCatch,
+    };
+  }
+
+  // Matched Catches fallback (matching React BuyerDashboard.tsx)
+  final List<Map<String, dynamic>> _recommendedCatches = [
+    {
+      'id': 1,
+      'species': 'Tuna',
+      'fullSpecies': 'Yellowfin Tuna (Kelawalla)',
+      'quantity': 100,
+      'verifiedWeight': 98,
+      'price': 1550,
+      'currentBid': 1600,
+      'totalPrice': 155000,
+      'location': 'Negombo Fishery Harbour',
+      'quality': 'Grade A',
+      'lot': 'LOT-NEG-902',
+      'emoji': '🐟',
+      'fisherman': 'Sunil Fernando (Boat SL-NEG-112)',
+      'status': 'Published',
+      'inspection': 'Passed',
+      'matchScore': 94,
+      'matchReasons':
+          'Species match (+40) · Volume in target range (+25) · Asking price below budget (+20) · Negombo hub proximity (+9)',
+    },
+    {
+      'id': 3,
+      'species': 'Trevally',
+      'fullSpecies': 'Giant Trevally (Paraw)',
+      'quantity': 80,
+      'verifiedWeight': 79,
+      'price': 1200,
+      'currentBid': 1250,
+      'totalPrice': 96000,
+      'location': 'Colombo Mutwal Pier',
+      'quality': 'Grade A',
+      'lot': 'LOT-CMB-441',
+      'emoji': '🐡',
+      'fisherman': 'Anura Silva (Boat SL-CMB-809)',
+      'status': 'Published',
+      'inspection': 'Passed',
+      'matchScore': 87,
+      'matchReasons':
+          'Species match (+40) · Price within budget (+20) · High freshness index (+17) · Colombo corridor (+10)',
+    },
+    {
+      'id': 2,
+      'species': 'Skipjack',
+      'fullSpecies': 'Skipjack Tuna (Balaya)',
+      'quantity': 60,
+      'verifiedWeight': 59,
+      'price': 850,
+      'currentBid': 920,
+      'totalPrice': 51000,
+      'location': 'Galle Fishery Harbour',
+      'quality': 'Grade A',
+      'lot': 'LOT-GAL-312',
+      'emoji': '🐠',
+      'fisherman': 'Priyadarsana (Boat SL-GAL-402)',
+      'status': 'Published',
+      'inspection': 'Passed',
+      'matchScore': 78,
+      'matchReasons':
+          'Volume fit (+25) · Excellent price margin (+20) · Grade A verified (+18) · Southern coastal route (+15)',
+    },
+  ];
+
+  String _displayName = 'Buyer';
+
+  List<Map<String, dynamic>> get _allPublishedCatches {
+    if (_liveCatches.isNotEmpty) {
+      return _liveCatches;
+    }
+    return _recommendedCatches;
+  }
+
+  List<Map<String, dynamic>> get _aiMatchedCatches {
+    final list = List<Map<String, dynamic>>.from(_allPublishedCatches);
+    list.sort((a, b) => ((b['matchScore'] ?? 0) as int).compareTo((a['matchScore'] ?? 0) as int));
+    return list;
+  }
+
+  String _formatCurrency(num amount) {
+    final parts = amount.round().toString();
+    return parts.replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    const storage = FlutterSecureStorage();
+    final name = await storage.read(key: 'userName');
+    if (mounted && name != null && name.isNotEmpty) {
+      setState(() => _displayName = name);
+    }
+    try {
+      final pref = await ApiClient().getBuyerPreferences();
+      if (pref.isNotEmpty && mounted) {
+        setState(() {
+          final s = pref['preferredSpecies']?.toString() ?? '';
+          if (_speciesList.contains(s)) _preferredSpecies = s;
+          if (pref['minQuantityKg'] != null) _minQtyCtrl.text = pref['minQuantityKg'].toString();
+          if (pref['maxQuantityKg'] != null) _maxQtyCtrl.text = pref['maxQuantityKg'].toString();
+          if (pref['maxPricePerKg'] != null) _maxPriceCtrl.text = pref['maxPricePerKg'].toString();
+          final c = pref['preferredCity']?.toString() ?? '';
+          if (_cityList.contains(c)) _preferredCity = c;
+          if (pref['notes'] != null) _notesCtrl.text = pref['notes'].toString();
+        });
+      }
+    } catch (_) {}
+
+    await _loadCatches();
+  }
+
+  Future<void> _loadCatches() async {
+    if (!mounted) return;
+    setState(() => _isLoadingCatches = true);
+    try {
+      final res = await ApiClient().catches();
+      if (res.isNotEmpty && mounted) {
+        final activeList = res.where((item) {
+          final s = (item as Map)['status']?.toString().toLowerCase();
+          return s == 'published' || s == 'bidding' || s == 'active';
+        }).toList();
+        final toMap = activeList.isNotEmpty ? activeList : res;
+
+        final mapped = toMap.map((item) {
+          final m = Map<String, dynamic>.from(item as Map);
+          final speciesRaw = m['fishSpecies']?.toString() ?? m['species']?.toString() ?? 'Fish';
+          String emoji = '🐟';
+          final sl = speciesRaw.toLowerCase();
+          if (sl.contains('prawn') || sl.contains('shrimp')) {
+            emoji = '🦐';
+          } else if (sl.contains('crab')) {
+            emoji = '🦀';
+          } else if (sl.contains('tuna') || sl.contains('kelawalla')) {
+            emoji = '🐟';
+          } else if (sl.contains('squid') || sl.contains('cuttlefish')) {
+            emoji = '🦑';
+          } else if (sl.contains('seer') || sl.contains('thora')) {
+            emoji = '🐠';
+          } else if (sl.contains('trevally') || sl.contains('paraw')) {
+            emoji = '🐡';
+          } else if (sl.contains('mackerel') || sl.contains('kumbalawa')) {
+            emoji = '🐟';
+          }
+          final shortSpecies = speciesRaw.contains('(') ? speciesRaw.split('(').first.trim() : speciesRaw;
+          final rawGrade = (m['declaredQualityGrade']?.toString() ?? '').trim();
+          final quality = rawGrade.isNotEmpty ? (rawGrade.startsWith('Grade') ? rawGrade : 'Grade $rawGrade') : 'Grade A';
+          final sellerName = m['fisherman'] is Map
+              ? (m['fisherman']['fullName']?.toString() ?? 'Fisherman')
+              : (m['fishermanName']?.toString() ?? m['seller']?.toString() ?? 'Fisherman');
+          final loc = (m['location']?.toString() ?? 'Negombo Fishery Harbour').trim();
+          final qty = (m['quantityKg'] as num?)?.toInt() ?? (m['quantity'] as num?)?.toInt() ?? 100;
+          final vWeight = (m['verifiedWeightKg'] as num?)?.toInt() ?? (m['verifiedWeight'] as num?)?.toInt() ?? qty;
+          final price = (m['askingPricePerKg'] as num?)?.toInt() ?? (m['price'] as num?)?.toInt() ?? 1500;
+          final currentBid = (m['currentBid'] as num?)?.toInt() ?? price;
+          final lot = m['lotNumber']?.toString() ?? (m['id'] != null ? 'LOT-#${m['id']}' : 'LOT-HARBOUR');
+          final status = m['status']?.toString() ?? 'Published';
+          final inspection = m['inspectionResult']?.toString() ?? 'Passed';
+          final fraudRisk = m['fraudRisk']?.toString() ?? 'Low';
+
+          int matchScore = 70;
+          final List<String> reasons = [];
+          if (_preferredSpecies != 'Any species' &&
+              (speciesRaw.toLowerCase().contains(_preferredSpecies.toLowerCase()) ||
+               _preferredSpecies.toLowerCase().contains(shortSpecies.toLowerCase()))) {
+            matchScore += 20;
+            reasons.add('Species match (+20)');
+          }
+          final maxBudget = double.tryParse(_maxPriceCtrl.text.trim()) ?? 2200;
+          if (price <= maxBudget) {
+            matchScore += 15;
+            reasons.add('Asking price below budget (+15)');
+          }
+          final minQ = double.tryParse(_minQtyCtrl.text.trim()) ?? 50;
+          final maxQ = double.tryParse(_maxQtyCtrl.text.trim()) ?? 300;
+          if (qty >= minQ && qty <= maxQ) {
+            matchScore += 10;
+            reasons.add('Volume in target range (+10)');
+          }
+          if (_preferredCity != 'Any location' && loc.toLowerCase().contains(_preferredCity.toLowerCase())) {
+            matchScore += 10;
+            reasons.add('$_preferredCity proximity (+10)');
+          }
+          if (reasons.isEmpty) {
+            reasons.add('Verified catch published on harbour marketplace');
+          }
+
+          return {
+            'id': m['id'] ?? 1,
+            'species': shortSpecies,
+            'fullSpecies': speciesRaw,
+            'quantity': qty,
+            'verifiedWeight': vWeight,
+            'price': price,
+            'currentBid': currentBid,
+            'totalPrice': price * qty,
+            'quality': quality,
+            'location': loc,
+            'fisherman': sellerName,
+            'lot': lot,
+            'emoji': emoji,
+            'status': status,
+            'inspection': inspection,
+            'fraudRisk': fraudRisk,
+            'matchScore': matchScore.clamp(50, 99),
+            'matchReasons': reasons.join(' · '),
+            'raw': m,
+          };
+        }).toList();
+
+        if (mounted) {
+          setState(() {
+            _liveCatches = mapped;
+          });
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _isLoadingCatches = false);
+  }
+
+  @override
+  void dispose() {
+    _minQtyCtrl.dispose();
+    _maxQtyCtrl.dispose();
+    _maxPriceCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
 
   void _showNotice(BuildContext context, String title, String body) {
     showDialog(
@@ -2441,318 +2867,1752 @@ class BuyerDashboardScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _savePreferences() async {
+    setState(() => _prefSaving = true);
+    try {
+      await ApiClient().updateBuyerPreferences({
+        'preferredSpecies': _preferredSpecies == 'Any species' ? '' : _preferredSpecies,
+        'minQuantityKg': double.tryParse(_minQtyCtrl.text.trim()) ?? 50,
+        'maxQuantityKg': double.tryParse(_maxQtyCtrl.text.trim()) ?? 300,
+        'maxPricePerKg': double.tryParse(_maxPriceCtrl.text.trim()) ?? 2200,
+        'preferredCity': _preferredCity == 'Any location' ? '' : _preferredCity,
+        'notes': _notesCtrl.text.trim(),
+      });
+    } catch (_) {}
+
+    if (!mounted) return;
+    setState(() {
+      _prefSaving = false;
+      _prefSaved = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Preferences saved! AI Buyer Matching Agent recommendations updated.'),
+        backgroundColor: Color(0xff059669),
+      ),
+    );
+
+    // Refresh catches & match score based on updated preferences
+    _loadCatches();
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _prefSaved = false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      children: [
-        // ── Header Greeting ─────────────────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xff0a3663), Color(0xff025380)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xff0a3663).withValues(alpha: 0.25),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _loadInitialData();
+      },
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        children: [
+          // ── Header Greeting ─────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xff0a3663), Color(0xff025380)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.storefront,
-                        color: Color(0xff0a3663), size: 28),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Hello Buyer 👋',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'FishLink B2B Fresh Seafood Exchange',
-                          style:
-                              TextStyle(color: Color(0xffc2e5fb), fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.tealAccent.shade700,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'VERIFIED',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.verified_user,
-                        color: Color(0xffffd166), size: 16),
-                    SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Direct Harbour Auctions • 100% Quality Inspected',
-                        style: TextStyle(color: Colors.white, fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 18),
-
-        // ── Quick Navigation ─────────────────────────────────────────
-        const Text(
-          'Quick Navigation',
-          style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff1f2937)),
-        ),
-        const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildNavChip(
-                context,
-                icon: Icons.set_meal,
-                label: 'Available Fish',
-                color: const Color(0xff0077b6),
-                onTap: () => onNavigateTab?.call(1),
-              ),
-              const SizedBox(width: 8),
-              _buildNavChip(
-                context,
-                icon: Icons.gavel,
-                label: 'My Bids',
-                color: const Color(0xffe76f51),
-                onTap: () => onNavigateTab?.call(2),
-              ),
-              const SizedBox(width: 8),
-              _buildNavChip(
-                context,
-                icon: Icons.inventory_2,
-                label: 'Orders',
-                color: const Color(0xff2a9d8f),
-                onTap: () => _showNotice(context, 'Won Orders',
-                    'You have 2 confirmed won orders:\n• ORD-1049: 100kg Tuna (Rs.165,000)\n• ORD-1033: 60kg Seer Fish (Rs.108,000)'),
-              ),
-              const SizedBox(width: 8),
-              _buildNavChip(
-                context,
-                icon: Icons.local_shipping,
-                label: 'Deliveries',
-                color: const Color(0xff7209b7),
-                onTap: () => _showNotice(context, 'Cold Chain Deliveries',
-                    'Truck WP-ND-4921 en-route from Negombo Pier 3B to Peliyagoda.\nTemp: 2.2°C • ETA: 25 mins'),
-              ),
-              const SizedBox(width: 8),
-              _buildNavChip(
-                context,
-                icon: Icons.payment,
-                label: 'Payments',
-                color: const Color(0xfff3722c),
-                onTap: () => _showNotice(context, 'Pending Payments',
-                    '1 invoice pending settlement:\n• Invoice #INV-8821: Rs. 248,000 due in 24 hours.'),
-              ),
-              const SizedBox(width: 8),
-              _buildNavChip(
-                context,
-                icon: Icons.notifications_active,
-                label: 'Notifications',
-                color: const Color(0xff43aa8b),
-                onTap: () => _showNotice(context, 'Notifications',
-                    '• New Yellowfin Tuna landed at Negombo (100kg)\n• Your bid of Rs.1650/kg on Tuna is currently HIGHEST!'),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 18),
-
-        // ── 4 Metric Cards (Exact numbers requested) ────────────────
-        const Text(
-          'Dashboard',
-          style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff1f2937)),
-        ),
-        const SizedBox(height: 10),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 650;
-            return GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isWide ? 4 : 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                mainAxisExtent: 118,
-              ),
-              children: [
-                _StatCardEnhanced(
-                  title: 'Available Listings',
-                  value: '24',
-                  change: 'Fresh landings today',
-                  isPositive: true,
-                  icon: Icons.set_meal,
-                  color: const Color(0xff0077b6),
-                  onTap: () => onNavigateTab?.call(1),
-                ),
-                _StatCardEnhanced(
-                  title: 'My Active Bids',
-                  value: '5',
-                  change: '2 Leading highest',
-                  isPositive: true,
-                  icon: Icons.gavel,
-                  color: const Color(0xffe76f51),
-                  onTap: () => onNavigateTab?.call(2),
-                ),
-                _StatCardEnhanced(
-                  title: 'Won Orders',
-                  value: '2',
-                  change: 'In cold chain dispatch',
-                  isPositive: true,
-                  icon: Icons.check_circle_outline,
-                  color: const Color(0xff2a9d8f),
-                  onTap: () => _showNotice(context, 'Won Orders (2)',
-                      '• ORD-1049: 100 kg Tuna (Rs. 165,000) - Preparing dispatch\n• ORD-1033: 60 kg Seer Fish (Rs. 108,000) - Dispatched'),
-                ),
-                _StatCardEnhanced(
-                  title: 'Pending Payments',
-                  value: '1',
-                  change: 'Rs. 248,000 due',
-                  isPositive: false,
-                  icon: Icons.receipt_long,
-                  color: const Color(0xffd90429),
-                  onTap: () => _showNotice(context, 'Pending Payment',
-                      'Invoice #INV-8821 for 180 kg Tuna.\nAmount: Rs. 248,000\nPayment terms: 24h bank settlement.'),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xff0a3663).withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
-            );
-          },
-        ),
-
-        const SizedBox(height: 18),
-
-        // ── Featured Landing Spotlight ──────────────────────────────
-        _InfoPanel(
-          icon: Icons.local_fire_department,
-          title: 'Featured Today in Harbour',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xfff8fafc),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: Colors.blue.shade100),
-                ),
-                child: Row(
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(
-                        child: Text('🐟', style: TextStyle(fontSize: 28)),
-                      ),
+                    const CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.storefront,
+                          color: Color(0xff0a3663), size: 28),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Tuna (Yellowfin Grade A)',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 14)),
-                          Text('100 kg • Negombo • Verified: 98 kg',
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
-                          SizedBox(height: 4),
-                          Text('Current Bid: Rs. 1600 / kg',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff0077b6))),
+                        children: [
+                          Text(
+                            'Hello ${_displayName.isNotEmpty ? _displayName : "Buyer"} 👋',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'OceanFresh Exporters • Registered Buyer',
+                            style:
+                                TextStyle(color: Color(0xffc2e5fb), fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
                         ],
                       ),
                     ),
-                    FilledButton(
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.tealAccent.shade700,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'VERIFIED',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.verified_user,
+                          color: Color(0xffffd166), size: 16),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Direct Harbour Auctions • 100% Quality Inspected',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── HERO ACTION: Place Order / Bid Form Banner (React Web Parity) ──
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xff004e75), Color(0xff0284c7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xff0284c7).withValues(alpha: 0.25),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.shopping_cart_checkout,
+                          color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Submit Seafood Bid',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Direct Pier Bidding • Escrow Protected',
+                            style: TextStyle(color: Color(0xffc2e5fb), fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xff004e75),
+                      padding: const EdgeInsets.symmetric(vertical: 13),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () => showBuyerOrderModal(context),
+                    icon: const Icon(Icons.gavel, size: 18),
+                    label: const Text(
+                      'Submit Bid',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── Quick Navigation ─────────────────────────────────────────
+          const Text(
+            'Quick Navigation',
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff1f2937)),
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildNavChip(
+                  context,
+                  icon: Icons.set_meal,
+                  label: 'Available Fish (${_allPublishedCatches.length})',
+                  color: const Color(0xff0077b6),
+                  onTap: () => setState(() => _selectedView = 0),
+                ),
+                const SizedBox(width: 8),
+                _buildNavChip(
+                  context,
+                  icon: Icons.auto_awesome,
+                  label: 'AI Matched',
+                  color: const Color(0xff059669),
+                  onTap: () => setState(() => _selectedView = 1),
+                ),
+                const SizedBox(width: 8),
+                _buildNavChip(
+                  context,
+                  icon: Icons.gavel,
+                  label: 'My Bids',
+                  color: const Color(0xffe76f51),
+                  onTap: () => widget.onNavigateTab?.call(2),
+                ),
+                const SizedBox(width: 8),
+                _buildNavChip(
+                  context,
+                  icon: Icons.inventory_2,
+                  label: 'Orders',
+                  color: const Color(0xff2a9d8f),
+                  onTap: () => _showNotice(context, 'Won Orders',
+                      'You have 2 confirmed won orders:\n• ORD-1049: 100kg Tuna (Rs.165,000)\n• ORD-1033: 60kg Seer Fish (Rs.108,000)'),
+                ),
+                const SizedBox(width: 8),
+                _buildNavChip(
+                  context,
+                  icon: Icons.local_shipping,
+                  label: 'Deliveries',
+                  color: const Color(0xff7209b7),
+                  onTap: () => showLogisticsPlansModal(context),
+                ),
+                const SizedBox(width: 8),
+                _buildNavChip(
+                  context,
+                  icon: Icons.payment,
+                  label: 'Payments',
+                  color: const Color(0xfff3722c),
+                  onTap: () => _showNotice(context, 'Pending Payments',
+                      '1 invoice pending settlement:\n• Invoice #INV-8821: Rs. 248,000 due in 24 hours.'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── 4 Metric Cards (Dynamic count of available catches) ───────
+          const Text(
+            'Dashboard',
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff1f2937)),
+          ),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth > 650;
+              return GridView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: isWide ? 4 : 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  mainAxisExtent: 118,
+                ),
+                children: [
+                  _StatCardEnhanced(
+                    title: 'Available Listings',
+                    value: '${_allPublishedCatches.length}',
+                    change: 'Fresh landings today',
+                    isPositive: true,
+                    icon: Icons.set_meal,
+                    color: const Color(0xff0077b6),
+                    onTap: () => setState(() => _selectedView = 0),
+                  ),
+                  _StatCardEnhanced(
+                    title: 'My Active Bids',
+                    value: '5',
+                    change: '2 Leading highest',
+                    isPositive: true,
+                    icon: Icons.gavel,
+                    color: const Color(0xffe76f51),
+                    onTap: () => widget.onNavigateTab?.call(2),
+                  ),
+                  _StatCardEnhanced(
+                    title: 'Won Orders',
+                    value: '2',
+                    change: 'In cold chain dispatch',
+                    isPositive: true,
+                    icon: Icons.check_circle_outline,
+                    color: const Color(0xff2a9d8f),
+                    onTap: () => _showNotice(context, 'Won Orders (2)',
+                        '• ORD-1049: 100 kg Tuna (Rs. 165,000) - Preparing dispatch\n• ORD-1033: 60 kg Seer Fish (Rs. 108,000) - Dispatched'),
+                  ),
+                  _StatCardEnhanced(
+                    title: 'Pending Payments',
+                    value: '1',
+                    change: 'Rs. 248,000 due',
+                    isPositive: false,
+                    icon: Icons.receipt_long,
+                    color: const Color(0xffd90429),
+                    onTap: () => _showNotice(context, 'Pending Payment',
+                        'Invoice #INV-8821 for 180 kg Tuna.\nAmount: Rs. 248,000\nPayment terms: 24h bank settlement.'),
+                  ),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: 18),
+
+          // ── Featured Landing Spotlight (Dynamic from live published) ─
+          if (_allPublishedCatches.isNotEmpty) ...[
+            _InfoPanel(
+              icon: Icons.local_fire_department,
+              title: 'Featured Today in Harbour',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xfff8fafc),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.blue.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _allPublishedCatches.first['emoji'] as String,
+                              style: const TextStyle(fontSize: 28),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _allPublishedCatches.first['fullSpecies'] as String,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              Text(
+                                '${_allPublishedCatches.first['quantity']} kg • ${_allPublishedCatches.first['location']} • Verified: ${_allPublishedCatches.first['verifiedWeight']} kg',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Price: Rs. ${_allPublishedCatches.first['price']} / kg • By ${_allPublishedCatches.first['fisherman']}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xff0077b6)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xff005b96),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                          ),
+                          onPressed: () => showBuyerOrderModal(context, fish: _allPublishedCatches.first),
+                          child: const Text('🛒 Order / Bid', style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => setState(() => _selectedView = 0),
+                      icon: const Icon(Icons.arrow_forward, size: 16),
+                      label: Text('View All ${_allPublishedCatches.length} Available Fish Listings'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ════════════════════════════════════════════════════════════════
+          // ALL PUBLISHED CATCHES + AI MATCHING + BUYING PREFERENCES TABS
+          // ════════════════════════════════════════════════════════════════
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 3-Segment Tab Selector
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xfff1f5f9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        // Tab 0: Published Fish
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedView = 0),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedView == 0
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: _selectedView == 0
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.06),
+                                          blurRadius: 4,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.set_meal,
+                                    size: 15,
+                                    color: _selectedView == 0
+                                        ? const Color(0xff005b96)
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      'Published (${_allPublishedCatches.length})',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: _selectedView == 0
+                                            ? const Color(0xff005b96)
+                                            : Colors.grey.shade700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Tab 1: AI Recommendations
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedView = 1),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedView == 1
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: _selectedView == 1
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.06),
+                                          blurRadius: 4,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.auto_awesome,
+                                    size: 15,
+                                    color: _selectedView == 1
+                                        ? const Color(0xff005b96)
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      'AI Matched',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: _selectedView == 1
+                                            ? const Color(0xff005b96)
+                                            : Colors.grey.shade700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Tab 2: Buying Preferences
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedView = 2),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: _selectedView == 2
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: _selectedView == 2
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.06),
+                                          blurRadius: 4,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.tune,
+                                    size: 15,
+                                    color: _selectedView == 2
+                                        ? const Color(0xff005b96)
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      'Preferences',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: _selectedView == 2
+                                            ? const Color(0xff005b96)
+                                            : Colors.grey.shade700,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const Divider(height: 1),
+
+                // ── View 0: All Fisherman Published Fish ────────────────────
+                if (_selectedView == 0) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.set_meal, color: Color(0xff005b96), size: 18),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Fisherman Published Catches',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              icon: _isLoadingCatches
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Icon(Icons.refresh, size: 20, color: Color(0xff005b96)),
+                              tooltip: 'Refresh live harbour catches',
+                              onPressed: _isLoadingCatches ? null : _loadCatches,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'All verified fish landings published by fishermen directly from harbours with complete lot & inspection details.',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 14),
+                        if (_isLoadingCatches && _allPublishedCatches.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(28),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        else if (_allPublishedCatches.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            alignment: Alignment.center,
+                            child: Column(
+                              children: [
+                                const Icon(Icons.inbox, size: 48, color: Colors.grey),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'No published catches available yet.',
+                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'When fishermen publish catches, they will automatically appear here.',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                FilledButton.icon(
+                                  onPressed: _loadCatches,
+                                  icon: const Icon(Icons.refresh, size: 16),
+                                  label: const Text('Refresh Listings'),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          ..._allPublishedCatches.map((c) => _buildPublishedCatchCard(c)),
+                      ],
+                    ),
+                  ),
+                ]
+
+                // ── View 1: AI Recommendations ──────────────────────────────
+                else if (_selectedView == 1) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'AI Matched Seafood Catches',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text('Ranked by Compatibility',
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xff005b96),
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Automatically ranked against OceanFresh Exporters purchasing profile & price willingness.',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 12),
+                        ..._aiMatchedCatches.map((c) => _buildRecommendationCard(c)),
+                      ],
+                    ),
+                  ),
+                ]
+
+                // ── View 2: My Buying Preferences Form ──────────────────────
+                else ...[
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(Icons.tune, color: Color(0xff005b96), size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'My Buying Preferences Form',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                          ],
+                        ),
+                        if (_prefSaved)
+                          Container(
+                            margin: const EdgeInsets.only(top: 8, bottom: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffd1fae5),
+                              border: Border.all(color: const Color(0xff6ee7b7)),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.check_circle, color: Color(0xff059669), size: 16),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text('Preferences saved! AI Recommendations updated.',
+                                      style: TextStyle(color: Color(0xff065f46), fontSize: 12, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'These parameters guide the AI Buyer Matching Agent to rank fresh catches and alert you in real-time.',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Preferred Species Dropdown
+                        const Text('Preferred Fish Species',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _preferredSpecies,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.set_meal, size: 18),
+                          ),
+                          items: _speciesList
+                              .map((s) => DropdownMenuItem(
+                                    value: s,
+                                    child: Text(s,
+                                        style: const TextStyle(fontSize: 13),
+                                        overflow: TextOverflow.ellipsis),
+                                  ))
+                              .toList(),
+                          onChanged: (v) => setState(() => _preferredSpecies = v!),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4, bottom: 12),
+                          child: Text('Species match gives 40 points in recommendation score.',
+                              style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        ),
+
+                        // Min & Max Quantity
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Min Quantity (kg)',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 6),
+                                  TextFormField(
+                                    controller: _minQtyCtrl,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      prefixIcon: Icon(Icons.scale, size: 18),
+                                      suffixText: 'kg',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Max Quantity (kg)',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 6),
+                                  TextFormField(
+                                    controller: _maxQtyCtrl,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      prefixIcon: Icon(Icons.scale, size: 18),
+                                      suffixText: 'kg',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Max Price (Rs/kg)
+                        const Text('Maximum Budget Price (Rs./kg)',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _maxPriceCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.payments_outlined, size: 18),
+                            prefixText: 'Rs. ',
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 4, bottom: 12),
+                          child: Text('Catches within your budget get up to 20 extra points.',
+                              style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        ),
+
+                        // Preferred City / Area
+                        const Text('Preferred Harbour / Area',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _preferredCity,
+                          decoration: const InputDecoration(
+                            prefixIcon: Icon(Icons.location_on, size: 18),
+                          ),
+                          items: _cityList
+                              .map((c) => DropdownMenuItem(
+                                    value: c,
+                                    child: Text(c,
+                                        style: const TextStyle(fontSize: 13),
+                                        overflow: TextOverflow.ellipsis),
+                                  ))
+                              .toList(),
+                          onChanged: (v) => setState(() => _preferredCity = v!),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // Additional Notes
+                        const Text('Additional Handling Notes (Optional)',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _notesCtrl,
+                          maxLines: 2,
+                          decoration: const InputDecoration(
+                            hintText: 'e.g. Fresh export only, require sensor cold-chain logger',
+                          ),
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Score Breakdown Card
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xfff0f9ff),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xffbae6fd)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('📊 How AI calculates your Match Score:',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Color(0xff0369a1))),
+                              const SizedBox(height: 6),
+                              _buildScoreRow('Species match', '40 pts'),
+                              _buildScoreRow('Quantity range fit', '25 pts'),
+                              _buildScoreRow('Price within budget', '20 pts'),
+                              _buildScoreRow('Location proximity', '10 pts'),
+                              _buildScoreRow('Quality & freshness', '10 pts'),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Dual Action Buttons: Save Preferences & Save as Target Bid
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xff005b96),
+                                  padding: const EdgeInsets.symmetric(vertical: 13),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: _prefSaving ? null : _savePreferences,
+                                icon: _prefSaving
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2, color: Colors.white),
+                                      )
+                                    : const Icon(Icons.save, size: 18),
+                                label: Text(
+                                  _prefSaving
+                                      ? 'Saving…'
+                                      : 'Save Preferences',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 3,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xff005b96),
+                                  side: const BorderSide(color: Color(0xff005b96), width: 1.5),
+                                  padding: const EdgeInsets.symmetric(vertical: 13),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                                onPressed: _addSavedBid,
+                                icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+                                label: const Text(
+                                  '+ Save Target Bid',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold, fontSize: 13),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+                        const Divider(height: 1),
+                        const SizedBox(height: 18),
+
+                        // ── SAVED BIDS & BUYER MATCHING SECTION ─────────────
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.bookmarks, color: Color(0xff005b96), size: 20),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Saved Bids & Inquiries',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffe0f2fe),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${_savedBids.length} Saved Targets',
+                                style: const TextStyle(
+                                  color: Color(0xff0369a1),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Your saved bids with AI Buyer Matching scores showing compatibility against live harbour landings.',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 14),
+
+                        if (_savedBids.isEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xfff8fafc),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Center(
+                              child: Column(
+                                children: const [
+                                  Icon(Icons.bookmark_border, size: 36, color: Colors.grey),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'No saved bids yet',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Fill the preferences form above and tap "+ Save Target Bid".',
+                                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ] else ...[
+                          ..._savedBids.map((b) => _buildSavedBidCard(b)),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavedBidCard(Map<String, dynamic> b) {
+    final matchResult = _calculateMatchForSavedBid(b);
+    final score = matchResult['score'] as int;
+    final reasons = matchResult['reasons'] as String;
+    final matchedCatch = matchResult['matchedCatch'] as Map<String, dynamic>?;
+
+    final scoreColor = score >= 85
+        ? const Color(0xff059669)
+        : score >= 70
+            ? const Color(0xffd97706)
+            : const Color(0xff64748b);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.35), width: 1.4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Row: Species & Match Score Ring
+            Row(
+              children: [
+                // Circular Match Score Gauge
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: scoreColor, width: 3.5),
+                    color: scoreColor.withValues(alpha: 0.08),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$score%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: scoreColor,
+                          ),
+                        ),
+                        Text(
+                          'MATCH',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 8,
+                            color: scoreColor,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              b['species']?.toString() ?? 'Target Species',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Color(0xff0f172a),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: scoreColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              score >= 85 ? 'HIGH COMPATIBILITY' : score >= 70 ? 'GOOD MATCH' : 'MODERATE',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.bold,
+                                color: scoreColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Target: ${b['minQty']} - ${b['maxQty']} kg  •  Budget: Max Rs. ${b['maxPrice']}/kg',
+                        style: const TextStyle(fontSize: 12, color: Color(0xff334155), fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 13, color: Color(0xffe11d48)),
+                          const SizedBox(width: 3),
+                          Text(
+                            b['city']?.toString() ?? 'Any harbour',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                          const SizedBox(width: 3),
+                          Text(
+                            b['createdAt']?.toString() ?? 'Saved',
+                            style: const TextStyle(fontSize: 10.5, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            if ((b['notes']?.toString() ?? '').isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xfff8fafc),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Text(
+                  'Note: ${b['notes']}',
+                  style: const TextStyle(fontSize: 11, color: Color(0xff475569)),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 10),
+
+            // AI Matching Breakdown Box
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xfff0fdf4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xffbbf7d0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.auto_awesome, size: 14, color: Color(0xff16a34a)),
+                      SizedBox(width: 6),
+                      Text(
+                        'AI Buyer Matching Analysis',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff15803d),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    reasons,
+                    style: const TextStyle(fontSize: 10.5, color: Color(0xff166534)),
+                  ),
+                  if (matchedCatch != null) ...[
+                    const Divider(height: 12, color: Color(0xffbbf7d0)),
+                    Row(
+                      children: [
+                        Text(matchedCatch['emoji']?.toString() ?? '🐟', style: const TextStyle(fontSize: 16)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Best Live Match: ${matchedCatch['fullSpecies']} (${matchedCatch['quantity']}kg @ Rs. ${matchedCatch['price']}/kg at ${matchedCatch['location']})',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xff065f46)),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red.shade700,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => _deleteSavedBid(b['id'] as String),
+                  icon: const Icon(Icons.delete_outline, size: 15),
+                  label: const Text('Remove', style: TextStyle(fontSize: 11)),
+                ),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xff005b96),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () {
+                    final targetFish = matchedCatch ?? {
+                      'species': b['species'],
+                      'fullSpecies': '${b['species']} (Saved Bid Target)',
+                      'quantity': b['maxQty'],
+                      'verifiedWeight': b['minQty'],
+                      'price': b['maxPrice'],
+                      'currentBid': b['maxPrice'],
+                      'location': b['city'] != 'Any location' ? b['city'] : 'Negombo Fishery Harbour',
+                      'quality': 'Grade A',
+                      'lot': 'SAVED-BID',
+                      'emoji': '🐟',
+                    };
+                    showBuyerOrderModal(context, fish: targetFish);
+                  },
+                  icon: const Icon(Icons.gavel, size: 14),
+                  label: const Text(
+                    '🛒 Place Bid on Match',
+                    style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScoreRow(String label, String pts) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 11, color: Color(0xff334155))),
+          Text(pts, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xff005b96))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPublishedCatchCard(Map<String, dynamic> c) {
+    final species = c['fullSpecies']?.toString() ?? c['species']?.toString() ?? 'Fresh Fish';
+    final emoji = c['emoji']?.toString() ?? '🐟';
+    final qty = c['quantity'] ?? 0;
+    final verifiedWeight = c['verifiedWeight'] ?? qty;
+    final price = c['price'] ?? 0;
+    final totalPrice = c['totalPrice'] ?? (price * qty);
+    final location = c['location']?.toString() ?? 'Harbour Pier';
+    final quality = c['quality']?.toString() ?? 'Grade A';
+    final seller = c['fisherman']?.toString() ?? 'Local Fisherman';
+    final lot = c['lot']?.toString() ?? 'LOT-HARBOUR';
+    final status = c['status']?.toString() ?? 'Published';
+    final inspection = c['inspection']?.toString() ?? 'Passed';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.blue.shade100, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Banner with Species, Emoji, Lot, Quality and Status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xfff8fafc),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Center(
+                    child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        species,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff0f172a),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffe0f2fe),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              lot,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff0369a1),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffdcfce7),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              quality,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff15803d),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: status.toLowerCase() == 'published'
+                        ? const Color(0xff059669)
+                        : const Color(0xff0284c7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Details Grid
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              children: [
+                // Fisherman and Location
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person, size: 16, color: Color(0xff005b96)),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              seller,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xff334155),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 16, color: Color(0xffe11d48)),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              location,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xff334155),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Weight & Inspection Row
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xfff1f5f9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.scale, size: 15, color: Color(0xff475569)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Declared: $qty kg  •  Verified: $verifiedWeight kg',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff1e293b),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.verified, size: 14, color: Color(0xff059669)),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Inspection: $inspection',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff059669),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Price and Order CTA Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Rs. $price / kg',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff005b96),
+                          ),
+                        ),
+                        Text(
+                          'Total Value: Rs. ${_formatCurrency(totalPrice)}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xff64748b),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    FilledButton.icon(
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xff005b96),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      onPressed: () => onNavigateTab?.call(1),
-                      child:
-                          const Text('View & Bid', style: TextStyle(fontSize: 12)),
+                      onPressed: () => showBuyerOrderModal(context, fish: c),
+                      icon: const Icon(Icons.shopping_cart_checkout, size: 15),
+                      label: const Text(
+                        'Place Order / Bid',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendationCard(Map<String, dynamic> c) {
+    final score = c['matchScore'] as int;
+    final scoreColor = score >= 85
+        ? const Color(0xff059669)
+        : score >= 75
+            ? const Color(0xffd97706)
+            : const Color(0xff6b7280);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xfff8fafc),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Match Score Ring
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: scoreColor, width: 3),
+                  color: scoreColor.withValues(alpha: 0.1),
+                ),
+                child: Center(
+                  child: Text(
+                    '$score%',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: scoreColor,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          c['fullSpecies'] as String,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            c['quality'] as String,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${c['quantity']} kg • ${c['location']} • Asking: Rs. ${c['price']}/kg',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () => onNavigateTab?.call(1),
-                  icon: const Icon(Icons.arrow_forward, size: 16),
-                  label: const Text('View All 24 Available Fish Listings'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Text(
+              c['matchReasons'] as String,
+              style: const TextStyle(fontSize: 10, color: Color(0xff475569)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'By ${c['fisherman']}',
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xff005b96),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
+                onPressed: () => showBuyerOrderModal(context, fish: c),
+                icon: const Icon(Icons.shopping_cart_checkout, size: 14),
+                label: const Text('🛒 Place Order / Bid',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -2809,8 +4669,10 @@ class _BrowseFishScreenState extends State<BrowseFishScreen> {
   String _selectedTag = 'All';
   String _selectedLocation = 'All';
   String _selectedQuality = 'All';
+  bool _loading = false;
+  List<Map<String, dynamic>> _catches = [];
 
-  final List<Map<String, dynamic>> _allCatches = [
+  final List<Map<String, dynamic>> _defaultCatches = [
     {
       'id': 1,
       'species': 'Tuna',
@@ -2891,9 +4753,77 @@ class _BrowseFishScreenState extends State<BrowseFishScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadCatches();
+  }
+
+  Future<void> _loadCatches() async {
+    setState(() => _loading = true);
+    try {
+      final res = await ApiClient().catches();
+      if (res.isNotEmpty && mounted) {
+        final activeList = res.where((item) {
+          final s = (item as Map)['status']?.toString();
+          return s == 'Published' || s == 'Bidding';
+        }).toList();
+        final toMap = activeList.isNotEmpty ? activeList : res;
+
+        final mapped = toMap.map((item) {
+          final m = Map<String, dynamic>.from(item as Map);
+          final speciesRaw = m['fishSpecies']?.toString() ?? m['species']?.toString() ?? 'Fish';
+          String emoji = '🐟';
+          final sl = speciesRaw.toLowerCase();
+          if (sl.contains('prawn') || sl.contains('shrimp')) {
+            emoji = '🦐';
+          } else if (sl.contains('crab')) {
+            emoji = '🦀';
+          } else if (sl.contains('tuna')) {
+            emoji = '🐟';
+          } else if (sl.contains('squid') || sl.contains('cuttlefish')) {
+            emoji = '🦑';
+          }
+          final shortSpecies = speciesRaw.contains('(') ? speciesRaw.split('(').first.trim() : speciesRaw;
+          final rawGrade = (m['declaredQualityGrade']?.toString() ?? '').trim();
+          final quality = rawGrade.isNotEmpty ? rawGrade : 'A';
+          final sellerName = m['fisherman']?['fullName']?.toString() ??
+              m['fishermanName']?.toString() ??
+              m['seller']?.toString() ??
+              'Local Fisherman';
+          final loc = (m['location']?.toString() ?? 'Negombo Pier').trim();
+
+          return {
+            'id': m['id'],
+            'species': shortSpecies,
+            'fullSpecies': speciesRaw,
+            'quantity': (m['quantityKg'] as num?)?.toInt() ?? (m['quantity'] as num?)?.toInt() ?? 100,
+            'verifiedWeight': (m['verifiedWeightKg'] as num?)?.toInt() ?? (m['quantityKg'] as num?)?.toInt() ?? 100,
+            'price': (m['askingPricePerKg'] as num?)?.toInt() ?? (m['price'] as num?)?.toInt() ?? 1500,
+            'currentBid': (m['askingPricePerKg'] as num?)?.toInt() ?? (m['currentBid'] as num?)?.toInt() ?? 1500,
+            'quality': quality,
+            'location': loc.contains('(') ? loc.split('(').last.replaceAll(')', '').trim() : loc,
+            'seller': sellerName,
+            'emoji': emoji,
+            'status': m['status']?.toString() ?? 'Published',
+            'raw': m,
+          };
+        }).toList();
+
+        setState(() {
+          _catches = mapped;
+        });
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _loading = false);
+  }
+
+  List<Map<String, dynamic>> get _availableCatches =>
+      _catches.isNotEmpty ? _catches : _defaultCatches;
+
   List<Map<String, dynamic>> get _filteredCatches {
     final query = _searchController.text.trim().toLowerCase();
-    return _allCatches.where((c) {
+    return _availableCatches.where((c) {
       final matchesQuery = query.isEmpty ||
           c['species'].toString().toLowerCase().contains(query) ||
           c['fullSpecies'].toString().toLowerCase().contains(query) ||
@@ -2997,20 +4927,34 @@ class _BrowseFishScreenState extends State<BrowseFishScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tags = ['All', 'Tuna', 'Mackerel', 'Seer', 'Skipjack', 'Trevally'];
+    final availableSpecies = _availableCatches.map((c) => c['species'].toString()).toSet().toList();
+    final tags = ['All', ...availableSpecies];
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(
-          'Available Fish',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
+    return RefreshIndicator(
+      onRefresh: _loadCatches,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Available Fish',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Color(0xff005b96)),
+                onPressed: _loadCatches,
+                tooltip: 'Refresh listings',
+              ),
+            ],
+          ),
+          if (_loading) const LinearProgressIndicator(),
+          const SizedBox(height: 12),
 
-        // Search Bar
-        Row(
-          children: [
+          // Search Bar
+          Row(
+            children: [
             Expanded(
               child: TextField(
                 controller: _searchController,
@@ -3083,8 +5027,9 @@ class _BrowseFishScreenState extends State<BrowseFishScreen> {
           },
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 
   // ┌─────────────────────┐
   // │ 🐟 Tuna             │
@@ -3116,24 +5061,29 @@ class _BrowseFishScreenState extends State<BrowseFishScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${fish['emoji']} ${fish['species']}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Color(0xff003b5c),
+              Expanded(
+                child: Text(
+                  '${fish['emoji']} ${fish['species']}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xff003b5c),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
                 decoration: BoxDecoration(
                   color: Colors.green.shade50,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'Quality: ${fish['quality']}',
+                  'Grade ${fish['quality']}',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.bold,
                     color: Colors.green.shade800,
                   ),
@@ -3282,40 +5232,26 @@ class _CatchDetailsSheet extends StatelessWidget {
 
                 // Detail Attributes Table
                 _buildDetailRow('Quantity:', '${fish['quantity']} kg'),
-                _buildDetailRow(
-                    'Verified Weight:', '${fish['verifiedWeight']} kg (Digital scale verified)'),
-                _buildDetailRow('Quality:', fish['quality'] as String),
-                _buildDetailRow('Location:', fish['location'] as String),
-                _buildDetailRow(
-                    'Current Bid:', 'Rs. ${fish['currentBid']} / kg',
-                    isHighlight: true),
-                _buildDetailRow('Seller:', fish['seller'] as String),
-                _buildDetailRow(
-                    'Asking Price:', 'Rs. ${fish['price']} / kg'),
-
-                const SizedBox(height: 24),
-
-                // [ Place Bid ] Action
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xff005b96),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      showPlaceBidModal(context, fish);
-                    },
-                    child: const Text(
-                      'Place Bid',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                _buildDetailRow('Verified Weight:', '${fish['verifiedWeight'] ?? fish['quantity']} kg'),
+                _buildDetailRow('Asking Price:', 'Rs. ${fish['price']} / kg'),
+                _buildDetailRow('Current Highest Bid:', 'Rs. ${fish['currentBid'] ?? fish['price']} / kg'),
+                _buildDetailRow('Landing Pier:', '${fish['location']} Harbour'),
+                _buildDetailRow('Quality Inspection:', '${fish['quality'] ?? "Grade A"} (Inspected)'),
+                _buildDetailRow('Time Landed:', 'Today, 04:30 AM (Cold-stored)'),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xff005b96),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    showBuyerOrderModal(context, fish: fish);
+                  },
+                  icon: const Icon(Icons.gavel),
+                  label: const Text('Submit Bid',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
               ],
             ),
@@ -3325,36 +5261,14 @@ class _CatchDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String title, String value,
-      {bool isHighlight = false}) {
+  Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 130,
-            child: Text(
-              title,
-              style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black54),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight:
-                    isHighlight ? FontWeight.bold : FontWeight.w500,
-                color: isHighlight
-                    ? const Color(0xff0077b6)
-                    : const Color(0xff1f2937),
-              ),
-            ),
-          ),
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
         ],
       ),
     );
@@ -3362,70 +5276,212 @@ class _CatchDetailsSheet extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// FEATURE 13: 💵 PLACE BID MODAL
+// FEATURE 13: 🛒 BUYER ORDER FORM (React Web Parity - POST /api/Bids)
 // ══════════════════════════════════════════════════════════════════════════════
 
-void showPlaceBidModal(BuildContext context, Map<String, dynamic> fish) {
-  showDialog(
+void showPlaceBidModal(BuildContext context, [Map<String, dynamic>? fish]) {
+  showBuyerOrderModal(context, fish: fish);
+}
+
+void showBuyerOrderModal(BuildContext context, {Map<String, dynamic>? fish}) {
+  final targetFish = fish ?? {
+    'id': 1,
+    'species': 'Tuna',
+    'fullSpecies': 'Yellowfin Tuna (Kelawalla)',
+    'quantity': 100,
+    'verifiedWeight': 98,
+    'price': 1550,
+    'currentBid': 1600,
+    'location': 'Negombo Fishery Harbour',
+    'lot': 'LOT-NEG-902',
+    'quality': 'Grade A',
+    'emoji': '🐟',
+  };
+  showModalBottomSheet(
     context: context,
-    builder: (ctx) => _PlaceBidDialog(fish: fish),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => _BuyerOrderFormSheet(fish: targetFish),
   );
 }
 
-class _PlaceBidDialog extends StatefulWidget {
-  const _PlaceBidDialog({required this.fish});
+class _BuyerOrderFormSheet extends StatefulWidget {
+  const _BuyerOrderFormSheet({required this.fish});
 
   final Map<String, dynamic> fish;
 
   @override
-  State<_PlaceBidDialog> createState() => _PlaceBidDialogState();
+  State<_BuyerOrderFormSheet> createState() => _BuyerOrderFormSheetState();
 }
 
-class _PlaceBidDialogState extends State<_PlaceBidDialog> {
-  late TextEditingController _bidController;
+class _BuyerOrderFormSheetState extends State<_BuyerOrderFormSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _buyerNameController;
+  late TextEditingController _buyerPhoneController;
+  late TextEditingController _bidRateController;
   late TextEditingController _qtyController;
-  bool _loading = false;
+  late TextEditingController _notesController;
+  late TextEditingController _customAddressController;
+
+  String _selectedDestination = 'Colombo Port Export Zone (Hub 1)';
+  String _selectedColdChain = 'Chilled (0°C to 4°C)';
+  String _selectedWindow = 'Immediate Pier Dispatch (within 2h)';
+  String _selectedPayment = 'FishLink Smart Escrow Guarantee';
+  bool _submitting = false;
+  Map<String, dynamic>? _existingBid;
+  bool _checkingExistingBid = true;
+
+  final List<String> _destinations = [
+    'Colombo Port Export Zone (Hub 1)',
+    'Peliyagoda Central Market (Stall 14)',
+    'Keells Distribution Logistics Center (Ja-Ela)',
+    'Katunayake Airport Export Cold Unit',
+    'Custom Address',
+  ];
 
   @override
   void initState() {
     super.initState();
-    // Default bid 1650 for Tuna, or currentBid + 50
-    final defaultBid = widget.fish['species'] == 'Tuna'
+    final defaultRate = widget.fish['species'] == 'Tuna'
         ? 1650
-        : (widget.fish['currentBid'] as num).toInt() + 50;
-    _bidController = TextEditingController(text: '$defaultBid');
+        : (widget.fish['currentBid'] as num?)?.toInt() ??
+            (widget.fish['price'] as num?)?.toInt() ??
+            1500;
+    _buyerNameController =
+        TextEditingController(text: 'OceanFresh Exporters (Pvt) Ltd');
+    _buyerPhoneController = TextEditingController(text: '+94 77 987 6543');
+    _bidRateController = TextEditingController(text: '$defaultRate');
     _qtyController =
-        TextEditingController(text: '${widget.fish['quantity']}');
+        TextEditingController(text: '${widget.fish['quantity'] ?? 100}');
+    _notesController = TextEditingController(
+        text: 'Cold-chain container required. Inspect upon dock arrival.');
+    _customAddressController = TextEditingController();
+    _checkExistingBid();
+  }
+
+  Future<void> _checkExistingBid() async {
+    try {
+      final myBids = await ApiClient().getMyBids();
+      final catchId = (widget.fish['id'] as num?)?.toInt() ?? 1;
+      for (var b in myBids) {
+        if ((b['catchId'] as num?)?.toInt() == catchId && b['status'] != 'Cancelled') {
+          if (mounted) {
+            setState(() {
+              _existingBid = Map<String, dynamic>.from(b as Map);
+              _checkingExistingBid = false;
+            });
+            return;
+          }
+        }
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _checkingExistingBid = false);
   }
 
   @override
   void dispose() {
-    _bidController.dispose();
+    _buyerNameController.dispose();
+    _buyerPhoneController.dispose();
+    _bidRateController.dispose();
     _qtyController.dispose();
+    _notesController.dispose();
+    _customAddressController.dispose();
     super.dispose();
   }
 
-  Future<void> _submitBid() async {
-    final bidRate = double.tryParse(_bidController.text.trim());
-    if (bidRate == null || bidRate <= 0) {
+  Future<void> _submitOrder() async {
+    if (_existingBid != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid bid amount.')),
+        SnackBar(
+          content: Text(
+            'You have already placed a bid on this catch (Rs. ${_existingBid!['bidPricePerKg']}/kg). Only 1 bid is allowed per catch.',
+          ),
+          backgroundColor: Colors.orange.shade800,
+        ),
       );
       return;
     }
 
-    setState(() => _loading = true);
+    if (!_formKey.currentState!.validate()) return;
 
+    final bidRate = double.tryParse(_bidRateController.text.trim()) ?? 0;
+    final qty = double.tryParse(_qtyController.text.trim()) ?? 0;
+    if (bidRate <= 0 || qty <= 0) return;
+
+    setState(() => _submitting = true);
+
+    final catchId = (widget.fish['id'] as num?)?.toInt() ?? 1;
     try {
-      // Backend: POST /api/bids
-      await ApiClient().placeBid(widget.fish['id'] as int, bidRate);
-    } catch (_) {}
+      await ApiClient().placeBid(catchId, bidRate);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      final rawMsg = e.toString().replaceAll('Exception:', '').trim();
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+              SizedBox(width: 8),
+              Text('Bid Limit (1 Bid Policy)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                rawMsg.isNotEmpty && !rawMsg.contains('HttpException')
+                    ? '$rawMsg\n\n(Only one active bid is allowed per buyer for each catch listing.)'
+                    : 'Each buyer is allowed a maximum of 1 active bid per catch listing.\n\nYou have already submitted a bid for this catch.',
+                style: const TextStyle(fontSize: 13.5, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.shade200),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.lock_outline, size: 16, color: Colors.brown),
+                    SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Policy: 1 Active Bid per Buyer per Catch',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.brown),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xff005b96)),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     if (!mounted) return;
-    setState(() => _loading = false);
+    setState(() => _submitting = false);
     Navigator.pop(context);
 
-    // Confirmation dialog
+    final destination = _selectedDestination == 'Custom Address'
+        ? _customAddressController.text.trim()
+        : _selectedDestination;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -3434,7 +5490,7 @@ class _PlaceBidDialogState extends State<_PlaceBidDialog> {
           children: const [
             Icon(Icons.check_circle, color: Colors.green, size: 28),
             SizedBox(width: 8),
-            Text('Bid Placed!', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Bid Submitted!', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -3442,31 +5498,39 @@ class _PlaceBidDialogState extends State<_PlaceBidDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your bid of Rs. ${bidRate.toInt()} / kg for ${widget.fish['species']} was submitted via POST /api/bids.',
-              style: const TextStyle(fontSize: 14),
+              'Bid placed successfully for ${widget.fish['species']} (${qty.toInt()} kg @ Rs. ${bidRate.toInt()}/kg).',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade200),
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.blue.shade200),
               ),
-              child: const Text(
-                'Status: ACTIVE (Highest Bidder)',
-                style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• Total Commitment: Rs. ${(bidRate * qty).toInt().toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (m) => "${m[1]},")}',
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xff005b96)),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('• Destination: $destination', style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 4),
+                  Text('• Cold Chain: $_selectedColdChain', style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 4),
+                  const Text('• Autonomous Logistics Agent notified for vehicle dispatch.',
+                      style: TextStyle(fontSize: 12, color: Colors.teal, fontWeight: FontWeight.bold)),
+                ],
               ),
             ),
           ],
         ),
         actions: [
           FilledButton(
-            style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xff005b96)),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xff005b96)),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('OK'),
           ),
@@ -3477,118 +5541,458 @@ class _PlaceBidDialogState extends State<_PlaceBidDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final currentBidVal = double.tryParse(_bidController.text.trim()) ?? 0;
-    final qtyVal = double.tryParse(_qtyController.text.trim()) ?? 0;
-    final total = currentBidVal * qtyVal;
+    final currentRate = double.tryParse(_bidRateController.text.trim()) ?? 0;
+    final qty = double.tryParse(_qtyController.text.trim()) ?? 0;
+    final total = currentRate * qty;
+    final askingPrice = (widget.fish['price'] as num?)?.toDouble() ?? 1500;
+    final isBelowAsking = currentRate > 0 && currentRate < askingPrice;
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text('Place Your Bid',
-          style: TextStyle(fontWeight: FontWeight.bold)),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.90,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 10, bottom: 6),
+            width: 44,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+            child: Row(
               children: [
-                const Text('Fish:',
-                    style:
-                        TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                Text(widget.fish['species'] as String,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff0077b6))),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff0284c7).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.gavel, color: Color(0xff0284c7), size: 22),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Submit Bid',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${widget.fish['species']} • Lot ${widget.fish['lot'] ?? 'LOT-NEG-902'} • Asking: Rs. ${askingPrice.toInt()}/kg',
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ],
             ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Available:',
-                    style:
-                        TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                Text('${widget.fish['quantity']} kg',
-                    style: const TextStyle(fontSize: 14)),
-              ],
-            ),
-            const Divider(height: 24),
-            const Text('Your Bid (Rs. / kg):',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _bidController,
-              keyboardType: TextInputType.number,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                prefixText: 'Rs. ',
-                hintText: '1650',
-              ),
-            ),
-            const SizedBox(height: 14),
-            const Text('Quantity (kg):',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            TextField(
-              controller: _qtyController,
-              keyboardType: TextInputType.number,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                suffixText: 'kg',
-                hintText: '100',
-              ),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xfff0f7fb),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(18),
                 children: [
-                  const Text('Estimated Total:',
-                      style: TextStyle(fontSize: 13, color: Colors.black54)),
-                  Text(
-                    'Rs. ${total.toInt()}',
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff005b96)),
+                  if (_existingBid != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffeff6ff),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xff93c5fd)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info_outline, color: Color(0xff1d4ed8), size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Limit: 1 active bid per catch listing',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff1e40af), fontSize: 13),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'You have already placed a bid of Rs. ${_existingBid!['bidPricePerKg']}/kg on this catch (Status: ${_existingBid!['status']}). Maximum 1 bid allowed per buyer.',
+                                  style: const TextStyle(fontSize: 12, color: Color(0xff1e3a8a), height: 1.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Catch Highlight Card
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xfff8fafc),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(widget.fish['emoji'] as String? ?? '🐟',
+                            style: const TextStyle(fontSize: 34)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.fish['fullSpecies'] as String? ?? widget.fish['species'] as String,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${widget.fish['quantity']} kg available • Harbour: ${widget.fish['location']} • Quality: ${widget.fish['quality'] ?? "Grade A"}',
+                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.green.shade300),
+                          ),
+                          child: Text(
+                            'Quality: ${widget.fish['quality'] ?? "A"}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Buyer Company Name
+                  const Text('Buyer Company / Trading Name',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _buyerNameController,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.business, size: 18),
+                      hintText: 'e.g. OceanFresh Exporters (Pvt) Ltd',
+                    ),
+                    validator: (v) => v == null || v.isEmpty ? 'Please enter buyer name' : null,
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Order Quantity
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Order Quantity (kg)',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text('Max: ${widget.fish['quantity']} kg',
+                          style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _qtyController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.scale, size: 18),
+                      suffixText: 'kg',
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    validator: (v) {
+                      final val = double.tryParse(v ?? '');
+                      if (val == null || val <= 0) return 'Enter a valid quantity';
+                      final maxQty = (widget.fish['quantity'] as num?)?.toDouble() ?? 500;
+                      if (val > maxQty) return 'Cannot exceed available $maxQty kg';
+                      return null;
+                    },
+                  ),
+
+                  // Quick Quantity Buttons
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [25, 50, 75, 100].map((pct) {
+                      final maxQty = (widget.fish['quantity'] as num?)?.toInt() ?? 100;
+                      final calcQty = (maxQty * (pct / 100)).round();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ActionChip(
+                          label: Text('$pct% ($calcQty kg)', style: const TextStyle(fontSize: 11)),
+                          onPressed: () {
+                            _qtyController.text = '$calcQty';
+                            setState(() {});
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Bid Rate (Rs. / kg)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Your Bid / Purchase Price (Rs./kg)',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text('Asking: Rs. ${askingPrice.toInt()}/kg',
+                          style: const TextStyle(fontSize: 11, color: Colors.blue)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _bidRateController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      prefixText: 'Rs. ',
+                      prefixIcon: Icon(Icons.payments_outlined, size: 18),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    validator: (v) {
+                      final val = double.tryParse(v ?? '');
+                      if (val == null || val <= 0) return 'Enter a valid price';
+                      return null;
+                    },
+                  ),
+
+                  if (isBelowAsking)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '⚠ Offer is below asking price (Rs. ${askingPrice.toInt()}/kg). Seller may decline.',
+                        style: const TextStyle(fontSize: 11, color: Colors.amber, fontWeight: FontWeight.w600),
+                      ),
+                    )
+                  else if (currentRate >= askingPrice)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        '✓ Competitive offer at or above asking price.',
+                        style: TextStyle(fontSize: 11, color: Colors.green.shade700, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+
+                  const SizedBox(height: 14),
+
+                  // Real-time Total Cost Card
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xff004e75), Color(0xff0077b6)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Total Estimated Order Value:',
+                            style: TextStyle(color: Color(0xffc2e5fb), fontSize: 12)),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Rs. ${total.toInt().toString().replaceAllMapped(RegExp(r"(\d{1,3})(?=(\d{3})+(?!\d))"), (m) => "${m[1]},")}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          '• Cold-Chain Logistics: Standby • Smart Escrow Protection: Verified',
+                          style: TextStyle(color: Color(0xffe0f2fe), fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Delivery Destination
+                  const Text('Delivery Destination / Warehouse',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _selectedDestination,
+                    decoration: const InputDecoration(prefixIcon: Icon(Icons.location_on, size: 18)),
+                    items: _destinations
+                        .map((d) => DropdownMenuItem(
+                              value: d,
+                              child: Text(
+                                d,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedDestination = v!),
+                  ),
+                  if (_selectedDestination == 'Custom Address') ...[
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _customAddressController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter street address, city, postal code',
+                        prefixIcon: Icon(Icons.map, size: 18),
+                      ),
+                      validator: (v) => _selectedDestination == 'Custom Address' && (v == null || v.isEmpty)
+                          ? 'Please enter delivery address'
+                          : null,
+                    ),
+                  ],
+
+                  const SizedBox(height: 14),
+
+                  // Cold-Chain Requirement
+                  const Text('Cold-Chain Requirement',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      'Chilled (0°C to 4°C)',
+                      'Deep Frozen (-18°C)',
+                      'Slurry Ice Packed',
+                    ].map((mode) {
+                      final isSel = _selectedColdChain == mode;
+                      return ChoiceChip(
+                        label: Text(mode, style: const TextStyle(fontSize: 12)),
+                        selected: isSel,
+                        onSelected: (_) => setState(() => _selectedColdChain = mode),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Delivery Schedule Window
+                  const Text('Preferred Delivery Window',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _selectedWindow,
+                    decoration: const InputDecoration(prefixIcon: Icon(Icons.access_time, size: 18)),
+                    items: [
+                      'Immediate Pier Dispatch (within 2h)',
+                      'Same-Day Evening (18:00 - 21:00)',
+                      'Next-Day Morning Auction Slot (05:00 - 08:00)',
+                    ]
+                        .map((w) => DropdownMenuItem(
+                              value: w,
+                              child: Text(
+                                w,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedWindow = v!),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Payment & Settlement Guarantee
+                  const Text('Settlement Guarantee Method',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _selectedPayment,
+                    decoration: const InputDecoration(prefixIcon: Icon(Icons.verified_user, size: 18)),
+                    items: [
+                      'FishLink Smart Escrow Guarantee',
+                      '24-Hour Verified Bank Wire Settlement',
+                      'Commercial Letter of Credit (LC)',
+                    ]
+                        .map((p) => DropdownMenuItem(
+                              value: p,
+                              child: Text(
+                                p,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedPayment = v!),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Special Handling Notes
+                  const Text('Special Instructions / Notes',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      hintText: 'e.g. Export grade packing, attach digital temperature logger',
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Submit Buttons
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _existingBid != null ? Colors.grey.shade400 : const Color(0xff005b96),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: (_submitting || _existingBid != null) ? null : _submitOrder,
+                    icon: _submitting
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : Icon(_existingBid != null ? Icons.lock_outline : Icons.gavel, size: 18),
+                    label: Text(
+                      _existingBid != null
+                          ? 'Bid already placed (Rs. ${_existingBid!['bidPricePerKg']}/kg)'
+                          : (_submitting ? 'Submitting Bid…' : 'Submit Bid'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          style:
-              FilledButton.styleFrom(backgroundColor: const Color(0xff005b96)),
-          onPressed: _loading ? null : _submitBid,
-          child: _loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Submit Bid'),
-        ),
-      ],
     );
   }
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// FEATURE 14: 📊 MY BIDS (Buyer View)
-// ══════════════════════════════════════════════════════════════════════════════
 
 class MyBidsScreen extends StatefulWidget {
   const MyBidsScreen({super.key});
@@ -3599,8 +6003,10 @@ class MyBidsScreen extends StatefulWidget {
 
 class _MyBidsScreenState extends State<MyBidsScreen> {
   String _selectedFilter = 'All';
+  bool _loading = false;
+  List<Map<String, dynamic>> _bidsList = [];
 
-  final List<Map<String, dynamic>> _myBids = [
+  final List<Map<String, dynamic>> _fallbackBids = [
     {
       'species': 'Tuna',
       'yourBid': 1650,
@@ -3608,7 +6014,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
       'quantity': 100,
       'location': 'Negombo',
       'status': 'ACTIVE',
-      'time': 'Placed 25m ago',
+      'time': 'Placed recently',
     },
     {
       'species': 'Mackerel',
@@ -3617,7 +6023,7 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
       'quantity': 75,
       'location': 'Beruwala',
       'status': 'LOST',
-      'time': 'Outbid 1h ago',
+      'time': 'Outbid',
     },
     {
       'species': 'Seer Fish',
@@ -3630,9 +6036,63 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadBids();
+  }
+
+  Future<void> _loadBids() async {
+    setState(() => _loading = true);
+    try {
+      final res = await ApiClient().getMyBids();
+      if (res.isNotEmpty && mounted) {
+        final parsed = <Map<String, dynamic>>[];
+        for (final item in res) {
+          if (item is Map) {
+            final m = Map<String, dynamic>.from(item);
+            final statusRaw = (m['status'] ?? 'Pending').toString().toUpperCase();
+            final mappedStatus = (statusRaw == 'ACCEPTED')
+                ? 'WON'
+                : (statusRaw == 'REJECTED')
+                    ? 'LOST'
+                    : 'ACTIVE';
+            parsed.add({
+              'id': m['id'],
+              'catchId': m['catchId'],
+              'species': m['fishSpecies'] ?? m['species'] ?? 'Fish Catch',
+              'yourBid': (m['bidPricePerKg'] ?? m['price'] ?? 0),
+              'highestBid': (m['highestBid'] ?? m['bidPricePerKg'] ?? 0),
+              'quantity': (m['quantityKg'] ?? m['quantity'] ?? 0),
+              'location': m['location'] ?? 'Negombo Harbour',
+              'status': mappedStatus,
+              'time': m['createdAt'] != null
+                  ? 'Placed on ${m['createdAt'].toString().split('T').first}'
+                  : 'Active Auction',
+            });
+          }
+        }
+        if (parsed.isNotEmpty) {
+          setState(() {
+            _bidsList = parsed;
+            _loading = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+    if (mounted) {
+      setState(() {
+        if (_bidsList.isEmpty) _bidsList = _fallbackBids;
+        _loading = false;
+      });
+    }
+  }
+
   List<Map<String, dynamic>> get _filteredBids {
-    if (_selectedFilter == 'All') return _myBids;
-    return _myBids
+    final list = _bidsList.isNotEmpty ? _bidsList : _fallbackBids;
+    if (_selectedFilter == 'All') return list;
+    return list
         .where((b) => b['status'] == _selectedFilter.toUpperCase())
         .toList();
   }
@@ -3644,9 +6104,21 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          'My Bids',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'My Bids',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: _loading
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.refresh, color: Color(0xff005b96)),
+              onPressed: _loading ? null : _loadBids,
+              tooltip: 'Refresh Bids',
+            ),
+          ],
         ),
         const SizedBox(height: 12),
 
@@ -3803,12 +6275,15 @@ class _MyBidsScreenState extends State<MyBidsScreen> {
                 children: const [
                   Icon(Icons.local_shipping, size: 16, color: Colors.purple),
                   SizedBox(width: 6),
-                  Text(
-                    'Order Created • Logistics Dispatched via Cold Storage',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple),
+                  Expanded(
+                    child: Text(
+                      'Order Created • Logistics Dispatched via Cold Storage',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),

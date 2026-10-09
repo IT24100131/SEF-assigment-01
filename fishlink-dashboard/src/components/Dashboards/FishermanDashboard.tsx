@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw, CircleDot, Search, Award, Mail, Calendar, ShieldAlert, AlertTriangle, FileText } from 'lucide-react';
+import { Camera, MapPin, CheckCircle, Edit, Trash2, X, Ban, Send, AlertCircle, Bot, Users, ChevronDown, ChevronUp, RefreshCw, CircleDot, Search, Mail, Calendar, ShieldAlert, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 
@@ -32,6 +32,18 @@ interface BidRecord {
   bidPricePerKg: number;
   bidTime: string;
   status: string;
+}
+
+interface BidRecord {
+  id: number;
+  bidPricePerKg: number;
+  bidTime: string;
+  status: string;
+  buyer?: {
+    id: number;
+    fullName: string;
+    email: string;
+  };
 }
 
 // ── Status config ─────────────────────────────────────────────────────────────
@@ -317,26 +329,336 @@ const CatchForm: React.FC<CatchFormProps> = ({
 
 // ── Highest Bid display ───────────────────────────────────────────────────────
 
-const HighestBid: React.FC<{ catchId: number }> = ({ catchId }) => {
-  const [highestBid, setHighestBid] = useState<number | null>(null);
+const CatchBidsSection: React.FC<{
+  catchId: number;
+  askingPrice: number;
+  quantityKg: number;
+  catchStatus?: string;
+  onActionCompleted?: () => void;
+}> = ({ catchId, askingPrice, quantityKg, catchStatus, onActionCompleted }) => {
+  const [bids, setBids] = useState<BidRecord[]>([]);
+  const [expanded, setExpanded] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  useEffect(() => {
+  const fetchBids = () => {
     const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
     axios.get<BidRecord[]>(`${API_BASE_URL}/api/Bids/catch/${catchId}`, { headers })
       .then(res => {
-        if (res.data.length > 0) {
-          const max = Math.max(...res.data.map(b => b.bidPricePerKg));
-          setHighestBid(max);
+        if (Array.isArray(res.data)) {
+          setBids(res.data);
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchBids();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catchId]);
 
-  if (highestBid === null) return null;
+  const handleAcceptBid = async (bid: BidRecord) => {
+    const totalAmount = Number(bid.bidPricePerKg) * quantityKg;
+    const confirmed = window.confirm(
+      `Accept bid from ${bid.buyer?.fullName || 'Buyer'} for Rs. ${Number(bid.bidPricePerKg).toLocaleString()}/kg?\n\n` +
+      `• Catch Weight: ${quantityKg} kg\n` +
+      `• Total Deal Amount: Rs. ${totalAmount.toLocaleString()}\n\n` +
+      `Accepting will finalize this deal, close bidding, mark other bids as lost, and dispatch the Logistics Agent.`
+    );
+    if (!confirmed) return;
+
+    setActionLoadingId(bid.id);
+    setFeedback(null);
+    try {
+      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+      await axios.patch(`${API_BASE_URL}/api/Bids/${bid.id}/accept`, {}, { headers });
+      setBids(prev => prev.map(b => b.id === bid.id ? { ...b, status: 'Accepted' } : { ...b, status: 'Lost' }));
+      setFeedback({
+        type: 'success',
+        message: `🎉 Bid from ${bid.buyer?.fullName || 'Buyer'} accepted! Sales order created and catch marked as Sold.`
+      });
+
+      // Notify Buyer and Admin in real time
+      try {
+        const acceptedInfo = {
+          bidId: bid.id,
+          buyerName: bid.buyer?.fullName || 'Buyer',
+          buyerId: bid.buyer?.id || 1,
+          price: Number(bid.bidPricePerKg),
+          time: new Date().toISOString(),
+          quantityKg: quantityKg,
+          species: 'Yellowfin Tuna'
+        };
+        localStorage.setItem('fishlink_latest_accepted_bid', JSON.stringify(acceptedInfo));
+        window.dispatchEvent(new CustomEvent('fishlink:bid_accepted', { detail: acceptedInfo }));
+      } catch {}
+
+      if (onActionCompleted) onActionCompleted();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data || 'Failed to accept bid. Please try again.';
+      setFeedback({ type: 'error', message: String(msg) });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRejectBid = async (bid: BidRecord) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to reject the bid of Rs. ${Number(bid.bidPricePerKg).toLocaleString()}/kg from ${bid.buyer?.fullName || 'Buyer'}?`
+    );
+    if (!confirmed) return;
+
+    setActionLoadingId(bid.id);
+    setFeedback(null);
+    try {
+      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+      await axios.patch(`${API_BASE_URL}/api/Bids/${bid.id}/reject`, {}, { headers });
+      setBids(prev => prev.map(b => b.id === bid.id ? { ...b, status: 'Rejected' } : b));
+      setFeedback({
+        type: 'success',
+        message: `Bid of Rs. ${Number(bid.bidPricePerKg).toLocaleString()}/kg was rejected.`
+      });
+      if (onActionCompleted) onActionCompleted();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data || 'Failed to reject bid. Please try again.';
+      setFeedback({ type: 'error', message: String(msg) });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  if (bids.length === 0) {
+    return (
+      <div style={{ marginTop: '10px', padding: '8px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.82rem', color: '#64748b' }}>
+        ⏳ Awaiting initial buyer bids...
+      </div>
+    );
+  }
+
+  const acceptedBid = bids.find(b => b.status === 'Accepted');
+  const activeBids = bids.filter(b => b.status !== 'Rejected' && b.status !== 'Lost');
+  const highestBid = activeBids.length > 0
+    ? Math.max(...activeBids.map(b => Number(b.bidPricePerKg)))
+    : Math.max(...bids.map(b => Number(b.bidPricePerKg)));
+  const highestBidObj = (activeBids.length > 0 ? activeBids : bids).find(b => Number(b.bidPricePerKg) === highestBid);
+  const diffFromAsking = askingPrice > 0 ? ((highestBid - askingPrice) / askingPrice * 100).toFixed(1) : '0';
+
+  const isSold = catchStatus === 'Sold' || !!acceptedBid;
+
   return (
-    <p style={{ margin: '6px 0 0', color: '#059669', fontWeight: 700, fontSize: '0.9rem' }}>
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Award size={16}/> Current highest bid: <strong>Rs. {highestBid.toLocaleString()}/kg</strong></span>
-    </p>
+    <div style={{
+      marginTop: '12px',
+      background: isSold ? '#f5f3ff' : '#f0fdf4',
+      border: `1px solid ${isSold ? '#c4b5fd' : '#86efac'}`,
+      borderRadius: '10px',
+      padding: '12px 14px'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+        <div>
+          {acceptedBid ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#6d28d9' }}>
+                  🏆 Accepted Winning Bid: Rs. {Number(acceptedBid.bidPricePerKg).toLocaleString()}/kg
+                </span>
+                <span style={{
+                  padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700,
+                  background: '#ede9fe', color: '#6d28d9', border: '1px solid #c4b5fd'
+                }}>
+                  ✅ DEAL CLOSED
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#5b21b6' }}>
+                Winner: <strong>{acceptedBid.buyer?.fullName ?? 'Buyer'}</strong> · Total Value: <strong>Rs. {(Number(acceptedBid.bidPricePerKg) * quantityKg).toLocaleString()}</strong>
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#15803d' }}>
+                  🏆 Current Highest Bid: Rs. {highestBid.toLocaleString()}/kg
+                </span>
+                <span style={{
+                  padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700,
+                  background: Number(diffFromAsking) >= 0 ? '#dcfce7' : '#fee2e2',
+                  color: Number(diffFromAsking) >= 0 ? '#166534' : '#991b1b'
+                }}>
+                  {Number(diffFromAsking) >= 0 ? `+${diffFromAsking}%` : `${diffFromAsking}%`} vs asking
+                </span>
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#166534' }}>
+                Placed by <strong>{highestBidObj?.buyer?.fullName ?? 'Verified Buyer'}</strong> · Total value: <strong>Rs. {(highestBid * quantityKg).toLocaleString()}</strong>
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Quick-action top accept button if highest bid is pending and not yet sold */}
+          {!isSold && highestBidObj && (highestBidObj.status === 'Pending' || !highestBidObj.status) && (
+            <button
+              type="button"
+              onClick={() => handleAcceptBid(highestBidObj)}
+              disabled={actionLoadingId !== null}
+              style={{
+                background: '#16a34a', color: '#ffffff', border: 'none',
+                borderRadius: '6px', padding: '6px 14px', fontSize: '0.82rem', fontWeight: 700,
+                cursor: actionLoadingId !== null ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '6px',
+                boxShadow: '0 2px 5px rgba(22,163,74,0.3)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {actionLoadingId === highestBidObj.id ? '⏳ Accepting...' : `✓ Accept Top Bid (Rs. ${highestBid.toLocaleString()}/kg)`}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              background: '#ffffff',
+              border: `1px solid ${isSold ? '#8b5cf6' : '#10b981'}`,
+              color: isSold ? '#6d28d9' : '#047857',
+              borderRadius: '6px', padding: '6px 12px', fontSize: '0.8rem', fontWeight: 600,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            {expanded ? '▲ Hide Bids' : `▼ View All Bids (${bids.length})`}
+          </button>
+        </div>
+      </div>
+
+      {feedback && (
+        <div style={{
+          marginTop: '10px',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          fontSize: '0.82rem',
+          fontWeight: 600,
+          background: feedback.type === 'success' ? '#dcfce7' : '#fee2e2',
+          color: feedback.type === 'success' ? '#15803d' : '#b91c1c',
+          border: `1px solid ${feedback.type === 'success' ? '#86efac' : '#fca5a5'}`
+        }}>
+          {feedback.message}
+        </div>
+      )}
+
+      {expanded && (
+        <div style={{ marginTop: '12px', borderTop: `1px solid ${isSold ? '#ddd6fe' : '#bbf7d0'}`, paddingTop: '10px' }}>
+          <p style={{ margin: '0 0 8px', fontSize: '0.75rem', fontWeight: 700, color: isSold ? '#6d28d9' : '#166534', textTransform: 'uppercase' }}>
+            Buyer Bids Overview ({bids.length}):
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {bids.slice().sort((a, b) => Number(b.bidPricePerKg) - Number(a.bidPricePerKg)).map((b, idx) => {
+              const isBidAccepted = b.status === 'Accepted';
+              const isBidRejected = b.status === 'Rejected';
+              const isBidLost     = b.status === 'Lost';
+              const isBidPending  = !b.status || b.status === 'Pending';
+              const canAct        = isBidPending && !isSold;
+
+              return (
+                <div
+                  key={b.id}
+                  style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px',
+                    background: isBidAccepted ? '#f0fdf4' : isBidRejected ? '#fef2f2' : idx === 0 && !isSold ? '#f0fdf4' : '#ffffff',
+                    border: `1px solid ${isBidAccepted ? '#86efac' : isBidRejected ? '#fca5a5' : idx === 0 && !isSold ? '#86efac' : '#e2e8f0'}`,
+                    borderRadius: '8px', padding: '10px 14px', fontSize: '0.82rem'
+                  }}
+                >
+                  <div style={{ flex: '1 1 200px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, color: '#1e293b' }}>
+                        {idx === 0 && '🥇 '}{idx === 1 && '🥈 '}{idx === 2 && '🥉 '}
+                        {b.buyer?.fullName || `Buyer #${b.id}`}
+                      </span>
+                      {b.buyer?.email && (
+                        <span style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                          ({b.buyer.email})
+                        </span>
+                      )}
+                      {/* Status Badges */}
+                      {isBidAccepted && (
+                        <span style={{ background: '#dcfce7', color: '#15803d', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+                          ✅ Accepted Winner
+                        </span>
+                      )}
+                      {isBidRejected && (
+                        <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+                          ❌ Rejected
+                        </span>
+                      )}
+                      {isBidLost && (
+                        <span style={{ background: '#f1f5f9', color: '#64748b', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 600 }}>
+                          Outbid / Lost
+                        </span>
+                      )}
+                      {isBidPending && (
+                        <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 700 }}>
+                          ⏳ Pending Decision
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                      Bid placed: {new Date(b.bidTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({new Date(b.bidTime).toLocaleDateString()})
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: 800, color: '#0f766e', fontSize: '0.95rem' }}>
+                        Rs. {Number(b.bidPricePerKg).toLocaleString()}/kg
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+                        Total: Rs. {(Number(b.bidPricePerKg) * quantityKg).toLocaleString()}
+                      </div>
+                    </div>
+
+                    {/* Action buttons for Fisherman */}
+                    {canAct && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleAcceptBid(b)}
+                          disabled={actionLoadingId !== null}
+                          title="Accept this bid and finalize the deal"
+                          style={{
+                            background: '#16a34a', color: '#ffffff', border: 'none',
+                            borderRadius: '6px', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 700,
+                            cursor: actionLoadingId !== null ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            boxShadow: '0 1px 3px rgba(22,163,74,0.3)',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {actionLoadingId === b.id ? '⏳' : '✓ Accept'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRejectBid(b)}
+                          disabled={actionLoadingId !== null}
+                          title="Reject this bid"
+                          style={{
+                            background: '#ffffff', color: '#dc2626', border: '1px solid #fca5a5',
+                            borderRadius: '6px', padding: '6px 10px', fontSize: '0.78rem', fontWeight: 600,
+                            cursor: actionLoadingId !== null ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          ✕ Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -1064,7 +1386,15 @@ export const FishermanDashboard = () => {
                 )}
 
                 {/* Highest bid — only show for Bidding status */}
-                {c.status === 'Bidding' && <HighestBid catchId={c.id} />}
+                {(c.status === 'Bidding' || c.status === 'Sold') && (
+                  <CatchBidsSection
+                    catchId={c.id}
+                    askingPrice={Number(c.askingPricePerKg)}
+                    quantityKg={Number(c.quantityKg)}
+                    catchStatus={c.status}
+                    onActionCompleted={fetchCatches}
+                  />
+                )}
 
                 {/* Locked notice */}
                 {isLocked && c.status !== 'Cancelled' && c.status !== 'Expired' && (
