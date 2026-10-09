@@ -170,11 +170,17 @@ export const AdminDashboard: React.FC<{
   const [activeTab,     setActiveTab]     = useState<'flagged' | 'workflows' | 'logistics'>(defaultTab);
 
   // Sync when parent sidebar tab changes
-  useEffect(() => { setActiveTab(defaultTab as any); }, [defaultTab]);
+  useEffect(() => {
+    setActiveTab(defaultTab as any);
+    if (defaultTab === 'logistics') {
+      fetchDeliveryPlans();
+    }
+  }, [defaultTab]);
   const [flagged,       setFlagged]       = useState<FlaggedCatch[]>([]);
   const [workflows,     setWorkflows]     = useState<any[]>([]);
   const [deliveryPlans, setDeliveryPlans] = useState<DeliveryPlan[]>([]);
   const [loading,       setLoading]       = useState(false);
+  const [loadingPlans,  setLoadingPlans]  = useState(false);
   const [actionMsg,     setActionMsg]     = useState('');
   const [expanded,      setExpanded]      = useState<number | null>(null);
   const [expandedWeather, setExpandedWeather] = useState<{ [id: number]: boolean }>({});
@@ -182,7 +188,7 @@ export const AdminDashboard: React.FC<{
   const [selectedCatch, setSelectedCatch] = useState<FlaggedCatch | null>(null);
   const [filterRisk,    setFilterRisk]    = useState<'all' | 'high' | 'medium' | 'review'>('all');
   const [filterPlanStatus, setFilterPlanStatus] = useState<'all' | 'PendingApproval' | 'Scheduled' | 'Delivered'>('all');
-  const [filterAcceptedOnly, setFilterAcceptedOnly] = useState<boolean>(true); // Default true: only fisherman-accepted deals!
+  const [filterAcceptedOnly, setFilterAcceptedOnly] = useState<boolean>(false); // Default false: show all dispatches directly
 
   // Live GPS Tracking Modal State
   const [trackingPlan, setTrackingPlan] = useState<DeliveryPlan | null>(null);
@@ -400,12 +406,19 @@ export const AdminDashboard: React.FC<{
   };
 
   const fetchDeliveryPlans = async () => {
+    setLoadingPlans(true);
     try {
       const res = await axios.get<DeliveryPlan[]>(
         `${API_BASE_URL}/api/Logistics/plans`, { headers: authHeader }
       );
-      setDeliveryPlans(res.data);
-    } catch { setDeliveryPlans([]); }
+      if (Array.isArray(res.data)) {
+        setDeliveryPlans(res.data);
+      }
+    } catch {
+      // Retain existing plans on error
+    } finally {
+      setLoadingPlans(false);
+    }
   };
 
   const handleApprovePlan = async (id: number) => {
@@ -1715,7 +1728,13 @@ export const AdminDashboard: React.FC<{
             </button>
           </div>
 
-          {displayedPlans.length === 0 ? (
+          {loadingPlans && deliveryPlans.length === 0 ? (
+            <div className="workflow-card" style={{ textAlign: 'center', padding: 40 }}>
+              <RefreshCw size={36} color="#0284c7" style={{ animation: 'spin 1s linear infinite', marginBottom: 12 }} />
+              <h3 style={{ color: '#0369a1' }}>Loading Delivery Plans...</h3>
+              <p style={{ color: '#64748b' }}>Connecting to Cold-Chain Dispatch Engine & Neon Cloud DB...</p>
+            </div>
+          ) : displayedPlans.length === 0 ? (
             <div className="workflow-card" style={{ textAlign: 'center', padding: 40 }}>
               <Truck size={48} color="#94a3b8" style={{ marginBottom: 12 }} />
               <h3 style={{ color: '#475569' }}>
