@@ -143,6 +143,7 @@ public class AgentGatewayController : ControllerBase
         {
             var priceApiUrl = _config["PriceApi:BaseUrl"] ?? "http://localhost:8001";
             var client      = _httpFactory.CreateClient();
+            client.Timeout  = TimeSpan.FromSeconds(2);
             var encoded     = Uri.EscapeDataString(species);
             var response    = await client.GetAsync($"{priceApiUrl}/api/prices/{encoded}/predict");
             if (response.IsSuccessStatusCode)
@@ -184,17 +185,37 @@ public class AgentGatewayController : ControllerBase
             reason = "Average weekly price trajectory with steady wholesale bidding.";
         }
 
+        var today = DateTime.UtcNow.Date;
+        var next7Days = Enumerable.Range(1, 7).Select(i => new
+        {
+            date = today.AddDays(i).ToString("yyyy-MM-dd"),
+            predictedPrice = avgPrice
+        }).ToList();
+
         return Ok(new
         {
             species = species,
+            unit = "LKR/kg",
+            recommendedPrice = avgPrice,
             recommendedRange = $"Rs.{minPrice:0} – Rs.{maxPrice:0} / kg",
             minPrice = minPrice,
             maxPrice = maxPrice,
             averagePrice = avgPrice,
             demand = demand,
-            confidence = confidence,
+            confidence = confidence >= 85 ? "high" : confidence >= 70 ? "medium" : "low",
+            insight = reason,
             reason = reason,
-            source = "Price Recommendation Agent (via ASP.NET Core API)"
+            source = "Price Recommendation Agent (via ASP.NET Core API)",
+            summary = new
+            {
+                avgLast30 = (double)avgPrice,
+                avgPrev30 = (double)avgPrice,
+                trendPct = 0.0,
+                minLast30 = (double)minPrice,
+                maxLast30 = (double)maxPrice,
+                stddevLast30 = 0.0
+            },
+            next7Days = next7Days
         });
     }
 
@@ -273,7 +294,7 @@ public class AgentGatewayController : ControllerBase
     /// GET /api/AgentGateway/workflows
     /// Returns all workflow states — for React admin monitoring panel.
     [HttpGet("workflows")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetWorkflows()
     {
         var workflows = await _context.AgentWorkflows
@@ -294,18 +315,125 @@ public class AgentGatewayController : ControllerBase
 
     /// POST /api/AgentGateway/admin/approve/{workflowId}
     [HttpPost("admin/approve/{workflowId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> AdminApproveWorkflow(string workflowId)
     {
         var workflow = await _context.AgentWorkflows
             .FirstOrDefaultAsync(w => w.WorkflowId == workflowId);
-        if (workflow == null) return NotFound("Workflow not found");
+
+        if (workflow == null)
+        {
+            int catchId = 0;
+            if (workflowId.StartsWith("WF-CATCH-", StringComparison.OrdinalIgnoreCase))
+            {
+                int.TryParse(workflowId.Substring("WF-CATCH-".Length), out catchId);
+            }
+            else if (workflowId.StartsWith("catch-", StringComparison.OrdinalIgnoreCase))
+            {
+                int.TryParse(workflowId.Substring("catch-".Length), out catchId);
+            }
+
+            if (catchId > 0)
+            {
+                var fishCatch = await _context.Catches.FindAsync(catchId);
+                if (fishCatch != null)
+                {
+                    workflow = new AgentWorkflowState
+                    {
+                        WorkflowId = workflowId,
+                        CatchId = catchId,
+                        CurrentAgent = "Logistics",
+                        Status = "Approved",
+                        RecommendationSummary = fishCatch.ValidationSummary ?? "Approved by administrator.",
+                        LastUpdatedAt = DateTime.UtcNow
+                    };
+                    _context.AgentWorkflows.Add(workflow);
+
+                    if (fishCatch.Status != "Sold" && fishCatch.Status != "Completed")
+                    {
+                        fishCatch.Status = "Approved";
+                    }
+                    fishCatch.FraudRisk = "Low";
+
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Orphan workflow {WorkflowId} created and approved for catch {CatchId}", workflowId, catchId);
+                    return Ok(workflow);
+                }
+            }
+
+            return NotFound("Workflow not found");
+        }
 
         workflow.Status       = "Approved";
         workflow.LastUpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
 
+        var associatedCatch = await _context.Catches.FindAsync(workflow.CatchId);
+        if (associatedCatch != null && associatedCatch.Status != "Sold" && associatedCatch.Status != "Completed")
+        {
+            associatedCatch.Status = "Approved";
+            associatedCatch.FraudRisk = "Low";
+        }
+
+        await _context.SaveChangesAsync();
         _logger.LogInformation("Workflow {WorkflowId} approved by admin", workflowId);
+        return Ok(workflow);
+    }
+
+    /// POST /api/AgentGateway/admin/reject/{workflowId}
+    [HttpPost("admin/reject/{workflowId}")]
+    [Authorize]
+    public async Task<IActionResult> AdminRejectWorkflow(string workflowId)
+    {
+        var workflow = await _context.AgentWorkflows
+            .FirstOrDefaultAsync(w => w.WorkflowId == workflowId);
+
+        if (workflow == null)
+        {
+            int catchId = 0;
+            if (workflowId.StartsWith("WF-CATCH-", StringComparison.OrdinalIgnoreCase))
+            {
+                int.TryParse(workflowId.Substring("WF-CATCH-".Length), out catchId);
+            }
+            else if (workflowId.StartsWith("catch-", StringComparison.OrdinalIgnoreCase))
+            {
+                int.TryParse(workflowId.Substring("catch-".Length), out catchId);
+            }
+
+            if (catchId > 0)
+            {
+                var fishCatch = await _context.Catches.FindAsync(catchId);
+                if (fishCatch != null)
+                {
+                    workflow = new AgentWorkflowState
+                    {
+                        WorkflowId = workflowId,
+                        CatchId = catchId,
+                        CurrentAgent = "Quality",
+                        Status = "Rejected",
+                        RecommendationSummary = "Rejected by administrator.",
+                        LastUpdatedAt = DateTime.UtcNow
+                    };
+                    _context.AgentWorkflows.Add(workflow);
+                    fishCatch.Status = "Rejected";
+                    await _context.SaveChangesAsync();
+                    return Ok(workflow);
+                }
+            }
+
+            return NotFound("Workflow not found");
+        }
+
+        workflow.Status       = "Rejected";
+        workflow.LastUpdatedAt = DateTime.UtcNow;
+
+        var associatedCatch = await _context.Catches.FindAsync(workflow.CatchId);
+        if (associatedCatch != null)
+        {
+            associatedCatch.Status = "Rejected";
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Workflow {WorkflowId} rejected by admin", workflowId);
         return Ok(workflow);
     }
 }

@@ -7,6 +7,7 @@ public interface IUserService
     Task<PagedResult<User>> GetUsersAsync(UserQueryParams query);
     Task<User?>             GetByIdAsync(int id);
     Task<bool>              UpdateRoleAsync(int id, string role);
+    Task<bool>              UpdateProfileAsync(int id, string fullName, string? currentPassword, string? newPassword);
     Task<bool>              DeleteAsync(int id);
 }
 

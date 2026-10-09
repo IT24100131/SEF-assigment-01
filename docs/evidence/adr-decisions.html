@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Architecture Decision Records (ADR-01 & ADR-02) — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    h2 { color: #203878; margin-top: 30px; margin-bottom: 12px; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 14px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 12px 14px; vertical-align: top; }
+    .field-name { font-weight: bold; width: 22%; background: #f8fafc; color: #1e293b; }
+    .decision-summary { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; margin-bottom: 24px; font-size: 13.5px; color: #166534; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Architecture Decision Records</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report</div>
+
+  <!-- ADR-01 -->
+  <h2>ADR-01: React State-Management Approach</h2>
+  <table>
+    <tr>
+      <th style="width: 22%;">Field</th>
+      <th style="width: 78%;">Details</th>
+    </tr>
+    <tr>
+      <td class="field-name">Context</td>
+      <td>
+        The FishLink web dashboard requires managing multi-role UI states (Fisherman, Buyer, Admin, Logistics), JWT token persistence, dynamic live-bidding updates, and API loading/error feedback without overcomplicating frontend architecture or degrading browser rendering performance.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Options Considered</td>
+      <td>
+        <ul>
+          <li><strong>Redux Toolkit / Zustand:</strong> High architectural overhead, extensive boilerplate, and unnecessary complexity for a focused single-page role dashboard.</li>
+          <li><strong>Global React Context:</strong> Triggers excessive re-renders across unrelated sibling components during high-frequency polling and real-time bid updates.</li>
+          <li><strong>Route-level state with shared Axios client (Chosen):</strong> Lightweight, modular, and cleanly decoupled by feature and role view boundaries.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Decision</td>
+      <td>
+        Use React route-level state with a shared Axios API client and protected routing. Authentication identity and tokens are centralized with Axios interceptors and localStorage, while view-specific transactional data (catches, bids, logistics schedules) is managed locally within each dashboard component.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Consequences</td>
+      <td>
+        <strong>Benefits:</strong> Minimal bundle size (~130 KB), lightning-fast production compilation, zero global boilerplate, and centralized error/token expiration handling.<br>
+        <strong>Trade-offs:</strong> Cross-screen data sharing requires re-fetching from the authoritative backend API or route params, preserving backend data integrity.
+      </td>
+    </tr>
+  </table>
+  <div class="decision-summary">
+    <strong>Decision Summary:</strong> Use React route-level state with a shared Axios API client and protected routing. This keeps the implementation simple while centralizing authentication headers, loading states and API errors. Rejected: duplicating business rules in each page.
+  </div>
+
+  <!-- ADR-02 -->
+  <h2>ADR-02: Flutter State-Management Approach</h2>
+  <table>
+    <tr>
+      <th style="width: 22%;">Field</th>
+      <th style="width: 78%;">Details</th>
+    </tr>
+    <tr>
+      <td class="field-name">Context</td>
+      <td>
+        The mobile application requires managing offline session tokens, device hardware integrations (Camera for quality inspection, GPS for harbor geolocation), multi-step catch registration forms, and real-time buyer bidding while guaranteeing high UI responsiveness and minimal battery/memory footprint on Android and Web.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Options Considered</td>
+      <td>
+        <ul>
+          <li><strong>BLoC / Cubit:</strong> Excessive boilerplate (events, states, streams) for simple form flows and harbor operations.</li>
+          <li><strong>Provider / Riverpod:</strong> Added external package dependency and potential version incompatibility risks with newer Flutter SDK releases.</li>
+          <li><strong>Feature-oriented StatefulWidget + ApiService + FlutterSecureStorage (Chosen):</strong> Idiomatic Flutter pattern utilizing native widget lifecycles and dedicated service layers.</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Decision</td>
+      <td>
+        Use feature-oriented StatefulWidget with local setState for UI reactions, combined with a modular ApiService for HTTP REST communication and FlutterSecureStorage for encrypted JWT persistence. Hardware sensor data (GPS, camera) is validated locally before dispatching to the API.
+      </td>
+    </tr>
+    <tr>
+      <td class="field-name">Consequences</td>
+      <td>
+        <strong>Benefits:</strong> Zero external state library overhead, maximum runtime performance, fast hot reload, and secure encrypted credential storage on iOS/Android.<br>
+        <strong>Trade-offs:</strong> Deeply nested widgets pass callbacks explicitly, which was mitigated by keeping screen widget hierarchies modular and self-contained.
+      </td>
+    </tr>
+  </table>
+  <div class="decision-summary">
+    <strong>Decision Summary:</strong> Use feature-oriented StatefulWidget with a modular ApiService and FlutterSecureStorage. This provides native performance, instant hot-reloading, and secure offline token encryption without heavy external state dependencies. Rejected: bloated BLoC architecture for standard transactional screens.
+  </div>
+</body>
+</html>

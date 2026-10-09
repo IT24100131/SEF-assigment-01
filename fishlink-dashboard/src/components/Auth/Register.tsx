@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fish } from 'lucide-react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, formatErrorMessage } from '../../config/api';
 
 export const Register = () => {
   const [role, setRole] = useState('Fisherman');
@@ -24,7 +24,7 @@ export const Register = () => {
       alert('Registration successful! Please login.');
       navigate('/login');
     } catch (err: any) {
-      setError(err.response?.data || 'Registration failed');
+      setError(formatErrorMessage(err, 'Registration failed'));
     }
   };
 
@@ -36,7 +36,7 @@ export const Register = () => {
           <h2>Create an Account</h2>
           <p>Join the FishLink platform</p>
         </div>
-        {error && <div style={{color: 'red', marginBottom: '10px', textAlign: 'center'}}>{error}</div>}
+        {error && <div style={{color: 'red', marginBottom: '10px', textAlign: 'center'}}>{typeof error === 'string' ? error : formatErrorMessage(error)}</div>}
         <form onSubmit={handleRegister} className="auth-form">
           <div className="form-group">
             <label>Full Name</label>
@@ -55,6 +55,8 @@ export const Register = () => {
             <select value={role} onChange={(e) => setRole(e.target.value)}>
               <option value="Fisherman">Fisherman</option>
               <option value="Buyer">Buyer</option>
+              <option value="Admin">Admin</option>
+              <option value="Logistics">Logistics Provider</option>
             </select>
           </div>
           <button type="submit" className="btn-primary">Register</button>

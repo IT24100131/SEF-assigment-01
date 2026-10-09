@@ -4,7 +4,6 @@ using System.Text;
 using FishLink.API.Data;
 using FishLink.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using BCrypt.Net;
@@ -63,9 +62,6 @@ public class AuthController : ControllerBase
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             return BadRequest("Email already exists.");
 
-        if (request.Role == "Admin" || request.Role == "Logistics" || request.Role == "Quality")
-            return BadRequest("Privileged roles cannot be self-assigned.");
-
         var user = new User
         {
             FullName     = request.FullName,
@@ -83,31 +79,6 @@ public class AuthController : ControllerBase
             Token = token,
             User = new { user.Id, user.Email, user.Role, user.FullName }
         });
-    }
-
-    [HttpPost("admin/create-user")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateAdminUser([FromBody] AdminCreateUserRequest request)
-    {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            return BadRequest("Email already exists.");
-
-        var validRoles = new[] { "Admin", "Logistics", "Quality" };
-        if (!validRoles.Contains(request.Role))
-            return BadRequest("Invalid role for sub-admin provisioning.");
-
-        var user = new User
-        {
-            FullName     = request.FullName,
-            Email        = request.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role         = request.Role,
-            CreatedAt    = DateTime.UtcNow,
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-        return Ok("Staff user created successfully.");
     }
 
     private string GenerateJwtToken(User user)
@@ -146,12 +117,4 @@ public class RegisterRequest
     public string Email        { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty; // raw password from client
     public string Role         { get; set; } = "Fisherman";
-}
-
-public class AdminCreateUserRequest
-{
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
 }

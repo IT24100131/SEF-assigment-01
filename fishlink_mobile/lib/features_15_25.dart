@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'api_config.dart';
 
-// Access API base url defined in main.dart
-String get _apiBase =>
-    const String.fromEnvironment('FISHLINK_API_URL').isNotEmpty
-        ? const String.fromEnvironment('FISHLINK_API_URL')
-        : (kIsWeb ? 'http://localhost:5157/api' : 'http://10.0.2.2:5157/api');
+// Access unified API base url
+String get _apiBase => ApiConfig.effectiveApiBaseUrl;
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 15. 📦 ORDERS SCREEN (Features 15, 16, 17, 18, 19, 20, 21)
@@ -1778,6 +1776,8 @@ void showInvoiceModal(BuildContext context, Map<String, dynamic> order) {
 // 22. 🔔 NOTIFICATIONS / ALERTS SCREEN (DEVICE FEATURE)
 // ════════════════════════════════════════════════════════════════════════════════
 
+final ValueNotifier<int> unreadNotificationsNotifier = ValueNotifier<int>(0);
+
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({this.role = 'Fisherman', super.key});
 
@@ -1789,169 +1789,780 @@ class NotificationsScreen extends StatefulWidget {
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
   String _filter = 'All';
-  List<Map<String, dynamic>> _alerts = [
-    {
-      'id': 1,
-      'title': '🔔 New Bid Received',
-      'message': 'Buyer ABC bid Rs.1600/kg for your Tuna catch.',
-      'time': '2 mins ago',
-      'category': 'Bids',
-      'isRead': false,
-      'color': Colors.blue,
-      'icon': Icons.gavel,
-    },
-    {
-      'id': 2,
-      'title': '🔔 Bid Accepted',
-      'message': 'Your bid for Tuna was accepted by ABC Fisherman.',
-      'time': '15 mins ago',
-      'category': 'Bids',
-      'isRead': false,
-      'color': Colors.green,
-      'icon': Icons.check_circle,
-    },
-    {
-      'id': 3,
-      'title': '🔔 Delivery Scheduled',
-      'message': 'Order O102 pickup: 10:00 AM. Driver 01 assigned with Vehicle V02.',
-      'time': '1 hour ago',
-      'category': 'Deliveries',
-      'isRead': true,
-      'color': Colors.purple,
-      'icon': Icons.local_shipping,
-    },
-    {
-      'id': 4,
-      'title': '💳 Payment Confirmed',
-      'message': 'Payment of Rs.160,000 received for Order #O102 (TXN10293).',
-      'time': '2 hours ago',
-      'category': 'Payments',
-      'isRead': true,
-      'color': Colors.orange,
-      'icon': Icons.payment,
-    },
-  ];
+  bool _loading = false;
+  List<Map<String, dynamic>> _alerts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  @override
+  void didUpdateWidget(covariant NotificationsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.role != widget.role) {
+      _filter = 'All';
+      _loadNotifications();
+    }
+  }
+
+  List<String> get _filterCategories {
+    if (widget.role == 'Fisherman') {
+      return ['All', 'Admin Actions', 'Buyer Bids', 'Quality AI', 'Market Trends', 'Sea Safety'];
+    } else if (widget.role == 'Buyer') {
+      return ['All', 'Fisherman Catches', 'Admin Actions', 'Bids Won', 'In-Transit', 'Pending Offers'];
+    } else {
+      return ['All', 'Fisherman Catches', 'Buyer Bids', 'Logistics Approvals', 'Live Deliveries', 'Fraud Alerts'];
+    }
+  }
+
+  String _formatTimeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inSeconds < 60) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
+  }
+
+  Future<void> _loadNotifications() async {
+    setState(() => _loading = true);
+    final items = <Map<String, dynamic>>[];
+    final token = await const FlutterSecureStorage().read(key: 'token');
+    final authHeader = {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+
+    try {
+      if (widget.role == 'Fisherman') {
+        // 1. FISHERMAN NOTIFICATIONS
+        // (A) Admin Actions on Fisherman's catches & logistics
+        items.add({
+          'id': 'fisher-admin-inspect',
+          'title': '✅ Admin Pier Inspection Verified: Grade A',
+          'message': 'Port Admin verified catch weight and freshness (Freshness 94/100). Marine export clearance certificate issued.',
+          'time': '12m ago',
+          'category': 'Admin Actions',
+          'badge': 'Admin Verified',
+          'isRead': false,
+          'color': const Color(0xff10b981),
+          'icon': Icons.verified_user_rounded,
+        });
+
+        items.add({
+          'id': 'fisher-admin-reefer',
+          'title': '🚚 Admin Logistics: Cold-Chain Van Assigned',
+          'message': 'Admin logistics dispatched refrigerated truck WP-ND-4921 to Negombo Pier bay #3 for your accepted consignment.',
+          'time': '25m ago',
+          'category': 'Admin Actions',
+          'badge': 'Dispatch Scheduled',
+          'isRead': false,
+          'color': const Color(0xff0284c7),
+          'icon': Icons.local_shipping_rounded,
+        });
+
+        // (B) Buyer Bids on Fisherman's catch
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Bids/catch/1'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final bids = jsonDecode(res.body);
+            if (bids is List) {
+              for (var b in bids) {
+                final buyerName = b['buyer']?['fullName'] ?? 'OceanFresh Buyer';
+                final rate = (b['bidPricePerKg'] as num?)?.toDouble() ?? 0.0;
+                final status = b['status']?.toString() ?? 'Pending';
+                final time = b['bidTime'] != null ? DateTime.tryParse(b['bidTime']) : null;
+                final timeStr = time != null ? _formatTimeAgo(time) : 'Recent';
+
+                if (status == 'Accepted') {
+                  items.add({
+                    'id': 'fisher-bid-acc-${b['id']}',
+                    'title': '✅ Deal Finalized: Rs. ${rate.toStringAsFixed(0)}/kg',
+                    'message': 'You accepted $buyerName\'s bid. Total deal value confirmed. Cold-chain reefer van dispatched to pier.',
+                    'time': timeStr,
+                    'category': 'Buyer Bids',
+                    'badge': 'Deal Closed',
+                    'isRead': false,
+                    'color': const Color(0xff10b981),
+                    'icon': Icons.check_circle_rounded,
+                  });
+                } else if (status == 'Pending') {
+                  items.add({
+                    'id': 'fisher-bid-new-${b['id']}',
+                    'title': '💰 New Bid Placed by $buyerName',
+                    'message': 'Offer of Rs. ${rate.toStringAsFixed(0)}/kg received on your live catch. Review offer and accept deal.',
+                    'time': timeStr,
+                    'category': 'Buyer Bids',
+                    'badge': 'New Offer',
+                    'isRead': false,
+                    'color': const Color(0xff2563eb),
+                    'icon': Icons.gavel_rounded,
+                  });
+                }
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Buyer Bids')) {
+          items.add({
+            'id': 'fisher-bid-seed-1',
+            'title': '💰 New Bid Placed by OceanFresh Buyer',
+            'message': 'Offer of Rs. 1,600/kg received on 150kg Yellowfin Tuna. Review offer and accept deal.',
+            'time': '5m ago',
+            'category': 'Buyer Bids',
+            'badge': 'New Offer',
+            'isRead': false,
+            'color': const Color(0xff2563eb),
+            'icon': Icons.gavel_rounded,
+          });
+        }
+
+        // (C) Quality AI scan certificate
+        items.add({
+          'id': 'fisher-cv-quality',
+          'title': '🔬 AI Computer-Vision Quality Certified',
+          'message': 'Your recent Yellowfin Tuna catch was graded Grade A (Freshness 92/100). Premium export pricing enabled.',
+          'time': '30m ago',
+          'category': 'Quality AI',
+          'badge': 'Grade A Verified',
+          'isRead': false,
+          'color': const Color(0xff0d9488),
+          'icon': Icons.verified_rounded,
+        });
+
+        // (D) Market price surge
+        items.add({
+          'id': 'fisher-market-trend',
+          'title': '📈 Market Surge: Yellowfin Tuna +12%',
+          'message': 'Wholesale market demand rose at Negombo & Beruwala fish landing sites. High buyer procurement volume.',
+          'time': '1h ago',
+          'category': 'Market Trends',
+          'badge': 'Price Surge',
+          'isRead': true,
+          'color': const Color(0xff4f46e5),
+          'icon': Icons.trending_up_rounded,
+        });
+
+        // (E) Sea Safety telemetry
+        items.add({
+          'id': 'fisher-sea-safety',
+          'title': '🌊 Harbour Navigational Clearance',
+          'message': 'Negombo Port wave height 1.2m, wind 14 km/h. Sea corridors clear for fishing vessel departures.',
+          'time': '2h ago',
+          'category': 'Sea Safety',
+          'badge': 'Safe Corridors',
+          'isRead': true,
+          'color': const Color(0xff0284c7),
+          'icon': Icons.water_rounded,
+        });
+      } else if (widget.role == 'Buyer') {
+        // 2. BUYER NOTIFICATIONS
+        // (A) Fisherman published catches
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Catches'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final catches = jsonDecode(res.body);
+            if (catches is List) {
+              for (var c in catches.take(3)) {
+                final sp = c['fishSpecies'] ?? 'Fish';
+                final wt = c['weightKg'] ?? 0;
+                final port = c['landingPort'] ?? 'Negombo Harbour';
+                final price = c['aiFairPricePerKg'] ?? 1600;
+                items.add({
+                  'id': 'buyer-catch-pub-${c['id']}',
+                  'title': '🐟 Fisherman Published Catch: $sp (${wt}kg)',
+                  'message': 'Fisherman landed $wt kg fresh $sp at $port. AI fair price Rs. $price/kg. Submit your bid now!',
+                  'time': 'Just now',
+                  'category': 'Fisherman Catches',
+                  'badge': 'New Catch',
+                  'isRead': false,
+                  'color': const Color(0xff0284c7),
+                  'icon': Icons.set_meal_rounded,
+                });
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Fisherman Catches')) {
+          items.add({
+            'id': 'buyer-catch-seed-1',
+            'title': '🐟 Fisherman Published Catch: Yellowfin Tuna (150kg)',
+            'message': 'Fisherman landed 150kg fresh Yellowfin Tuna at Negombo Pier. Grade A quality certified. Fair price Rs. 1,600/kg.',
+            'time': '8m ago',
+            'category': 'Fisherman Catches',
+            'badge': 'New Catch',
+            'isRead': false,
+            'color': const Color(0xff0284c7),
+            'icon': Icons.set_meal_rounded,
+          });
+        }
+
+        // (B) Admin Actions for Buyer
+        items.add({
+          'id': 'buyer-admin-audit',
+          'title': '🛡️ Admin Pier Quality Inspection Passed',
+          'message': 'Port Admin verified Negombo landing pier batch #104. Temperature standards (-18°C) and lab grade passed.',
+          'time': '18m ago',
+          'category': 'Admin Actions',
+          'badge': 'Admin Verified',
+          'isRead': false,
+          'color': const Color(0xff10b981),
+          'icon': Icons.verified_user_rounded,
+        });
+
+        items.add({
+          'id': 'buyer-admin-route',
+          'title': '🚚 Admin Logistics Scheduled Dispatch',
+          'message': 'Admin dispatch confirmed reefer van route from Negombo Pier to Peliyagoda Wholesale Market.',
+          'time': '35m ago',
+          'category': 'Admin Actions',
+          'badge': 'Transit Confirmed',
+          'isRead': true,
+          'color': const Color(0xff0284c7),
+          'icon': Icons.local_shipping_rounded,
+        });
+
+        // (C) Buyer's own Bids
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Bids/my'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final bids = jsonDecode(res.body);
+            if (bids is List) {
+              for (var b in bids) {
+                final species = b['species'] ?? 'Tuna';
+                final rate = (b['bidPricePerKg'] as num?)?.toDouble() ?? 0.0;
+                final status = b['status']?.toString() ?? 'Pending';
+                final time = b['bidTime'] != null ? DateTime.tryParse(b['bidTime']) : null;
+                final timeStr = time != null ? _formatTimeAgo(time) : 'Recent';
+
+                if (status == 'Accepted') {
+                  items.add({
+                    'id': 'buyer-bid-won-${b['id']}',
+                    'title': '🏆 🎉 Bid Won: $species',
+                    'message': 'Fisherman accepted your bid of Rs. ${rate.toStringAsFixed(0)}/kg. Cold-chain delivery transit scheduled!',
+                    'time': timeStr,
+                    'category': 'Bids Won',
+                    'badge': 'Bid Won 🏆',
+                    'isRead': false,
+                    'color': const Color(0xff10b981),
+                    'icon': Icons.emoji_events_rounded,
+                  });
+                } else if (status == 'Pending') {
+                  items.add({
+                    'id': 'buyer-bid-pend-${b['id']}',
+                    'title': '⏳ Bid Under Review: $species',
+                    'message': 'Your bid offer of Rs. ${rate.toStringAsFixed(0)}/kg is currently under review by the fisherman.',
+                    'time': timeStr,
+                    'category': 'Pending Offers',
+                    'badge': 'Under Review',
+                    'isRead': false,
+                    'color': const Color(0xfff59e0b),
+                    'icon': Icons.schedule_rounded,
+                  });
+                }
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Bids Won')) {
+          items.add({
+            'id': 'buyer-bid-won-seed',
+            'title': '🏆 🎉 Bid Won: Yellowfin Tuna',
+            'message': 'Fisherman accepted your bid of Rs. 1,600/kg for 150kg Yellowfin Tuna. Cold-chain transit initialized!',
+            'time': '10m ago',
+            'category': 'Bids Won',
+            'badge': 'Bid Won 🏆',
+            'isRead': false,
+            'color': const Color(0xff10b981),
+            'icon': Icons.emoji_events_rounded,
+          });
+        }
+
+        // (D) Cold-Chain Logistics In-Transit tracking
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Logistics/plans'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final plans = jsonDecode(res.body);
+            if (plans is List) {
+              for (var p in plans) {
+                final status = p['status']?.toString() ?? '';
+                final planId = p['planId'] ?? '#${p['id']}';
+                final van = p['vehicleCode'] ?? 'WP-ND-4921';
+                final pickup = p['pickupLocation'] ?? 'Negombo Pier';
+                final delivery = p['deliveryLocation'] ?? 'Peliyagoda Market';
+
+                if (status == 'Scheduled' || status == 'InTransit') {
+                  items.add({
+                    'id': 'buyer-deliv-active-${p['id']}',
+                    'title': '🚚 Cold-Chain In-Transit ($planId)',
+                    'message': 'Reefer van $van en route from $pickup to $delivery. Active temp -18°C maintained.',
+                    'time': 'Live',
+                    'category': 'In-Transit',
+                    'badge': 'Live Transit 🚛',
+                    'isRead': false,
+                    'color': const Color(0xff0284c7),
+                    'icon': Icons.local_shipping_rounded,
+                  });
+                } else if (status == 'Delivered') {
+                  items.add({
+                    'id': 'buyer-deliv-done-${p['id']}',
+                    'title': '✅ Order Delivered & Verified ($planId)',
+                    'message': 'Fish shipment delivered to $delivery. Cold-chain temperature audit passed.',
+                    'time': '1h ago',
+                    'category': 'In-Transit',
+                    'badge': 'Delivered',
+                    'isRead': true,
+                    'color': const Color(0xff059669),
+                    'icon': Icons.done_all_rounded,
+                  });
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      } else {
+        // 3. ADMIN / LOGISTICS NOTIFICATIONS
+        // (A) Fisherman published catches arriving at harbours
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Catches'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final catches = jsonDecode(res.body);
+            if (catches is List) {
+              for (var c in catches.take(3)) {
+                final sp = c['fishSpecies'] ?? 'Fish';
+                final wt = c['weightKg'] ?? 0;
+                final port = c['landingPort'] ?? 'Negombo Harbour';
+                items.add({
+                  'id': 'admin-catch-pub-${c['id']}',
+                  'title': '🎣 Fisherman Landing Published: $sp (${wt}kg)',
+                  'message': 'Fisherman reported catch arrival at $port. Ready for pier quality inspection and weighing.',
+                  'time': 'Just now',
+                  'category': 'Fisherman Catches',
+                  'badge': 'New Landing',
+                  'isRead': false,
+                  'color': const Color(0xff0284c7),
+                  'icon': Icons.sailing_rounded,
+                });
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Fisherman Catches')) {
+          items.add({
+            'id': 'admin-catch-seed',
+            'title': '🎣 Fisherman Landing Published: Yellowfin Tuna (150kg)',
+            'message': 'Fisherman reported catch arrival at Negombo Harbour. Ready for pier quality inspection.',
+            'time': '6m ago',
+            'category': 'Fisherman Catches',
+            'badge': 'New Landing',
+            'isRead': false,
+            'color': const Color(0xff0284c7),
+            'icon': Icons.sailing_rounded,
+          });
+        }
+
+        // (B) Buyer Bids & Inquiries placed
+        items.add({
+          'id': 'admin-buyer-bid-1',
+          'title': '💰 Buyer Submitted Bid: Rs. 1,600/kg',
+          'message': 'OceanFresh Buyer placed a procurement bid of Rs. 1,600/kg on Yellowfin Tuna catch at Negombo Pier.',
+          'time': '10m ago',
+          'category': 'Buyer Bids',
+          'badge': 'New Bid Placed',
+          'isRead': false,
+          'color': const Color(0xff10b981),
+          'icon': Icons.gavel_rounded,
+        });
+
+        // (C) Logistics plans for approval and active delivery
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Logistics/plans'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final plans = jsonDecode(res.body);
+            if (plans is List) {
+              for (var p in plans) {
+                final status = p['status']?.toString() ?? '';
+                final planId = p['planId'] ?? '#${p['id']}';
+                final van = p['vehicleCode'] ?? 'WP-ND-4921';
+                final pickup = p['pickupLocation'] ?? 'Negombo Pier';
+                final delivery = p['deliveryLocation'] ?? 'Peliyagoda Central Market';
+                final km = p['distanceKm'] ?? 38;
+
+                if (status == 'PendingApproval') {
+                  items.add({
+                    'id': 'admin-plan-pend-${p['id']}',
+                    'title': '🚚 Delivery Plan Awaiting Approval ($planId)',
+                    'message': 'Dispatch Request: $pickup ➔ $delivery ($km km). Reefer van $van allocated with -18°C cooling.',
+                    'time': 'Just now',
+                    'category': 'Logistics Approvals',
+                    'badge': 'Needs Approval',
+                    'isRead': false,
+                    'color': const Color(0xfff59e0b),
+                    'icon': Icons.approval_rounded,
+                  });
+                } else if (status == 'Scheduled' || status == 'InTransit') {
+                  items.add({
+                    'id': 'admin-plan-live-${p['id']}',
+                    'title': '🟢 Live In-Transit Delivery ($planId)',
+                    'message': 'Refrigerated van $van actively delivering from $pickup to $delivery via Expressway.',
+                    'time': 'Live',
+                    'category': 'Live Deliveries',
+                    'badge': 'On Route 🚛',
+                    'isRead': false,
+                    'color': const Color(0xff0284c7),
+                    'icon': Icons.local_shipping_rounded,
+                  });
+                } else if (status == 'Delivered') {
+                  items.add({
+                    'id': 'admin-plan-done-${p['id']}',
+                    'title': '✅ Cold-Chain Delivery Complete ($planId)',
+                    'message': 'Fish consignment received at $delivery. Cold-chain audit confirmed optimal quality.',
+                    'time': '2h ago',
+                    'category': 'Live Deliveries',
+                    'badge': 'Delivered',
+                    'isRead': true,
+                    'color': const Color(0xff10b981),
+                    'icon': Icons.check_circle_rounded,
+                  });
+                }
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Logistics Approvals')) {
+          items.add({
+            'id': 'admin-plan-seed',
+            'title': '🚚 Delivery Plan Awaiting Approval (PLAN-1049)',
+            'message': 'Dispatch Request: Negombo Pier ➔ Peliyagoda Market (38 km). Reefer van WP-ND-4921 allocated.',
+            'time': '5m ago',
+            'category': 'Logistics Approvals',
+            'badge': 'Needs Approval',
+            'isRead': false,
+            'color': const Color(0xfff59e0b),
+            'icon': Icons.approval_rounded,
+          });
+        }
+
+        // (D) Flagged catch review
+        try {
+          final res = await http.get(Uri.parse('$_apiBase/Catches/flagged'), headers: authHeader);
+          if (res.statusCode == 200) {
+            final catches = jsonDecode(res.body);
+            if (catches is List) {
+              for (var c in catches.take(3)) {
+                items.add({
+                  'id': 'admin-fraud-${c['id']}',
+                  'title': '⚠️ Catch #${c['id']} Flagged (${c['fishSpecies'] ?? 'Fish'})',
+                  'message': 'Pier scale discrepancy detected: ${c['weightDiscrepancyPct'] ?? 14}%. AI Fraud Risk: ${c['fraudRisk'] ?? 'Medium'}. Pier inspection required.',
+                  'time': '20m ago',
+                  'category': 'Fraud Alerts',
+                  'badge': 'Fraud Review',
+                  'isRead': false,
+                  'color': const Color(0xffef4444),
+                  'icon': Icons.shield_rounded,
+                });
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!items.any((e) => e['category'] == 'Fraud Alerts')) {
+          items.add({
+            'id': 'admin-fraud-seed',
+            'title': '⚠️ Catch #1 Flagged (Yellowfin Tuna)',
+            'message': 'Pier scale discrepancy detected: 14%. AI Fraud Risk: Medium (150 kg). Pier inspection required.',
+            'time': '20m ago',
+            'category': 'Fraud Alerts',
+            'badge': 'Fraud Review',
+            'isRead': false,
+            'color': const Color(0xffef4444),
+            'icon': Icons.shield_rounded,
+          });
+        }
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _alerts = items;
+        _loading = false;
+      });
+      unreadNotificationsNotifier.value = items.where((a) => a['isRead'] == false).length;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final filtered = _alerts.where((a) => _filter == 'All' || a['category'] == _filter).toList();
+    final unreadCount = _alerts.where((a) => a['isRead'] == false).length;
+
+    String roleHeaderTitle;
+    IconData roleIcon;
+    Color roleThemeColor;
+
+    if (widget.role == 'Fisherman') {
+      roleHeaderTitle = 'Fisherman Bids & Sea Telemetry';
+      roleIcon = Icons.sailing_rounded;
+      roleThemeColor = const Color(0xff005b96);
+    } else if (widget.role == 'Buyer') {
+      roleHeaderTitle = 'Buyer Orders & Cold-Chain Dispatch';
+      roleIcon = Icons.shopping_bag_rounded;
+      roleThemeColor = const Color(0xff059669);
+    } else {
+      roleHeaderTitle = 'Admin Operations & Fleet Telemetry';
+      roleIcon = Icons.admin_panel_settings_rounded;
+      roleThemeColor = const Color(0xff7c3aed);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xfff0f4f8),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Device Alerts & Push Notifications', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    for (var a in _alerts) {
-                      a['isRead'] = true;
-                    }
-                  });
-                },
-                child: const Text('Mark all read'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: ['All', 'Bids', 'Deliveries', 'Payments']
-                  .map((f) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(f),
-                          selected: _filter == f,
-                          onSelected: (_) => setState(() => _filter = f),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ...filtered.map((item) {
-            final isRead = item['isRead'] as bool;
-            final color = item['color'] as Color;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
+      body: RefreshIndicator(
+        onRefresh: _loadNotifications,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          children: [
+            // Role Banner Card
+            Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isRead ? Colors.grey.shade200 : color.withValues(alpha: 0.3),
-                  width: isRead ? 1 : 1.5,
+                gradient: LinearGradient(
+                  colors: [roleThemeColor, roleThemeColor.withValues(alpha: 0.85)],
                 ),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: roleThemeColor.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(item['icon'] as IconData, color: color, size: 20),
+                    child: Icon(roleIcon, color: Colors.white, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item['title'] as String,
-                              style: TextStyle(
-                                fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
-                                fontSize: 14,
-                                color: isRead ? Colors.black87 : const Color(0xff003b5c),
-                              ),
-                            ),
-                            if (!isRead)
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
                         Text(
-                          item['message'] as String,
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+                          roleHeaderTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 2),
                         Text(
-                          item['time'] as String,
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                          'Targeted for ${widget.role} • $unreadCount unread notification${unreadCount == 1 ? '' : 's'}',
+                          style: const TextStyle(color: Colors.white70, fontSize: 11.5),
                         ),
                       ],
                     ),
                   ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withValues(alpha: 0.15),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        for (var a in _alerts) {
+                          a['isRead'] = true;
+                        }
+                      });
+                      unreadNotificationsNotifier.value = 0;
+                    },
+                    child: const Text('Mark all read', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
                 ],
               ),
-            );
-          }),
-        ],
+            ),
+            const SizedBox(height: 12),
+
+            // Role Category Filter Chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _filterCategories
+                    .map((f) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(f, style: TextStyle(fontSize: 12, fontWeight: _filter == f ? FontWeight.bold : FontWeight.normal)),
+                            selected: _filter == f,
+                            selectedColor: roleThemeColor.withValues(alpha: 0.15),
+                            side: BorderSide(
+                              color: _filter == f ? roleThemeColor : Colors.grey.shade300,
+                              width: _filter == f ? 1.5 : 1,
+                            ),
+                            onSelected: (_) => setState(() => _filter = f),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            if (_loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (filtered.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(32),
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Icon(Icons.notifications_off_outlined, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No alerts in "$_filter"',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...filtered.map((item) {
+                final isRead = item['isRead'] as bool;
+                final color = item['color'] as Color;
+                final badge = item['badge'] as String?;
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    if (!isRead) {
+                      setState(() {
+                        item['isRead'] = true;
+                      });
+                      unreadNotificationsNotifier.value = _alerts.where((a) => a['isRead'] == false).length;
+                    }
+                  },
+                  child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isRead ? Colors.white : color.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isRead ? Colors.grey.shade200 : color.withValues(alpha: 0.35),
+                      width: isRead ? 1 : 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(item['icon'] as IconData, color: color, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item['title'] as String,
+                                    style: TextStyle(
+                                      fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
+                                      fontSize: 13.5,
+                                      color: isRead ? Colors.black87 : const Color(0xff003b5c),
+                                    ),
+                                  ),
+                                ),
+                                if (badge != null)
+                                  Container(
+                                    margin: const EdgeInsets.only(left: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: color.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      badge,
+                                      style: TextStyle(
+                                        color: color,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              item['message'] as String,
+                              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade800, height: 1.3),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  item['time'] as String,
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                                ),
+                                if (!isRead)
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        item['isRead'] = true;
+                                      });
+                                      unreadNotificationsNotifier.value = _alerts.where((a) => a['isRead'] == false).length;
+                                    },
+                                    child: Text(
+                                      'Mark as read',
+                                      style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -1972,7 +2583,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String _name = 'Captain Kaveesha Perera';
+  String _name = 'Fisherman Kaveesha';
   String _phone = '+94 77 123 4567';
   String _email = 'kaveesha@fishlink.lk';
   String _address = 'Harbour Road, Negombo, Sri Lanka';
@@ -1988,6 +2599,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _address = 'Pettah Fish Market, Colombo 11';
       _business = 'Colombo Seafood Direct Ltd';
     }
+    _loadStoredProfile();
+  }
+
+  Future<void> _loadStoredProfile() async {
+    try {
+      const storage = FlutterSecureStorage();
+      var name = await storage.read(key: 'userName');
+      var email = await storage.read(key: 'userEmail');
+      if (name == null || name.isEmpty) {
+        final token = await storage.read(key: 'token');
+        if (token != null) {
+          final res = await http.get(
+            Uri.parse('$_apiBase/Users/me'),
+            headers: {'Authorization': 'Bearer \$token'},
+          );
+          if (res.statusCode == 200) {
+            final data = jsonDecode(res.body);
+            if (data is Map) {
+              name = data['fullName']?.toString();
+              email = data['email']?.toString();
+              if (name != null) await storage.write(key: 'userName', value: name);
+              if (email != null) await storage.write(key: 'userEmail', value: email);
+            }
+          }
+        }
+      }
+      if (mounted) {
+        setState(() {
+          if (name != null && name.trim().isNotEmpty) {
+            var clean = name.trim();
+            if (clean.toLowerCase().startsWith('captain ')) {
+              clean = clean.substring(8).trim();
+            }
+            if (clean.contains(r'${name')) {
+              clean = '';
+            }
+            if (widget.role == 'Fisherman') {
+              _name = clean.isEmpty ? 'Fisherman' : (clean.toLowerCase().startsWith('fisherman ') ? clean : 'Fisherman $clean');
+            } else {
+              _name = clean;
+            }
+          }
+          if (email != null && email.trim().isNotEmpty) _email = email.trim();
+        });
+      }
+    } catch (_) {}
   }
 
   void _showEditProfile() {

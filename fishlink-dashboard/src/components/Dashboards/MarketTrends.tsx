@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, RefreshCw, AlertCircle, Activity, Calendar, TrendingUp, TrendingDown, Minus, Database, Zap } from 'lucide-react';
+import { BarChart3, RefreshCw, AlertCircle, Activity, Calendar } from 'lucide-react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, formatErrorMessage } from '../../config/api';
 
-const SPECIES_LIST  = ['Tuna (Yellowfin)', 'Skipjack', 'Trevally (Paraw)', 'Mackerel'];
+const BASE_SPECIES_LIST = [
+  'Tuna (Yellowfin)',
+  'Skipjack',
+  'Trevally (Paraw)',
+  'Mackerel',
+  'Seer Fish (Thora)',
+  'Sailfish (Thalapath)',
+  'Barramundi (Modha)',
+  'Red Snapper (Ranna)',
+];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -53,8 +62,8 @@ interface CombinedStat {
 
 const trendColor  = (p: number) => p > 3 ? '#10b981' : p < -3 ? '#ef4444' : '#3b82f6';
 const trendBg     = (p: number) => p > 3 ? '#d1fae5' : p < -3 ? '#fee2e2' : '#dbeafe';
-const TrendLabel = ({p}: {p: number}) =>
-  p > 3 ? <span style={{display: 'flex', alignItems: 'center', gap: 4}}><TrendingUp size={14}/> +{p}%</span> : p < -3 ? <span style={{display: 'flex', alignItems: 'center', gap: 4}}><TrendingDown size={14}/> {p}%</span> : <span style={{display: 'flex', alignItems: 'center', gap: 4}}><Minus size={14}/> {p > 0 ? '+' : ''}{p}%</span>;
+const trendLabel  = (p: number) =>
+  p > 3 ? `▲ +${p}%` : p < -3 ? `▼ ${p}%` : `― ${p > 0 ? '+' : ''}${p}%`;
 
 const confidenceBg = (c: string) =>
   c === 'high' ? '#d1fae5' : c === 'medium' ? '#fef3c7' : '#fee2e2';
@@ -76,23 +85,32 @@ export const MarketTrends = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch price predictions via ASP.NET Core proxy (mandatory backend rule — never call port 8001 directly)
-      const [predictionsRes, dbRes] = await Promise.all([
-        Promise.allSettled(
-          SPECIES_LIST.map(sp =>
-            axios.get<PricePrediction>(
-              `${API_BASE_URL}/api/AgentGateway/prices/${encodeURIComponent(sp)}/predict`,
-              { headers: authHeader }
-            )
+      // 1. Fetch DB market stats to discover any custom species added by fishermen
+      const dbRes = await axios.get<DbStat[]>(`${API_BASE_URL}/api/Catches/market-stats`, { headers: authHeader })
+        .catch(() => ({ data: [] as DbStat[] }));
+      const dbStats: DbStat[] = dbRes.data || [];
+
+      // Combine base species list with all unique species found in DB
+      const speciesSet = new Set<string>(BASE_SPECIES_LIST);
+      dbStats.forEach(d => {
+        if (d.species && d.species.trim()) {
+          const match = Array.from(speciesSet).find(s => s.toLowerCase() === d.species.toLowerCase());
+          if (!match) speciesSet.add(d.species.trim());
+        }
+      });
+      const activeSpeciesList = Array.from(speciesSet);
+
+      // 2. Fetch price predictions via ASP.NET Core proxy
+      const predictionsRes = await Promise.allSettled(
+        activeSpeciesList.map(sp =>
+          axios.get<PricePrediction>(
+            `${API_BASE_URL}/api/AgentGateway/prices/${encodeURIComponent(sp)}/predict`,
+            { headers: authHeader }
           )
-        ),
-        axios.get<DbStat[]>(`${API_BASE_URL}/api/Catches/market-stats`, { headers: authHeader })
-          .catch(() => ({ data: [] as DbStat[] })),
-      ]);
+        )
+      );
 
-      const dbStats: DbStat[] = dbRes.data;
-
-      const combined: CombinedStat[] = SPECIES_LIST.map((sp, i) => {
+      const combined: CombinedStat[] = activeSpeciesList.map((sp, i) => {
         const predResult = predictionsRes[i];
         const pred: PricePrediction | null =
           predResult.status === 'fulfilled' ? predResult.value.data : null;
@@ -109,8 +127,8 @@ export const MarketTrends = () => {
 
         return {
           species:        sp,
-          apiAvg:         pred?.summary.avgLast30       ?? 0,
-          apiTrend:       pred?.summary.trendPct        ?? 0,
+          apiAvg:         pred?.summary?.avgLast30      ?? 0,
+          apiTrend:       pred?.summary?.trendPct       ?? 0,
           apiRecommended: apiRec,
           apiConfidence:  pred?.confidence              ?? 'low',
           apiInsight:     pred?.insight                 ?? 'Price API unavailable.',
@@ -145,7 +163,7 @@ export const MarketTrends = () => {
         <div>
           <h2 style={{ margin:0 }}>Market Intelligence & Price Forecast</h2>
           <p style={{ color:'#64748b', margin:'6px 0 0', fontSize:'0.9rem' }}>
-            AI predictions from 90-day price history · blended with live DB transaction data
+            AI predictions from 90-day price history
           </p>
         </div>
         <button onClick={fetchAll} className="btn-outline"
@@ -175,7 +193,7 @@ export const MarketTrends = () => {
             <AlertCircle color="#ef4444" size={22} />
             <div>
               <p style={{ margin:0, color:'#ef4444', fontWeight:600 }}>Could not load market data</p>
-              <p style={{ margin:'4px 0 0', color:'#64748b', fontSize:'0.85rem' }}>{error}</p>
+              <p style={{ margin:'4px 0 0', color:'#64748b', fontSize:'0.85rem' }}>{typeof error === 'string' ? error : formatErrorMessage(error)}</p>
             </div>
           </div>
           <div style={{ marginTop:'16px', background:'#f8fafc', borderRadius:'8px', padding:'14px', fontSize:'0.85rem', color:'#475569' }}>
@@ -210,7 +228,7 @@ export const MarketTrends = () => {
                   {/* API trend badge */}
                   <span style={{ padding:'2px 8px', borderRadius:'10px', fontSize:'0.75rem', fontWeight:700,
                     background: trendBg(s.apiTrend), color: trendColor(s.apiTrend) }}>
-                    <TrendLabel p={s.apiTrend} />
+                    {trendLabel(s.apiTrend)}
                   </span>
                   {/* Confidence badge */}
                   <span style={{ padding:'2px 8px', borderRadius:'10px', fontSize:'0.75rem', fontWeight:600,
@@ -286,17 +304,17 @@ export const MarketTrends = () => {
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Avg last 30d: <strong>Rs. {s.apiAvg.toLocaleString()}/kg</strong></p>
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Recommended: <strong>Rs. {s.apiRecommended.toLocaleString()}/kg</strong></p>
                       <p style={{ margin:'3px 0', fontSize:'0.83rem', color: trendColor(s.apiTrend) }}>
-                        Trend: <strong><TrendLabel p={s.apiTrend} /></strong>
+                        Trend: <strong>{trendLabel(s.apiTrend)}</strong>
                       </p>
                     </div>
                     <div style={{ background:'#f0fdf4', borderRadius:'8px', padding:'14px', border:'1px solid #bbf7d0' }}>
-                      <p style={{ fontWeight:700, color:'#15803d', margin:'0 0 8px', fontSize:'0.85rem', display:'flex', alignItems:'center', gap:6 }}><Database size={16} /> Live DB Transactions</p>
+                      <p style={{ fontWeight:700, color:'#15803d', margin:'0 0 8px', fontSize:'0.85rem' }}>🗄️ Live DB Transactions</p>
                       {s.dbCatchCount > 0 ? (
                         <>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Avg last 30d: <strong>Rs. {s.dbAvg?.toLocaleString()}/kg</strong></p>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color:'#334155' }}>Catches: <strong>{s.dbCatchCount} ({s.dbTotalKg} kg)</strong></p>
                           <p style={{ margin:'3px 0', fontSize:'0.83rem', color: trendColor(s.dbTrend ?? 0) }}>
-                            Trend: <strong><TrendLabel p={s.dbTrend ?? 0} /></strong>
+                            Trend: <strong>{trendLabel(s.dbTrend ?? 0)}</strong>
                           </p>
                         </>
                       ) : (
@@ -305,14 +323,13 @@ export const MarketTrends = () => {
                     </div>
                   </div>
 
-                  {/* Blended recommendation */}
+                  {/* AI Recommendation */}
                   <div style={{ background:'#fefce8', border:'1px solid #fde047', borderRadius:'8px', padding:'14px', marginBottom:'14px' }}>
                     <p style={{ margin:0, fontWeight:700, color:'#854d0e', fontSize:'0.9rem' }}>
-                      <span style={{ display:'flex', alignItems:'center', gap:6 }}><Zap size={16} /> Blended AI Recommendation: Rs. {s.blendedPrice.toLocaleString()}/kg</span>
+                      ⚡ AI Price Recommendation: Rs. {s.blendedPrice.toLocaleString()}/kg
                     </p>
                     <p style={{ margin:'4px 0 0', color:'#713f12', fontSize:'0.8rem' }}>
-                      60% price model weight + 40% local DB weight
-                      {s.dbCatchCount === 0 ? ' (DB weight unused — no local data)' : ''}
+                      Calculated from 90-day market price trend analysis
                     </p>
                   </div>
 
@@ -359,7 +376,7 @@ export const MarketTrends = () => {
                         </td>
                         <td style={{ padding:'10px 12px' }}>
                           <span style={{ color: trendColor(s.apiTrend), fontWeight:700 }}>
-                            <TrendLabel p={s.apiTrend} />
+                            {trendLabel(s.apiTrend)}
                           </span>
                         </td>
                         <td style={{ padding:'10px 12px' }}>

@@ -54,11 +54,11 @@ public class BuyerMatchController : ControllerBase
     // ── Buyer Preference CRUD ─────────────────────────────────────────────────
 
     // ── Buyer Preference CRUD ─────────────────────────────────────────────────
-
+    
     /// GET /api/BuyerMatch/preferences
     /// Returns current buyer's list of all saved preferences.
     [HttpGet("preferences")]
-    [Authorize(Roles = "Buyer")]
+    [Authorize]
     public async Task<IActionResult> GetMyPreferencesList()
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -75,7 +75,7 @@ public class BuyerMatchController : ControllerBase
     /// GET /api/BuyerMatch/preferences/me
     /// Returns current buyer's most recent saved preference.
     [HttpGet("preferences/me")]
-    [Authorize(Roles = "Buyer")]
+    [Authorize]
     public async Task<IActionResult> GetMyPreference()
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -95,7 +95,7 @@ public class BuyerMatchController : ControllerBase
     /// Create new or update an existing preference in the buyer's list.
     [HttpPost("preferences")]
     [HttpPost("preferences/me")]
-    [Authorize(Roles = "Buyer")]
+    [Authorize]
     public async Task<IActionResult> SaveMyPreference([FromBody] BuyerPreferenceRequest req)
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -145,7 +145,7 @@ public class BuyerMatchController : ControllerBase
     /// DELETE /api/BuyerMatch/preferences/{id}
     /// Deletes a specific preference from the buyer's list.
     [HttpDelete("preferences/{id:int}")]
-    [Authorize(Roles = "Buyer")]
+    [Authorize]
     public async Task<IActionResult> DeletePreferenceById(int id)
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -164,7 +164,7 @@ public class BuyerMatchController : ControllerBase
     /// DELETE /api/BuyerMatch/preferences/me
     /// Deletes all preferences for current buyer.
     [HttpDelete("preferences/me")]
-    [Authorize(Roles = "Buyer")]
+    [Authorize]
     public async Task<IActionResult> DeleteMyPreference()
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

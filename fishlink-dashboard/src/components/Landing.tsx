@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Fish, ArrowRight, X, CheckCircle, Phone, Mail, MapPin } from 'lucide-react';
 import axios from 'axios';
 import '../landing.css';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, formatErrorMessage } from '../config/api';
 
 export const Landing = () => {
   const navigate = useNavigate();
@@ -26,11 +26,7 @@ export const Landing = () => {
       localStorage.setItem('role', user.role);
       navigate('/dashboard');
     } catch (err: any) {
-      if (typeof err.response?.data === 'string') {
-        setError(err.response.data);
-      } else {
-        setError('Invalid credentials');
-      }
+      setError(formatErrorMessage(err, 'Invalid credentials'));
     }
   };
 
@@ -292,7 +288,7 @@ export const Landing = () => {
             <p>{authView === 'login' ? 'Sign in to your account' : 'Join the FishLink platform'}</p>
           </div>
 
-          {error && <div style={{color: 'red', marginBottom: '15px', textAlign: 'center', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '6px'}}>{error}</div>}
+          {error && <div style={{color: 'red', marginBottom: '15px', textAlign: 'center', backgroundColor: '#fee2e2', padding: '10px', borderRadius: '6px'}}>{typeof error === 'string' ? error : formatErrorMessage(error)}</div>}
 
           {authView === 'login' ? (
             <form onSubmit={handleLogin} className="auth-form">

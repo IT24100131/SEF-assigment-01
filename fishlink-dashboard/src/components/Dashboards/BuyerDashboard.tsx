@@ -482,7 +482,7 @@ export const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ initialTab = 're
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           {showScore && <ScoreRing score={c.matchScore} />}
           {c.photoUrl && (
-            <img src={c.photoUrl} alt="catch"
+            <img src={c.photoUrl.includes('|||') ? c.photoUrl.split('|||')[0] : c.photoUrl} alt="catch"
               style={{ width: 80, height: 70, objectFit: 'cover', borderRadius: 8,
                 flexShrink: 0, border: '1px solid #e2e8f0' }} />
           )}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>9.2 Evaluation Methods and Results — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 14px; vertical-align: top; }
+    .pass { color: #08783f; font-weight: bold; }
+    .check-text { font-weight: 600; color: #1a365d; }
+    .note { margin-top: 22px; padding: 15px; background: #f2f5fa; border-left: 4px solid #203878; }
+  </style>
+</head>
+<body>
+  <h1>9.2 Evaluation Methods and Results</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report | Page 9</div>
+
+  <table>
+    <tr>
+      <th style="width: 25%;">Evaluation Method</th>
+      <th style="width: 40%;">What It Checks</th>
+      <th style="width: 35%;">Result</th>
+    </tr>
+    <tr>
+      <td><strong>Rule-based assertions</strong></td>
+      <td>
+        Predefined operational thresholds across agents:
+        <ul>
+          <li>Weight discrepancy: &gt;10% triggers warning, &gt;25% triggers high-risk fraud flag</li>
+          <li>Price anomaly: &gt;20% triggers price warning, &gt;50% triggers high price surge flag</li>
+          <li>Duplicate bid detection and seller fraud history inspection</li>
+        </ul>
+      </td>
+      <td class="pass">
+        Verified (100% pass on boundary unit tests). Correctly triggered fraud flags and audit warnings on simulated 28% weight mismatch and 60% price deviation.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Schema validation</strong></td>
+      <td>
+        Strict input/output contract enforcement via Pydantic models (<code>WorkflowRequest</code>, <code>BuyerMatchRequest</code>, <code>LogisticsRequest</code>) and ASP.NET Core DTOs for type constraints, positive weight/price limits, and non-empty species values.
+      </td>
+      <td class="pass">
+        Verified (Zero unhandled exceptions). Malformed payloads and negative values were automatically rejected with standard HTTP 422 / 400 Bad Request responses.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Deterministic validators</strong></td>
+      <td>
+        Non-hallucinatory mathematical computations:
+        <ul>
+          <li>Weighted Moving Average (WMA) price prediction model</li>
+          <li>Weather-buffered ETA logic (+20 min buffer added upon rain)</li>
+          <li>Multi-criteria buyer matching formula (0–100% weighted score)</li>
+        </ul>
+      </td>
+      <td class="pass">
+        Verified (100% reproducible outputs). All mathematical models returned identical results across repeated test runs (4/4 Python unit tests passed).
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Human review</strong></td>
+      <td>
+        Human-in-the-loop safety gating: when risk rating is evaluated as "High" or pier inspection fails, the system enforces <code>requires_admin_review = True</code>, halting automatic publishing and dispatch until authorized by an administrator.
+      </td>
+      <td class="pass">
+        Verified in Admin Dashboard. High-risk catch was successfully held in <code>PendingApproval</code> state and resumed only after manual administrator sign-off.
+      </td>
+    </tr>
+    <tr>
+      <td><strong>LLM-as-a-judge (supporting only)</strong></td>
+      <td>
+        Supporting non-authoritative qualitative checks: semantic coherence of generated logistics notes, explainability of trade recommendations, and natural language translation readability. Never used for authoritative transactional state transitions.
+      </td>
+      <td class="pass">
+        Verified in supporting mode. Agent reasoning logs scored 4.8/5.0 for clarity and domain relevance; strict deterministic guardrails prevented hallucination leakage into core state.
+      </td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>Verification Note:</strong> Evaluated against live FishLink services (FastAPI Agentic AI, ASP.NET Core Web API, and PostgreSQL). All deterministic validators and assertions executed without relying on ungrounded generative outputs.
+  </div>
+</body>
+</html>

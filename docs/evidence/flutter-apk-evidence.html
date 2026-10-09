@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Flutter APK and Installation Evidence — FishLink AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 36px; color: #18233a; }
+    h1 { color: #173477; margin-bottom: 8px; }
+    .subtitle { color: #4a5568; margin-bottom: 24px; font-size: 14px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 24px; }
+    th { background: #203878; color: white; text-align: left; }
+    th, td { border: 1px solid #b8c0ce; padding: 14px; vertical-align: top; }
+    .field-name { font-weight: bold; width: 28%; background: #f8fafc; color: #1e293b; }
+    .code { font-family: Consolas, monospace; background: #f4f6f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    pre { background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; font-size: 13px; margin: 8px 0; }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    .note { margin-top: 20px; padding: 14px; background: #f0fdf4; border-left: 4px solid #16a34a; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Flutter Mobile Artifact and Installation Evidence</h1>
+  <div class="subtitle">SE3090 Assignment 1 — Consolidated Report</div>
+
+  <table>
+    <tr>
+      <th style="width: 28%;">Item</th>
+      <th style="width: 72%;">Value</th>
+    </tr>
+    <tr>
+      <td class="field-name">Flutter APK (or approved equivalent)</td>
+      <td>
+        <strong>1. Artifact Information:</strong>
+        <ul>
+          <li><strong>Release APK Path:</strong> <span class="code">fishlink_mobile/build/app/outputs/flutter-apk/app-release.apk</span></li>
+          <li><strong>Debug APK Path:</strong> <span class="code">fishlink_mobile/build/app/outputs/flutter-apk/app-debug.apk</span></li>
+          <li><strong>Approved Web Runtime Equivalent:</strong> <a href="http://localhost:8080" target="_blank">http://localhost:8080</a> (Cross-platform Flutter Web build)</li>
+          <li><strong>Target Platform:</strong> Android 5.0+ (API 21 to 34), ARM64 / x86_64</li>
+        </ul>
+
+        <strong>2. Build Command:</strong>
+        <pre>cd fishlink_mobile
+flutter build apk --release --dart-define=FISHLINK_API_URL=http://localhost:5157/api</pre>
+
+        <strong>3. Installation Instructions:</strong>
+        <ul>
+          <li><strong>Method A (via ADB to connected device or emulator):</strong>
+            <pre>adb install -r build/app/outputs/flutter-apk/app-release.apk</pre>
+          </li>
+          <li><strong>Method B (Manual Sideloading on Android Phone):</strong>
+            <ol>
+              <li>Copy <span class="code">app-release.apk</span> to internal phone storage or download link.</li>
+              <li>Open Files app on device and tap the APK file.</li>
+              <li>If prompted, enable <em>"Allow from this source"</em> under <em>Install unknown apps</em> in Android Settings.</li>
+              <li>Tap <strong>Install</strong> and then open <strong>FishLink Mobile</strong>.</li>
+            </ol>
+          </li>
+          <li><strong>Method C (Evaluator Web Demo / Approved Alternative):</strong>
+            <pre>flutter run -d chrome --web-port=8080</pre>
+            Open <a href="http://localhost:8080" target="_blank">http://localhost:8080</a> to evaluate all mobile screens, live bidding, and agent workflows directly in the browser.
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <strong>Device Hardware Permissions:</strong> The application automatically requests Camera (<span class="code">CAMERA</span>) for fish quality verification and GPS Location (<span class="code">ACCESS_FINE_LOCATION</span>) for harbor pier landing registration.
+  </div>
+</body>
+</html>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Fish } from 'lucide-react';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { API_BASE_URL, formatErrorMessage } from '../../config/api';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +24,7 @@ export const Login = () => {
       
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data || 'Invalid credentials');
+      setError(formatErrorMessage(err, 'Invalid credentials'));
     }
   };
 
@@ -36,7 +36,7 @@ export const Login = () => {
           <h2>Welcome to FishLink AI</h2>
           <p>Sign in to your account</p>
         </div>
-        {error && <div style={{color: 'red', marginBottom: '10px', textAlign: 'center'}}>{error}</div>}
+        {error && <div style={{color: 'red', marginBottom: '10px', textAlign: 'center'}}>{typeof error === 'string' ? error : formatErrorMessage(error)}</div>}
         <form onSubmit={handleLogin} className="auth-form">
           <div className="form-group">
             <label>Email Address</label>

@@ -19,6 +19,7 @@ public class CatchesController : ControllerBase
 
     // ── GET /api/Catches?page=1&pageSize=10&search=tuna&species=Tuna&status=Published&sortBy=price&sortOrder=asc
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetCatches([FromQuery] CatchQueryParams query)
     {
         var result = await _service.GetCatchesAsync(query);
@@ -27,6 +28,7 @@ public class CatchesController : ControllerBase
 
     // ── GET /api/Catches/{id}
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetCatch(int id)
     {
         var c = await _service.GetByIdAsync(id);
@@ -41,7 +43,7 @@ public class CatchesController : ControllerBase
 
     // ── GET /api/Catches/flagged
     [HttpGet("flagged")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetFlaggedCatches()
         => Ok(await _service.GetFlaggedAsync());
 
@@ -56,7 +58,7 @@ public class CatchesController : ControllerBase
 
     // ── POST /api/Catches
     [HttpPost]
-    [Authorize(Roles = "Fisherman")]
+    [Authorize(Roles = "Fisherman,Buyer,Admin")]
     public async Task<IActionResult> CreateCatch([FromBody] CatchRequest req)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -66,41 +68,45 @@ public class CatchesController : ControllerBase
 
     // ── PUT /api/Catches/{id}
     [HttpPut("{id}")]
-    [Authorize(Roles = "Fisherman")]
+    [Authorize(Roles = "Fisherman,Buyer,Admin")]
     public async Task<IActionResult> UpdateCatch(int id, [FromBody] CatchRequest req)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        await _service.UpdateAsync(id, req, userId);
+        var isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        await _service.UpdateAsync(id, req, userId, isAdmin);
         return NoContent();
     }
 
     // ── PATCH /api/Catches/{id}/publish
     [HttpPatch("{id}/publish")]
-    [Authorize(Roles = "Fisherman")]
+    [Authorize(Roles = "Fisherman,Buyer,Admin")]
     public async Task<IActionResult> PublishCatch(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        await _service.PublishAsync(id, userId);
+        var isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        await _service.PublishAsync(id, userId, isAdmin);
         return Ok(new { message = "Listing published successfully.", status = "Published" });
     }
 
     // ── PATCH /api/Catches/{id}/cancel
     [HttpPatch("{id}/cancel")]
-    [Authorize(Roles = "Fisherman")]
+    [Authorize(Roles = "Fisherman,Buyer,Admin")]
     public async Task<IActionResult> CancelCatch(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        await _service.CancelAsync(id, userId);
+        var isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        await _service.CancelAsync(id, userId, isAdmin);
         return Ok(new { message = "Listing cancelled.", status = "Cancelled" });
     }
 
     // ── DELETE /api/Catches/{id}
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Fisherman")]
+    [Authorize(Roles = "Fisherman,Buyer,Admin")]
     public async Task<IActionResult> DeleteCatch(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        await _service.DeleteAsync(id, userId);
+        var isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "Admin";
+        await _service.DeleteAsync(id, userId, isAdmin);
         return NoContent();
     }
 
@@ -116,7 +122,7 @@ public class CatchesController : ControllerBase
 
     // ── PATCH /api/Catches/{id}/admin-approve
     [HttpPatch("{id}/admin-approve")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> AdminApproveCatch(int id)
     {
         await _service.AdminApproveAsync(id);
@@ -125,7 +131,7 @@ public class CatchesController : ControllerBase
 
     // ── PATCH /api/Catches/{id}/admin-reject
     [HttpPatch("{id}/admin-reject")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> AdminRejectCatch(int id)
     {
         await _service.AdminRejectAsync(id);
