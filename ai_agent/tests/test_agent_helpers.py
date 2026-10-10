@@ -1,6 +1,7 @@
 import unittest
 import sys
 import os
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -8,6 +9,7 @@ from main import (
     BuyerMatchRequest,
     WorkflowRequest,
     compute_final_recommendation,
+    get_market_recommendation,
     run_buyer_matching,
     tool_calculate_eta,
 )
@@ -23,6 +25,22 @@ class AgentHelperTests(unittest.TestCase):
         price, summary = compute_final_recommendation("Tuna", 1000, None, None)
         self.assertEqual(price, 1050)
         self.assertIn("Fallback", summary)
+
+    @patch("main.get_db_market_stats", return_value={
+        "catchCount": 10, "recommendedPrice": 1100, "avgPriceLast30": 1080,
+    })
+    @patch("main.get_price_prediction", return_value={
+        "recommendedPrice": 1200, "summary": {"trendPct": 3.5},
+        "next7Days": [{"predictedPrice": 1220}],
+    })
+    def test_market_recommendation_uses_workflow_calculation(self, get_prediction, get_stats):
+        recommendation = get_market_recommendation("Tuna", 1000)
+
+        self.assertEqual(recommendation["species"], "Tuna")
+        self.assertEqual(recommendation["recommendedPrice"], 1160)
+        self.assertIn("[Hybrid]", recommendation["marketInsight"])
+        get_prediction.assert_called_once_with("Tuna")
+        get_stats.assert_called_once_with("Tuna")
 
     def test_buyer_matching_requires_species_and_returns_score(self):
         matches = run_buyer_matching(

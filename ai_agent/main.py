@@ -15,7 +15,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
@@ -768,6 +768,19 @@ def compute_final_recommendation(
         return rec, f"[Fallback] Rs.{rec}/kg (5% above asking)."
 
 
+def get_market_recommendation(species: str, asking_price: float) -> dict:
+    prediction = get_price_prediction(species)
+    db_stat = get_db_market_stats(species)
+    recommended_price, market_insight = compute_final_recommendation(
+        species, asking_price, prediction, db_stat
+    )
+    return {
+        "species": species,
+        "recommendedPrice": recommended_price,
+        "marketInsight": market_insight,
+    }
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # BUYER MATCHING HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -979,6 +992,14 @@ def run_agentic_workflow(req: WorkflowRequest):
 async def start_workflow(req: WorkflowRequest, background_tasks: BackgroundTasks):
     background_tasks.add_task(run_agentic_workflow, req)
     return {"status": "Workflow started", "workflow_id": req.workflow_id}
+
+
+@app.get("/api/market-intelligence/recommendation")
+def market_recommendation(
+    species: str = Query(min_length=1, max_length=80),
+    asking_price: float = Query(gt=0),
+):
+    return get_market_recommendation(species, asking_price)
 
 
 @app.post("/api/buyer-match")
