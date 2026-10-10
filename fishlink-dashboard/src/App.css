@@ -346,3 +346,54 @@ button.btn-approve, button.btn-reject {
   font-weight: 700;
   color: #03396c;
 }
+
+/* Fisherman dashboard visual polish */
+.fisherman-dashboard {
+  background: #f6f9fc;
+  color: #1e293b;
+  min-height: 100%;
+}
+
+.fisherman-dashboard > h2 {
+  color: #073b5c;
+  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  letter-spacing: -0.035em;
+  margin-bottom: 22px;
+}
+
+.fisherman-dashboard .stat-card {
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 45, 70, 0.08);
+}
+
+.fisherman-dashboard .stat-card:hover {
+  box-shadow: 0 12px 28px rgba(15, 45, 70, 0.15) !important;
+  transform: translateY(-3px) !important;
+}
+
+.fisherman-dashboard .workflow-card {
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 45, 70, 0.08);
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.fisherman-dashboard .workflow-card:hover {
+  box-shadow: 0 12px 30px rgba(15, 45, 70, 0.13);
+  transform: translateY(-2px);
+}
+
+.fisherman-dashboard button {
+  transition: background-color 160ms ease, box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.fisherman-dashboard button:focus-visible {
+  outline: 3px solid rgba(14, 116, 144, 0.35);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .fisherman-dashboard {
+    padding: 20px 16px;
+  }
+}

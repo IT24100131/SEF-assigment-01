@@ -2091,7 +2091,7 @@ export const FishermanDashboard: React.FC<FishermanDashboardProps> = ({ initialF
   // ── Form view ──────────────────────────────────────────────────────────────
   if (showForm) {
     return (
-      <div className="dashboard-content">
+      <div className="dashboard-content fisherman-dashboard">
         <h2>{editTarget ? 'Edit Catch' : 'Register New Catch'}</h2>
         <button type="button" className="btn-outline" onClick={handleFormCancel} style={{ marginBottom: '20px' }}>
           ← Back to Dashboard
@@ -2118,7 +2118,7 @@ export const FishermanDashboard: React.FC<FishermanDashboardProps> = ({ initialF
 
   // ── Main view ──────────────────────────────────────────────────────────────
   return (
-    <div className="dashboard-content">
+    <div className="dashboard-content fisherman-dashboard">
       <h2>My Catch Listings</h2>
 
       {/* Interactive 5 Stats Cards */}
