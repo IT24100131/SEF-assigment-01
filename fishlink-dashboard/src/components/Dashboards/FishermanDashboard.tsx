@@ -2971,4 +2971,3 @@ export const FishermanDashboard: React.FC<FishermanDashboardProps> = ({ initialF
     </div>
   );
 };
-#new fisherman dashboard component
