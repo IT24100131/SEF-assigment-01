@@ -4,7 +4,9 @@ import 'package:fishlink_mobile/main.dart';
 
 void main() {
   group('FishLink Mobile App Widget & Form Validation Tests', () {
-    testWidgets('Login screen validates required fields on submit', (tester) async {
+    testWidgets('Login screen validates required fields on submit', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -25,7 +27,9 @@ void main() {
       expect(find.text('Minimum 6 characters'), findsOneWidget);
     });
 
-    testWidgets('Register screen navigation and role selector works', (tester) async {
+    testWidgets('Register screen navigation and role selector works', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -49,7 +53,9 @@ void main() {
       expect(find.text('Enter your name'), findsOneWidget);
     });
 
-    testWidgets('New Catch form validates quantity and price fields', (tester) async {
+    testWidgets('New Catch form validates quantity and price fields', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -66,25 +72,27 @@ void main() {
       expect(find.text('Register New Catch'), findsOneWidget);
       expect(find.text('Fish Species'), findsOneWidget);
       expect(find.text('Quantity (kg)'), findsOneWidget);
-      expect(find.text('Asking Price (Rs/kg)'), findsOneWidget);
+      expect(find.text('Expected Price (Rs/kg)'), findsOneWidget);
       expect(find.text('Quality & Inspection Details'), findsOneWidget);
+      expect(
+        find.text('Get Market Intelligence Recommendation'),
+        findsOneWidget,
+      );
 
-      // Scroll down by dragging ListView
-      await tester.drag(find.byType(ListView), const Offset(0, -600));
-      await tester.pumpAndSettle();
-
-      // Tap Save Draft
-      final draftBtn = find.widgetWithText(OutlinedButton, '📋 Save Draft');
+      final draftBtn = find.widgetWithText(FilledButton, 'Save as Draft');
       expect(draftBtn, findsOneWidget);
+      await tester.ensureVisible(draftBtn);
       await tester.tap(draftBtn);
       await tester.pumpAndSettle();
 
       // Quantity validation error should appear
-      expect(find.text('Enter valid kg'), findsOneWidget);
-      expect(find.text('Enter valid price'), findsOneWidget);
+      expect(find.text('Enter a valid quantity'), findsOneWidget);
+      expect(find.text('Price must be at least Rs. 50/kg'), findsOneWidget);
     });
 
-    testWidgets('MyCatchesScreen displays filter chips and UI elements', (tester) async {
+    testWidgets('MyCatchesScreen displays filter chips and UI elements', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(() => tester.view.resetPhysicalSize());
