@@ -83,6 +83,12 @@ interface BidRecord {
   };
 }
 
+interface MarketRecommendation {
+  species: string;
+  recommendedPrice: number;
+  marketInsight: string;
+}
+
 export const hasQualityAgent = (c: CatchRecord): boolean => {
   const { inspectorPhoto } = parseCatchPhotos(c.photoUrl);
   const insp = extractInspectorInfo(c.sellerNote);
@@ -201,10 +207,65 @@ const CatchForm: React.FC<CatchFormProps> = ({
   const [error,            setError]            = useState('');
   const [fieldErrors,      setFieldErrors]      = useState<Record<string, string>>({});
   const [savingDraft,      setSavingDraft]      = useState(false);
+  const [marketRecommendation, setMarketRecommendation] = useState<MarketRecommendation | null>(null);
+  const [marketRecommendationLoading, setMarketRecommendationLoading] = useState(false);
+  const [marketRecommendationError, setMarketRecommendationError] = useState('');
+  const appliedRecommendationPrice = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inspectorFileInputRef = useRef<HTMLInputElement>(null);
 
   const getAuthHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+
+  const recommendationSpecies = selectedSpeciesOption === '__custom__'
+    ? customSpeciesName.trim()
+    : selectedSpeciesOption;
+
+  useEffect(() => {
+    if (appliedRecommendationPrice.current === price) {
+      appliedRecommendationPrice.current = null;
+      return;
+    }
+
+    const askingPrice = Number(price);
+    if (!recommendationSpecies || !price.trim() || !Number.isFinite(askingPrice) || askingPrice <= 0) {
+      setMarketRecommendation(null);
+      setMarketRecommendationLoading(false);
+      setMarketRecommendationError('');
+      return;
+    }
+
+    let active = true;
+    setMarketRecommendation(null);
+    setMarketRecommendationError('');
+    const timeout = window.setTimeout(() => {
+      setMarketRecommendationLoading(true);
+      axios.get<MarketRecommendation>(
+        `${API_BASE_URL}/api/AgentGateway/market-recommendation`,
+        {
+          headers: { Authorization: `******'token')}` },
+          params: { species: recommendationSpecies, askingPrice },
+        }
+      )
+        .then(response => {
+          if (active) setMarketRecommendation(response.data);
+        })
+        .catch(err => {
+          if (active) {
+            setMarketRecommendationError(formatErrorMessage(
+              err, 'Could not get a price recommendation from the Market Intelligence Agent.'
+            ));
+          }
+        })
+        .finally(() => {
+          if (active) setMarketRecommendationLoading(false);
+        });
+    }, 300);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [customSpeciesName, price, recommendationSpecies]);
 
   const clearFieldError = (field: string) => {
     if (fieldErrors[field]) {
@@ -559,7 +620,11 @@ const CatchForm: React.FC<CatchFormProps> = ({
             placeholder="e.g. 1400"
             required
             value={price}
-            onChange={(e) => { setPrice(e.target.value); clearFieldError('price'); }}
+            onChange={(e) => {
+              appliedRecommendationPrice.current = null;
+              setPrice(e.target.value);
+              clearFieldError('price');
+            }}
             style={{ borderColor: fieldErrors.price ? '#ef4444' : undefined }}
           />
           {fieldErrors.price && (
@@ -567,6 +632,66 @@ const CatchForm: React.FC<CatchFormProps> = ({
               {fieldErrors.price}
             </span>
           )}
+          <div
+            aria-live="polite"
+            style={{
+              marginTop: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: '1px solid #bfdbfe',
+              background: '#eff6ff',
+              color: '#1e3a8a',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 700 }}>
+              <Bot size={18} /> Market Intelligence Agent price suggestion
+            </div>
+            {marketRecommendationLoading ? (
+              <p style={{ margin: '8px 0 0', fontSize: '0.84rem' }}>Calculating recommendation…</p>
+            ) : marketRecommendation ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <strong style={{ fontSize: '1.1rem' }}>
+                    Rs. {marketRecommendation.recommendedPrice.toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}/kg
+                  </strong>
+                  <button
+                    type="button"
+                    disabled={Number(price) === marketRecommendation.recommendedPrice}
+                    onClick={() => {
+                      const suggestedPrice = String(marketRecommendation.recommendedPrice);
+                      appliedRecommendationPrice.current = suggestedPrice;
+                      setPrice(suggestedPrice);
+                    }}
+                    style={{
+                      border: '1px solid #2563eb',
+                      borderRadius: '6px',
+                      padding: '5px 10px',
+                      background: '#ffffff',
+                      color: '#1d4ed8',
+                      fontWeight: 600,
+                      cursor: Number(price) === marketRecommendation.recommendedPrice ? 'default' : 'pointer',
+                      opacity: Number(price) === marketRecommendation.recommendedPrice ? 0.65 : 1,
+                    }}
+                  >
+                    Use suggested price
+                  </button>
+                </div>
+                <p style={{ margin: '6px 0 0', fontSize: '0.8rem' }}>
+                  {marketRecommendation.marketInsight}
+                </p>
+              </>
+            ) : marketRecommendationError ? (
+              <p role="alert" style={{ margin: '8px 0 0', color: '#b91c1c', fontSize: '0.82rem' }}>
+                {marketRecommendationError}
+              </p>
+            ) : (
+              <p style={{ margin: '8px 0 0', fontSize: '0.82rem' }}>
+                Enter an asking price to get a recommendation based on the AI prediction and market history.
+              </p>
+            )}
+          </div>
         </div>
 
         {/* ── Save My Form (Pre-Inspection Draft Option) ── */}
@@ -2846,3 +2971,4 @@ export const FishermanDashboard: React.FC<FishermanDashboardProps> = ({ initialF
     </div>
   );
 };
+#new fisherman dashboard component
